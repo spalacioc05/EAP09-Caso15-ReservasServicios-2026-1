@@ -68,6 +68,12 @@ public class GlobalExceptionHandler {
                 .body(build("PROVIDER_ROLE_REQUIRED", ex.getMessage(), List.of()));
     }
 
+    @ExceptionHandler(ServiceNameAlreadyExistsException.class)
+    public ResponseEntity<ErrorResponse> handleServiceNameAlreadyExists(ServiceNameAlreadyExistsException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(build("SERVICE_NAME_ALREADY_EXISTS", ex.getMessage(), List.of()));
+    }
+
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<ErrorResponse> handleAuthentication(AuthenticationException ex) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
