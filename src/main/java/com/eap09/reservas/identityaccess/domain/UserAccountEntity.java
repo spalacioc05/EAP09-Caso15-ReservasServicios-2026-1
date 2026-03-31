@@ -24,7 +24,7 @@ public class UserAccountEntity {
     @JoinColumn(name = "id_rol", nullable = false)
     private RoleEntity rol;
 
-    @Column(name = "id_estado", nullable = false)
+    @Column(name = "id_estado_usuario", nullable = false)
     private Long idEstado;
 
     @Column(name = "correo_usuario", nullable = false, unique = true, length = 120)
