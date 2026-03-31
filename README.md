@@ -17,6 +17,10 @@
 Backend del equipo **EAP09** para el **Caso 15**, enfocado en una plataforma de reservas por agenda y cupos.  
 Este README documenta **el estado real implementado hasta hoy en Sprint 1**: sin humo, sin plantillas genéricas y sin funcionalidades inventadas.
 
+> [!NOTE]
+> Ruta oficial de documentación interactiva: **`/swagger-ui/index.html`**.
+> En este README se usa esa única ruta para evitar ambigüedades.
+
 ---
 
 ## 1) Resumen Ejecutivo
@@ -68,6 +72,18 @@ El Sprint 1 está diseñado como una cadena funcional, no como historias aislada
 - **HU-14 + HU-15 + HU-16**: cierran el flujo cliente -> consulta -> reserva.
 
 En este repositorio ya está implementada toda la parte "actor + acceso + construcción de oferta".
+
+---
+
+## 3.1) Decisiones Funcionales Congeladas (Sprint 1)
+
+Decisiones funcionales acordadas para mantener consistencia del dominio y evitar ambigüedades entre historias:
+
+- proveedor registrado en Sprint 1 queda en estado **ACTIVA**
+- horario general del proveedor se modela como **un único rango por día**
+- disponibilidad se modela como **franja concreta con fecha real**
+- la reserva nace en estado **CREADA** (definición de negocio para HU-16, aún pendiente de implementación funcional)
+- la capacidad restante se **calcula**, no se persiste como campo redundante
 
 ---
 
@@ -213,9 +229,9 @@ flowchart LR
 
 ```text
 .
-├── src/main/java/com/eap09/reservas
-│   ├── config/                 # API paths, CORS, config transversal
-│   ├── security/               # JWT filter, user details, security config
+├── src/main/java/com/eap09/reservas/
+│   ├── config/                 # rutas base API, CORS, configuración transversal
+│   ├── security/               # JWT filter, security config, user details
 │   ├── common/
 │   │   ├── api/                # endpoints base públicos/protegidos
 │   │   ├── audit/              # traceId y publicación de eventos
@@ -250,7 +266,7 @@ flowchart LR
 | Spring Data JPA | Persistencia relacional sobre entidades y repositorios |
 | PostgreSQL (Supabase) | Base de datos transaccional del dominio |
 | Flyway | Versionado de esquema y catálogos base/eventos |
-| OpenAPI/Swagger | Contrato y exploración de API (`/swagger-ui.html`) |
+| OpenAPI/Swagger | Contrato y exploración de API (`/swagger-ui/index.html`) |
 | Spring HATEOAS | Links mínimos de navegación en endpoints clave |
 | JUnit 5 + Mockito | Pruebas unitarias y de capa controller |
 | Spring Boot Test | Pruebas de integración/e2e |
@@ -262,9 +278,18 @@ flowchart LR
 
 ### Estado actual
 
-- Integración activa con PostgreSQL (local o Supabase vía `DB_URL`).
+- Integración activa con PostgreSQL, usando Supabase como entorno principal del sprint.
 - Modelo relacional con claves foráneas y catálogos de estado/evento.
 - Migraciones administradas por Flyway al arranque.
+
+### Entornos de base de datos
+
+| Entorno | Uso | Configuración |
+|---|---|---|
+| Supabase (PostgreSQL) | Entorno real de trabajo del Sprint 1 | Variables de entorno (`DB_URL`, `DB_USERNAME`, `DB_PASSWORD`) |
+| PostgreSQL local (opcional) | Desarrollo/pruebas locales | Mismas variables apuntando a instancia local |
+
+La aplicación no depende de credenciales hardcodeadas: cambia únicamente el valor de variables según el entorno.
 
 ### Migraciones presentes
 
@@ -281,6 +306,20 @@ flowchart LR
 - **Disponibilidades**: `tbl_disponibilidad_servicio`
 - **Reservas**: `tbl_reserva` (estructura disponible; lógica HU-16 pendiente)
 - **Trazabilidad/eventos**: `tbl_evento`, `tbl_tipo_evento`, `tbl_tipo_registro`
+
+### Estados centralizados (`tbl_categoria_estado` + `tbl_estado`)
+
+El modelo usa un catálogo único de estados para múltiples agregados. Esto evita duplicar catálogos por tabla, mejora consistencia de reglas y simplifica trazabilidad funcional.
+
+Ejemplo simplificado:
+
+| Categoría (`tbl_categoria_estado`) | Estados (`tbl_estado`) |
+|---|---|
+| `tbl_usuario` | `ACTIVA`, `BLOQUEADA_TEMPORAL` |
+| `tbl_servicio` | `HABILITADO`, `DESHABILITADO` |
+| `tbl_disponibilidad_servicio` | `HABILITADA`, `BLOQUEADA` |
+
+Este enfoque permite evolucionar reglas de negocio sin romper contratos ni replicar lógica de estados en distintos módulos.
 
 ### Configuración segura por variables
 
@@ -323,7 +362,6 @@ En autenticación (`AuthenticationService`):
 - `/api/v1/clients`
 - `/api/v1/providers`
 - `/swagger-ui/**`
-- `/swagger-ui.html`
 - `/v3/api-docs/**`
 - `/actuator/health`
 - `/actuator/info`
@@ -338,7 +376,7 @@ Todo el resto requiere autenticación.
 
 - Base path: **`/api/v1`**
 - Estilo: REST con validación de payloads y respuestas uniformes
-- Documentación interactiva: `GET /swagger-ui.html`
+- Documentación interactiva oficial: `GET /swagger-ui/index.html`
 
 ### Endpoints implementados hasta ahora
 
@@ -418,6 +456,19 @@ Eventos integrados en alcance actual:
 - **Controller tests (api)**: validan contrato HTTP, validaciones y códigos.
 - **E2E/Integración**: levantan contexto, autentican contra API y validan persistencia/eventos reales.
 
+### Flujo mínimo para probar endpoints protegidos
+
+1. Autenticar con `POST /api/v1/auth/sessions`.
+2. Extraer `accessToken` de la respuesta.
+3. Enviar header `Authorization: Bearer <token>`.
+4. Consumir endpoints protegidos (por ejemplo HU-08, HU-09, HU-11).
+
+Ejemplo de header:
+
+```http
+Authorization: Bearer eyJhbGciOi...
+```
+
 ### Historias con cobertura automatizada
 
 - HU-01, HU-02, HU-03
@@ -470,15 +521,21 @@ Existe una colección versionada en el repo:
 
 ### Organización
 
+Carpetas con requests funcionales hoy:
+
 - `00 - Health & Setup`
-- `01 - Sprint 1`
-    - HU-01
-    - HU-02
-    - HU-03
-    - HU-08
-    - HU-09
-    - HU-11
-    - HU-14 / HU-15 / HU-16 (carpetas creadas, aún sin requests funcionales)
+- `01 - Sprint 1 / HU-01`
+- `01 - Sprint 1 / HU-02`
+- `01 - Sprint 1 / HU-03`
+- `01 - Sprint 1 / HU-08`
+- `01 - Sprint 1 / HU-09`
+- `01 - Sprint 1 / HU-11`
+
+Carpetas preparadas (sin implementación funcional aún):
+
+- `01 - Sprint 1 / HU-14`
+- `01 - Sprint 1 / HU-15`
+- `01 - Sprint 1 / HU-16`
 
 ### Variables de environment sugeridas
 
@@ -522,6 +579,12 @@ cd EAP09-Caso15-ReservasServicios-2026-1
 cp .env.example .env
 ```
 
+En PowerShell (Windows), alternativa equivalente:
+
+```powershell
+Copy-Item .env.example .env
+```
+
 Editar `.env` con valores reales (sin subirlo al repositorio).
 
 ### 3. Ejecutar backend
@@ -533,7 +596,7 @@ mvn clean spring-boot:run
 ### 4. Verificar salud y documentación
 
 - Health: `GET /actuator/health`
-- Swagger UI: `http://localhost:8080/swagger-ui.html`
+- Swagger UI: `http://localhost:8080/swagger-ui/index.html`
 - OpenAPI JSON: `http://localhost:8080/v3/api-docs`
 
 ### 5. Ejecutar pruebas
