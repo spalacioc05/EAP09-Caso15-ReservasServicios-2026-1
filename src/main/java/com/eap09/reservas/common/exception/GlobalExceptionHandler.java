@@ -74,6 +74,18 @@ public class GlobalExceptionHandler {
                 .body(build("SERVICE_NAME_ALREADY_EXISTS", ex.getMessage(), List.of()));
     }
 
+    @ExceptionHandler(AvailabilityOverlapException.class)
+    public ResponseEntity<ErrorResponse> handleAvailabilityOverlap(AvailabilityOverlapException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(build("AVAILABILITY_OVERLAP", ex.getMessage(), List.of()));
+    }
+
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleResourceNotFound(ResourceNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(build(ex.getErrorCode(), ex.getMessage(), List.of()));
+    }
+
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<ErrorResponse> handleAuthentication(AuthenticationException ex) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
