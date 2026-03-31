@@ -72,7 +72,7 @@ public class JwtService {
 
         try {
             keyBytes = Decoders.BASE64.decode(configuredSecret);
-        } catch (IllegalArgumentException ex) {
+        } catch (RuntimeException ex) {
             keyBytes = configuredSecret.getBytes();
         }
 

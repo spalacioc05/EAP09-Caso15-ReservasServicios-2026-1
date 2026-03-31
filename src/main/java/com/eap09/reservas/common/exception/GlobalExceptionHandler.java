@@ -44,6 +44,24 @@ public class GlobalExceptionHandler {
                 .body(build("EMAIL_ALREADY_REGISTERED", ex.getMessage(), List.of()));
     }
 
+    @ExceptionHandler(InvalidCredentialsException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidCredentials(InvalidCredentialsException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(build("INVALID_CREDENTIALS", ex.getMessage(), List.of()));
+    }
+
+    @ExceptionHandler(AccountInactiveException.class)
+    public ResponseEntity<ErrorResponse> handleAccountInactive(AccountInactiveException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(build("ACCOUNT_INACTIVE", ex.getMessage(), List.of()));
+    }
+
+    @ExceptionHandler(TemporaryAccessRestrictedException.class)
+    public ResponseEntity<ErrorResponse> handleTemporaryRestriction(TemporaryAccessRestrictedException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(build("ACCESS_TEMPORARILY_RESTRICTED", ex.getMessage(), List.of()));
+    }
+
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<ErrorResponse> handleAuthentication(AuthenticationException ex) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
