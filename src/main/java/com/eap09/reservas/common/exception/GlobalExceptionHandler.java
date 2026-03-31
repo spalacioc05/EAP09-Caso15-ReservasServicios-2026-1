@@ -62,6 +62,12 @@ public class GlobalExceptionHandler {
                 .body(build("ACCESS_TEMPORARILY_RESTRICTED", ex.getMessage(), List.of()));
     }
 
+    @ExceptionHandler(ProviderRoleRequiredException.class)
+    public ResponseEntity<ErrorResponse> handleProviderRoleRequired(ProviderRoleRequiredException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(build("PROVIDER_ROLE_REQUIRED", ex.getMessage(), List.of()));
+    }
+
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<ErrorResponse> handleAuthentication(AuthenticationException ex) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
