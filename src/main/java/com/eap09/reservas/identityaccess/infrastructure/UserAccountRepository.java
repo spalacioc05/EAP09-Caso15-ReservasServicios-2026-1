@@ -9,4 +9,6 @@ public interface UserAccountRepository extends JpaRepository<UserAccountEntity, 
 
     @EntityGraph(attributePaths = "rol")
     Optional<UserAccountEntity> findByCorreoUsuarioIgnoreCase(String correoUsuario);
+
+    boolean existsByCorreoUsuarioIgnoreCase(String correoUsuario);
 }

@@ -22,7 +22,7 @@ public class GlobalExceptionHandler {
                 .map(this::formatFieldError)
                 .toList();
 
-        return ResponseEntity.badRequest().body(build("VALIDATION_ERROR", "Request validation failed", details));
+        return ResponseEntity.badRequest().body(build("VALIDATION_ERROR", "Validacion de la solicitud fallida", details));
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
@@ -30,7 +30,7 @@ public class GlobalExceptionHandler {
         List<String> details = ex.getConstraintViolations().stream()
                 .map(violation -> violation.getPropertyPath() + ": " + violation.getMessage())
                 .toList();
-        return ResponseEntity.badRequest().body(build("VALIDATION_ERROR", "Request validation failed", details));
+        return ResponseEntity.badRequest().body(build("VALIDATION_ERROR", "Validacion de la solicitud fallida", details));
     }
 
     @ExceptionHandler(ApiException.class)
@@ -38,22 +38,28 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(build(ex.getErrorCode(), ex.getMessage(), List.of()));
     }
 
+    @ExceptionHandler(EmailAlreadyRegisteredException.class)
+    public ResponseEntity<ErrorResponse> handleEmailConflict(EmailAlreadyRegisteredException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(build("EMAIL_ALREADY_REGISTERED", ex.getMessage(), List.of()));
+    }
+
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<ErrorResponse> handleAuthentication(AuthenticationException ex) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(build("UNAUTHORIZED", "Authentication required", List.of(ex.getMessage())));
+                .body(build("UNAUTHORIZED", "Autenticacion requerida", List.of(ex.getMessage())));
     }
 
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ErrorResponse> handleAccessDenied(AccessDeniedException ex) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                .body(build("FORBIDDEN", "Insufficient permissions", List.of(ex.getMessage())));
+                .body(build("FORBIDDEN", "Permisos insuficientes", List.of(ex.getMessage())));
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleUnexpected(Exception ex) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(build("INTERNAL_ERROR", "Unexpected server error", List.of(ex.getMessage())));
+                .body(build("INTERNAL_ERROR", "No fue posible completar la solicitud", List.of(ex.getMessage())));
     }
 
     private ErrorResponse build(String errorCode, String message, List<String> details) {

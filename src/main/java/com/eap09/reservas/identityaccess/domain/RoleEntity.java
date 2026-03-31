@@ -20,7 +20,15 @@ public class RoleEntity {
         return idRol;
     }
 
+    public void setIdRol(Long idRol) {
+        this.idRol = idRol;
+    }
+
     public String getNombreRol() {
         return nombreRol;
+    }
+
+    public void setNombreRol(String nombreRol) {
+        this.nombreRol = nombreRol;
     }
 }
