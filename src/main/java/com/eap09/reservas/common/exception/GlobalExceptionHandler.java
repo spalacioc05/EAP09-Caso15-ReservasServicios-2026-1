@@ -68,6 +68,12 @@ public class GlobalExceptionHandler {
                 .body(build("PROVIDER_ROLE_REQUIRED", ex.getMessage(), List.of()));
     }
 
+    @ExceptionHandler(ClientRoleRequiredException.class)
+    public ResponseEntity<ErrorResponse> handleClientRoleRequired(ClientRoleRequiredException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(build("CLIENT_ROLE_REQUIRED", ex.getMessage(), List.of()));
+    }
+
     @ExceptionHandler(ServiceNameAlreadyExistsException.class)
     public ResponseEntity<ErrorResponse> handleServiceNameAlreadyExists(ServiceNameAlreadyExistsException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
@@ -86,6 +92,12 @@ public class GlobalExceptionHandler {
                 .body(build(ex.getErrorCode(), ex.getMessage(), List.of()));
     }
 
+    @ExceptionHandler(OfferQueryFailedException.class)
+    public ResponseEntity<ErrorResponse> handleOfferQueryFailed(OfferQueryFailedException ex) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(build("OFFER_QUERY_UNAVAILABLE", ex.getMessage(), List.of()));
+    }
+
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<ErrorResponse> handleAuthentication(AuthenticationException ex) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -101,7 +113,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleUnexpected(Exception ex) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(build("INTERNAL_ERROR", "No fue posible completar la solicitud", List.of(ex.getMessage())));
+                .body(build("INTERNAL_ERROR", "No fue posible completar la solicitud", List.of()));
     }
 
     private ErrorResponse build(String errorCode, String message, List<String> details) {
