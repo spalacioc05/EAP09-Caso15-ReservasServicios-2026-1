@@ -98,6 +98,12 @@ public class GlobalExceptionHandler {
                 .body(build("OFFER_QUERY_UNAVAILABLE", ex.getMessage(), List.of()));
     }
 
+    @ExceptionHandler(AvailabilityQueryFailedException.class)
+    public ResponseEntity<ErrorResponse> handleAvailabilityQueryFailed(AvailabilityQueryFailedException ex) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(build("AVAILABILITY_QUERY_UNAVAILABLE", ex.getMessage(), List.of()));
+    }
+
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<ErrorResponse> handleAuthentication(AuthenticationException ex) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
