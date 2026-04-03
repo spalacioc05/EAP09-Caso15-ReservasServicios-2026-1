@@ -32,11 +32,13 @@ La plataforma permite construir la oferta de un proveedor y sentar la base del f
 - definición de horario general semanal del proveedor
 - registro de servicios
 - definición y bloqueo de disponibilidades por servicio
+- consulta de oferta disponible y horarios con cupos
+- creación transaccional de reservas válidas
 
 Estado actual del MVP Sprint 1:
 
-- ✅ Implementado: **HU-01, HU-02, HU-03, HU-08, HU-09, HU-11**
-- ⏳ Pendiente para cerrar el flujo de reserva: **HU-14, HU-15, HU-16**
+- ✅ Implementado y validado: **HU-01, HU-02, HU-03, HU-08, HU-09, HU-11, HU-14, HU-15, HU-16**
+- ✅ Flujo backend de punta a punta habilitado: **registro -> autenticación -> oferta -> consulta -> reserva**
 
 ---
 
@@ -58,7 +60,9 @@ Cadena funcional del producto:
 2. Proveedor define horario general y publica servicios.
 3. Proveedor crea disponibilidades concretas por servicio.
 4. Cliente crea su cuenta y se autentica.
-5. Cliente consulta oferta/horarios y crea reserva (pendiente en HU-14/15/16).
+5. Cliente consulta oferta disponible (HU-14).
+6. Cliente consulta horarios y cupos por proveedor, servicio y fecha (HU-15).
+7. Cliente confirma una reserva válida sobre una franja reservable (HU-16).
 
 ---
 
@@ -71,7 +75,7 @@ El Sprint 1 está diseñado como una cadena funcional, no como historias aislada
 - **HU-08 + HU-09 + HU-11**: construyen la oferta publicable del proveedor.
 - **HU-14 + HU-15 + HU-16**: cierran el flujo cliente -> consulta -> reserva.
 
-En este repositorio ya está implementada toda la parte "actor + acceso + construcción de oferta".
+En este repositorio ya está implementada la cadena completa del MVP Sprint 1 a nivel backend.
 
 ---
 
@@ -82,7 +86,7 @@ Decisiones funcionales acordadas para mantener consistencia del dominio y evitar
 - proveedor registrado en Sprint 1 queda en estado **ACTIVA**
 - horario general del proveedor se modela como **un único rango por día**
 - disponibilidad se modela como **franja concreta con fecha real**
-- la reserva nace en estado **CREADA** (definición de negocio para HU-16, aún pendiente de implementación funcional)
+- la reserva nace en estado **CREADA**
 - la capacidad restante se **calcula**, no se persiste como campo redundante
 
 ---
@@ -164,15 +168,53 @@ Decisiones funcionales acordadas para mantener consistencia del dominio y evitar
     - `POST /api/v1/providers/me/services/{serviceId}/availabilities`
     - `PATCH /api/v1/providers/me/services/{serviceId}/availabilities/{availabilityId}/block`
 
+### HU-14 - Consulta de oferta disponible
+
+- **Objetivo**: permitir al cliente autenticado consultar servicios reservables de proveedores activos.
+- **Implementado**:
+    - acceso para usuario autenticado con rol cliente
+    - filtrado de oferta por servicio activo + proveedor activo + disponibilidad habilitada
+    - respuesta uniforme con trazabilidad y HATEOAS mínimo
+    - manejo de escenarios sin oferta sin romper contrato de respuesta
+- **Endpoint principal**:
+    - `GET /api/v1/offers`
+- **Valor dentro del MVP**: habilita la exploración de oferta real antes de seleccionar proveedor/servicio para reservar.
+
+### HU-15 - Consulta de horarios y cupos disponibles
+
+- **Objetivo**: consultar por proveedor, servicio y fecha las franjas reservables y su cupo restante.
+- **Implementado**:
+    - validación de campos obligatorios (`providerId`, `serviceId`, `date`)
+    - validación de relación proveedor-servicio activa
+    - cálculo de cupo restante por franja en tiempo de consulta
+    - exclusión de franjas bloqueadas/no reservables
+    - control de acceso para rol cliente
+- **Endpoint principal**:
+    - `GET /api/v1/providers/{providerId}/services/{serviceId}/availabilities?date=YYYY-MM-DD`
+- **Valor dentro del MVP**: permite tomar la decisión de reserva sobre disponibilidad y cupo reales.
+
+### HU-16 - Creación de reserva
+
+- **Objetivo**: crear una reserva válida y persistente para una franja seleccionada por el cliente autenticado.
+- **Implementado**:
+    - endpoint autenticado de cliente para confirmar reserva
+    - revalidación final de proveedor activo, servicio activo y franja habilitada
+    - validación de consistencia proveedor-servicio-franja
+    - validación de cupo disponible sobre reservas en estado `CREADA`
+    - creación transaccional de reserva con estado inicial `CREADA`
+    - trazabilidad funcional con evento `CREACION_RESERVA`
+    - endurecimiento de errores para no exponer detalles internos de BD
+- **Endpoint principal**:
+    - `POST /api/v1/bookings`
+- **Valor dentro del MVP**: materializa la operación principal del sprint al concretar una reserva real, consistente y auditable.
+
 ---
 
-## 5) Historias Pendientes para Cerrar MVP Sprint 1
+## 5) Historias Pendientes
 
-- **HU-14 - Consulta de oferta disponible**
-- **HU-15 - Consulta de horarios y cupos**
-- **HU-16 - Creación de reserva**
+Para el alcance de **Sprint 1 backend**, no quedan historias pendientes de cierre funcional del MVP.
 
-Estas tres historias cierran el tramo cliente de la solución: explorar disponibilidad real y concretar una reserva válida sobre la oferta ya publicada por proveedores.
+El crecimiento natural siguiente corresponde a funcionalidades post-MVP (por ejemplo: ciclo de vida posterior de reserva, notificaciones, pagos o nuevos módulos), no a completar HU-14/15/16.
 
 ---
 
@@ -193,7 +235,7 @@ Estas tres historias cierran el tramo cliente de la solución: explorar disponib
 
 - `identityaccess`: registro y autenticación.
 - `provideroffer`: horario general, servicios y disponibilidades.
-- `customerbooking`: reservado para consulta de oferta/slots y reservas (pendiente funcional).
+- `customerbooking`: consulta de oferta, consulta de horarios/cupos y creación de reservas.
 - `common`: trazabilidad, respuestas, errores, eventos y utilitarios transversales.
 
 ### Capas por módulo
@@ -240,7 +282,7 @@ flowchart LR
 │   │   └── util/
 │   ├── identityaccess/         # HU-01, HU-02, HU-03
 │   ├── provideroffer/          # HU-08, HU-09, HU-11
-│   └── customerbooking/        # bootstrap + base para HU-14/15/16
+│   └── customerbooking/        # HU-14, HU-15, HU-16 (consulta y reserva)
 ├── src/main/resources/
 │   ├── application.yml
 │   ├── application-dev.yml
@@ -304,8 +346,10 @@ La aplicación no depende de credenciales hardcodeadas: cambia únicamente el va
 - **Horario general proveedor**: `tbl_horario_general_proveedor`, `tbl_dia_semana`
 - **Servicios**: `tbl_servicio`
 - **Disponibilidades**: `tbl_disponibilidad_servicio`
-- **Reservas**: `tbl_reserva` (estructura disponible; lógica HU-16 pendiente)
+- **Reservas**: `tbl_reserva` (operación transaccional activa para HU-16)
 - **Trazabilidad/eventos**: `tbl_evento`, `tbl_tipo_evento`, `tbl_tipo_registro`
+
+El modelo relacional ya soporta el flujo completo del MVP Sprint 1: alta de actores, autenticación, publicación de oferta, consulta de disponibilidad con cupo y creación de reservas.
 
 ### Estados centralizados (`tbl_categoria_estado` + `tbl_estado`)
 
@@ -315,9 +359,10 @@ Ejemplo simplificado:
 
 | Categoría (`tbl_categoria_estado`) | Estados (`tbl_estado`) |
 |---|---|
-| `tbl_usuario` | `ACTIVA`, `BLOQUEADA_TEMPORAL` |
-| `tbl_servicio` | `HABILITADO`, `DESHABILITADO` |
+| `tbl_usuario` | `ACTIVA`, `INACTIVA` |
+| `tbl_servicio` | `ACTIVO`, `INACTIVO` |
 | `tbl_disponibilidad_servicio` | `HABILITADA`, `BLOQUEADA` |
+| `tbl_reserva` | `CREADA` |
 
 Este enfoque permite evolucionar reglas de negocio sin romper contratos ni replicar lógica de estados en distintos módulos.
 
@@ -334,7 +379,7 @@ No se almacenan secretos en el README ni en código fuente. La conexión se conf
 - API stateless (`SessionCreationPolicy.STATELESS`).
 - JWT Bearer para endpoints protegidos.
 - BCrypt para almacenamiento de contraseñas.
-- Validación de rol en casos de uso de proveedor.
+- Validación de rol en casos de uso de proveedor y cliente según HU.
 
 ### Política de contraseña (registración)
 
@@ -354,6 +399,13 @@ En autenticación (`AuthenticationService`):
 - máximo de intentos fallidos consecutivos: **5**
 - restricción temporal al exceder límite: **15 minutos**
 - reseteo de contador al autenticar correctamente
+
+### Protección de información sensible
+
+- Contrato uniforme de error: `errorCode`, `message`, `details`, `traceId`.
+- Manejo centralizado en `GlobalExceptionHandler`.
+- Endurecimiento de errores internos para evitar fuga de SQL, constraints o detalles internos de PostgreSQL.
+- Mensajes funcionales en español, sin exponer internals de persistencia.
 
 ### Rutas públicas permitidas
 
@@ -380,15 +432,18 @@ Todo el resto requiere autenticación.
 
 ### Endpoints implementados hasta ahora
 
-| HU | Método | Ruta | Módulo | Descripción | Auth |
-|---|---|---|---|---|---|
-| HU-01 | POST | `/api/v1/clients` | identityaccess | Registro de cliente | No |
-| HU-02 | POST | `/api/v1/providers` | identityaccess | Registro de proveedor | No |
-| HU-03 | POST | `/api/v1/auth/sessions` | identityaccess | Autenticación y JWT | No |
-| HU-08 | PUT | `/api/v1/providers/me/general-schedule/{dayOfWeek}` | provideroffer | Definir/reemplazar horario general | Sí |
-| HU-09 | POST | `/api/v1/providers/me/services` | provideroffer | Registrar servicio del proveedor | Sí |
-| HU-11 | POST | `/api/v1/providers/me/services/{serviceId}/availabilities` | provideroffer | Crear disponibilidad del servicio | Sí |
-| HU-11 | PATCH | `/api/v1/providers/me/services/{serviceId}/availabilities/{availabilityId}/block` | provideroffer | Bloquear disponibilidad existente | Sí |
+| HU | Método | Ruta | Módulo | Descripción | Auth | Rol esperado |
+|---|---|---|---|---|---|---|
+| HU-01 | POST | `/api/v1/clients` | identityaccess | Registro de cliente | No | N/A |
+| HU-02 | POST | `/api/v1/providers` | identityaccess | Registro de proveedor | No | N/A |
+| HU-03 | POST | `/api/v1/auth/sessions` | identityaccess | Autenticación y emisión JWT | No | N/A |
+| HU-08 | PUT | `/api/v1/providers/me/general-schedule/{dayOfWeek}` | provideroffer | Definir/reemplazar horario general | Sí | PROVEEDOR |
+| HU-09 | POST | `/api/v1/providers/me/services` | provideroffer | Registrar servicio del proveedor | Sí | PROVEEDOR |
+| HU-11 | POST | `/api/v1/providers/me/services/{serviceId}/availabilities` | provideroffer | Crear disponibilidad del servicio | Sí | PROVEEDOR |
+| HU-11 | PATCH | `/api/v1/providers/me/services/{serviceId}/availabilities/{availabilityId}/block` | provideroffer | Bloquear disponibilidad existente | Sí | PROVEEDOR |
+| HU-14 | GET | `/api/v1/offers` | customerbooking | Consultar oferta disponible | Sí | CLIENTE |
+| HU-15 | GET | `/api/v1/providers/{providerId}/services/{serviceId}/availabilities?date=YYYY-MM-DD` | customerbooking | Consultar horarios y cupos disponibles | Sí | CLIENTE |
+| HU-16 | POST | `/api/v1/bookings` | customerbooking | Crear reserva válida sobre franja seleccionada | Sí | CLIENTE |
 
 ### Endpoints auxiliares de estado/bootstrap
 
@@ -445,6 +500,7 @@ Eventos integrados en alcance actual:
 - `REGISTRO_SERVICIO`
 - `CREACION_DISPONIBILIDAD`
 - `BLOQUEO_DISPONIBILIDAD`
+- `CREACION_RESERVA`
 
 ---
 
@@ -461,7 +517,7 @@ Eventos integrados en alcance actual:
 1. Autenticar con `POST /api/v1/auth/sessions`.
 2. Extraer `accessToken` de la respuesta.
 3. Enviar header `Authorization: Bearer <token>`.
-4. Consumir endpoints protegidos (por ejemplo HU-08, HU-09, HU-11).
+4. Consumir endpoints protegidos según rol (por ejemplo HU-08/09/11 con proveedor y HU-14/15/16 con cliente).
 
 Ejemplo de header:
 
@@ -473,6 +529,7 @@ Authorization: Bearer eyJhbGciOi...
 
 - HU-01, HU-02, HU-03
 - HU-08, HU-09, HU-11
+- HU-14, HU-15, HU-16
 
 ### Comandos Maven útiles
 
@@ -488,16 +545,25 @@ Ejecutar solo HU-11:
 mvn "-Dtest=ServiceAvailabilityServiceTest,ServiceAvailabilityControllerTest,ServiceAvailabilityE2ETest" test
 ```
 
-Regresión Sprint 1 implementado (HU-08/09/11):
+Regresión de service/controller por módulos:
 
 ```bash
-mvn "-Dtest=GeneralScheduleServiceTest,GeneralScheduleControllerTest,GeneralScheduleE2ETest,ServiceRegistrationServiceTest,ServiceRegistrationControllerTest,ServiceRegistrationE2ETest,ServiceAvailabilityServiceTest,ServiceAvailabilityControllerTest,ServiceAvailabilityE2ETest" test
+mvn "-Dtest=*ControllerTest,*ServiceTest" test
+```
+
+Validación E2E de customer booking (HU-14/15/16):
+
+```bash
+mvn "-Dtest=CustomerBookingOfferE2ETest,CustomerBookingAvailabilityE2ETest,CustomerBookingReservationE2ETest" test
 ```
 
 Resultado de regresión más reciente en este repositorio:
 
-- `Tests run: 69, Failures: 0, Errors: 0, Skipped: 0`
+- `Tests run: 108, Failures: 0, Errors: 0, Skipped: 0` (service + controller)
+- `Tests run: 20, Failures: 0, Errors: 0, Skipped: 0` (E2E customerbooking HU-14/15/16)
 - `BUILD SUCCESS`
+
+Además de la automatización, las HU del Sprint 1 se validaron manualmente con Postman en escenarios positivos y negativos.
 
 ### ¿Cuándo considerar una HU "Done" desde backend?
 
@@ -530,9 +596,6 @@ Carpetas con requests funcionales hoy:
 - `01 - Sprint 1 / HU-08`
 - `01 - Sprint 1 / HU-09`
 - `01 - Sprint 1 / HU-11`
-
-Carpetas preparadas (sin implementación funcional aún):
-
 - `01 - Sprint 1 / HU-14`
 - `01 - Sprint 1 / HU-15`
 - `01 - Sprint 1 / HU-16`
@@ -545,6 +608,9 @@ Carpetas preparadas (sin implementación funcional aún):
 - `otherProviderToken`
 - `serviceId`
 - `availabilityId`
+- `providerId`
+- `bookingId`
+- `date`
 
 ### Uso recomendado
 
@@ -552,7 +618,13 @@ Carpetas preparadas (sin implementación funcional aún):
 2. Crear environment con variables anteriores.
 3. Ejecutar HU-01/HU-02 para crear usuarios.
 4. Ejecutar HU-03 para obtener tokens y guardarlos.
-5. Probar HU-08 -> HU-09 -> HU-11 en orden.
+5. Probar HU-08 -> HU-09 -> HU-11 para construir oferta.
+6. Probar HU-14 -> HU-15 -> HU-16 para validar el flujo cliente completo.
+
+Nota práctica para endpoints protegidos:
+
+- usar `providerToken` en endpoints de proveedor (HU-08/09/11)
+- usar `clientToken` en endpoints de cliente (HU-14/15/16)
 
 Postman es clave para validación funcional, QA y sustentación docente porque deja evidencia reproducible de casos positivos/negativos.
 
@@ -650,17 +722,23 @@ Notas:
     - HU-08 Horario general
     - HU-09 Registro de servicio
     - HU-11 Gestión de disponibilidad
+- Flujo cliente y cierre transaccional de reserva:
+    - HU-14 Consulta de oferta disponible
+    - HU-15 Consulta de horarios y cupos disponibles
+    - HU-16 Creación de reserva
 
 ### Probado
 
-- pruebas unitarias, controller y e2e para historias implementadas
-- regresión ejecutada en HU-08/HU-09/HU-11 en verde
+- pruebas unitarias, controller y e2e/integración para historias implementadas
+- validación manual por HU con colección Postman
+- regresión por capas en verde y e2e de customerbooking en verde
 
-### Pendiente para cierre de MVP Sprint 1
+### Conclusión del sprint backend
 
-- HU-14 Consulta de oferta disponible
-- HU-15 Consulta de horarios y cupos
-- HU-16 Creación de reserva
+- El MVP backend de Sprint 1 está completado.
+- Ya existe flujo funcional de extremo a extremo: registro/autenticación -> oferta -> consulta -> reserva.
+- El proyecto se mantiene como backend local con integración PostgreSQL/Supabase.
+- El siguiente crecimiento natural es evolutivo (post-MVP), no de cierre de HU-14/15/16.
 
 ---
 
@@ -679,7 +757,7 @@ Este backend **ya refleja** (hasta su alcance actual) los criterios del proyecto
 - ✅ Suite de pruebas (unitarias, controller, e2e)
 - ✅ Enfoque orientado a casos de uso, no solo CRUD
 
-Pendiente de próximos sprints para completar el flujo end-to-end de reserva en lado cliente (HU-14/15/16).
+El flujo de reserva de Sprint 1 ya está cerrado en backend; los próximos sprints pueden enfocarse en capacidades posteriores del dominio.
 
 ---
 
