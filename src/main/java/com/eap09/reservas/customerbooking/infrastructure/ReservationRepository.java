@@ -7,4 +7,6 @@ public interface ReservationRepository extends JpaRepository<ReservationEntity, 
 
     long countByIdDisponibilidadServicio(Long idDisponibilidadServicio);
 
+    long countByIdDisponibilidadServicioAndIdEstadoReserva(Long idDisponibilidadServicio, Long idEstadoReserva);
+
 }

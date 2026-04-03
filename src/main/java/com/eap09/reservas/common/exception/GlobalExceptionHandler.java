@@ -104,6 +104,18 @@ public class GlobalExceptionHandler {
                 .body(build("AVAILABILITY_QUERY_UNAVAILABLE", ex.getMessage(), List.of()));
     }
 
+    @ExceptionHandler(ReservationConflictException.class)
+    public ResponseEntity<ErrorResponse> handleReservationConflict(ReservationConflictException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(build(ex.getErrorCode(), ex.getMessage(), List.of()));
+    }
+
+    @ExceptionHandler(ReservationCreationFailedException.class)
+    public ResponseEntity<ErrorResponse> handleReservationCreationFailed(ReservationCreationFailedException ex) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(build("RESERVATION_CREATION_FAILED", ex.getMessage(), List.of()));
+    }
+
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<ErrorResponse> handleAuthentication(AuthenticationException ex) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
