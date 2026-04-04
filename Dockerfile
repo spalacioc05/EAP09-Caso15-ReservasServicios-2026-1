@@ -11,4 +11,13 @@ FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 COPY --from=build /app/target/reservas-backend-0.0.1-SNAPSHOT.jar app.jar
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java", \
+  "-Xmx180m", \
+  "-Xms32m", \
+  "-XX:+UseSerialGC", \
+  "-XX:MaxMetaspaceSize=80m", \
+  "-XX:+TieredCompilation", \
+  "-XX:TieredStopAtLevel=1", \
+  "-XX:CompressedClassSpaceSize=32m", \
+  "-Xss256k", \
+  "-jar", "app.jar"]
