@@ -29,18 +29,38 @@ public class JwtService {
     public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
         Instant now = Instant.now();
         Instant expiration = now.plusSeconds(securityProperties.getJwtExpirationSeconds());
+        String tokenId = extraClaims.get("jti") == null ? null : extraClaims.get("jti").toString();
 
-        return Jwts.builder()
+        var builder = Jwts.builder()
                 .claims(extraClaims)
                 .subject(userDetails.getUsername())
                 .issuedAt(Date.from(now))
                 .expiration(Date.from(expiration))
-                .signWith(getSignInKey())
-                .compact();
+                .signWith(getSignInKey());
+
+        if (tokenId != null && !tokenId.isBlank()) {
+            builder.id(tokenId);
+        }
+
+        return builder.compact();
     }
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
+    }
+
+    public String extractTokenId(String token) {
+        return extractClaim(token, claims -> {
+            String registeredTokenId = claims.getId();
+            if (registeredTokenId != null && !registeredTokenId.isBlank()) {
+                return registeredTokenId;
+            }
+            Object explicitJti = claims.get("jti");
+            if (explicitJti != null) {
+                return explicitJti.toString();
+            }
+            return null;
+        });
     }
 
     public boolean isTokenValid(String token, UserDetails userDetails) {

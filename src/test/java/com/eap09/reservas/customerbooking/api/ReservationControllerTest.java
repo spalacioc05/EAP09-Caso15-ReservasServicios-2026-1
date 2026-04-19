@@ -15,6 +15,7 @@ import com.eap09.reservas.customerbooking.api.dto.CreateReservationRequest;
 import com.eap09.reservas.customerbooking.api.dto.CreateReservationResponse;
 import com.eap09.reservas.customerbooking.application.ReservationService;
 import com.eap09.reservas.security.application.JwtService;
+import com.eap09.reservas.security.application.SessionTokenValidationService;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import org.junit.jupiter.api.Test;
@@ -44,6 +45,9 @@ class ReservationControllerTest {
 
     @MockBean
     private UserDetailsService userDetailsService;
+
+        @MockBean
+        private SessionTokenValidationService sessionTokenValidationService;
 
     @Test
     void shouldCreateReservationSuccessfully() throws Exception {

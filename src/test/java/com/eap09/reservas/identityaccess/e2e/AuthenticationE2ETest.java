@@ -85,6 +85,7 @@ class AuthenticationE2ETest {
                         SELECT id_usuario FROM tbl_usuario WHERE correo_usuario = ?
                     )
                     """, email, email);
+            jdbcTemplate.update("DELETE FROM tbl_sesion_usuario WHERE id_usuario IN (SELECT id_usuario FROM tbl_usuario WHERE correo_usuario = ?)", email);
             jdbcTemplate.update("DELETE FROM tbl_usuario WHERE correo_usuario = ?", email);
         }
         createdEmails.clear();

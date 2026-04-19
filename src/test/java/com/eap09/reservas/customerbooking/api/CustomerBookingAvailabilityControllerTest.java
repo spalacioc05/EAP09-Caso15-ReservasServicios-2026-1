@@ -15,6 +15,7 @@ import com.eap09.reservas.customerbooking.api.dto.AvailabilityResponse;
 import com.eap09.reservas.customerbooking.application.AvailabilityQueryResult;
 import com.eap09.reservas.customerbooking.application.CustomerBookingAvailabilityService;
 import com.eap09.reservas.security.application.JwtService;
+import com.eap09.reservas.security.application.SessionTokenValidationService;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -44,6 +45,9 @@ class CustomerBookingAvailabilityControllerTest {
 
     @MockBean
     private UserDetailsService userDetailsService;
+
+        @MockBean
+        private SessionTokenValidationService sessionTokenValidationService;
 
     @Test
     void shouldReturnAvailableSlotsSuccessfully() throws Exception {

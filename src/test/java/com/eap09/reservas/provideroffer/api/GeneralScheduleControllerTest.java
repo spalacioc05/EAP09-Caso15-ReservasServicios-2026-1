@@ -12,6 +12,7 @@ import com.eap09.reservas.common.exception.ProviderRoleRequiredException;
 import com.eap09.reservas.provideroffer.api.dto.GeneralScheduleResponse;
 import com.eap09.reservas.provideroffer.application.GeneralScheduleService;
 import com.eap09.reservas.security.application.JwtService;
+import com.eap09.reservas.security.application.SessionTokenValidationService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -39,6 +40,9 @@ class GeneralScheduleControllerTest {
 
     @MockBean
     private UserDetailsService userDetailsService;
+
+        @MockBean
+        private SessionTokenValidationService sessionTokenValidationService;
 
     @Test
     void shouldDefineGeneralScheduleSuccessfully() throws Exception {

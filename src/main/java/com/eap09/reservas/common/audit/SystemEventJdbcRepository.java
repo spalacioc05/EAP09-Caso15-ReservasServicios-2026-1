@@ -19,6 +19,7 @@ public class SystemEventJdbcRepository {
 
     public void save(SystemEvent event) {
         String detailJson = toJson(Map.of("detail", event.details()));
+        Long responsibleUserId = parseLongOrNull(event.responsibleUserId());
         Long affectedRecordId = parseLongOrNull(event.entityId());
 
         String sql = """
@@ -52,7 +53,7 @@ public class SystemEventJdbcRepository {
                 .addValue("eventType", event.type())
                 .addValue("entityType", event.entityType())
                 .addValue("result", event.result())
-                .addValue("responsibleUserId", affectedRecordId)
+            .addValue("responsibleUserId", responsibleUserId)
                 .addValue("affectedRecordId", affectedRecordId)
                 .addValue("traceId", event.traceId() == null ? "no-trace-id" : event.traceId())
                 .addValue("detail", detailJson);

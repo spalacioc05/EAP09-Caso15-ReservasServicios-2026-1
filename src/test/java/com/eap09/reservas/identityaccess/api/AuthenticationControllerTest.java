@@ -2,6 +2,7 @@ package com.eap09.reservas.identityaccess.api;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -9,10 +10,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.eap09.reservas.common.exception.AccountInactiveException;
 import com.eap09.reservas.common.exception.GlobalExceptionHandler;
 import com.eap09.reservas.common.exception.InvalidCredentialsException;
+import com.eap09.reservas.common.exception.SessionNotActiveException;
 import com.eap09.reservas.common.exception.TemporaryAccessRestrictedException;
 import com.eap09.reservas.identityaccess.api.dto.AuthenticationResponse;
 import com.eap09.reservas.identityaccess.application.AuthenticationService;
 import com.eap09.reservas.security.application.JwtService;
+import com.eap09.reservas.security.application.SessionTokenValidationService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -21,6 +24,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(controllers = AuthenticationController.class)
@@ -39,6 +43,9 @@ class AuthenticationControllerTest {
 
     @MockBean
     private UserDetailsService userDetailsService;
+
+        @MockBean
+        private SessionTokenValidationService sessionTokenValidationService;
 
     @Test
     void shouldAuthenticateSuccessfully() throws Exception {
@@ -143,5 +150,46 @@ class AuthenticationControllerTest {
                 .andExpect(status().isInternalServerError())
                 .andExpect(jsonPath("$.errorCode").value("INTERNAL_ERROR"))
                 .andExpect(jsonPath("$.message").value("No fue posible completar la solicitud"));
+    }
+
+    @Test
+    @WithMockUser(username = "user@example.com")
+    void shouldCloseCurrentSessionSuccessfully() throws Exception {
+        mockMvc.perform(delete("/api/v1/auth/sessions/current")
+                        .header("Authorization", "Bearer token"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("Sesion cerrada correctamente"))
+                .andExpect(jsonPath("$.data").value("CERRADA"));
+    }
+
+    @Test
+    @WithMockUser(username = "user@example.com")
+    void shouldReturnConflictWhenSessionIsNotActive() throws Exception {
+        org.mockito.Mockito.doThrow(new SessionNotActiveException("No existe una sesion activa valida para cerrar"))
+                .when(authenticationService)
+                .closeCurrentSession(any(), any());
+
+        mockMvc.perform(delete("/api/v1/auth/sessions/current")
+                        .header("Authorization", "Bearer token"))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.errorCode").value("SESSION_NOT_ACTIVE"));
+    }
+
+    @Test
+    void shouldRejectLogoutWhenNotAuthenticated() throws Exception {
+        mockMvc.perform(delete("/api/v1/auth/sessions/current")
+                        .header("Authorization", "Bearer token"))
+                                .andExpect(status().isUnauthorized())
+                                .andExpect(jsonPath("$.errorCode").value("UNAUTHORIZED"))
+                                .andExpect(jsonPath("$.message").value("Autenticacion requerida"));
+        }
+
+        @Test
+        @WithMockUser(username = "user@example.com")
+        void shouldRejectLogoutWhenBearerTokenIsMissing() throws Exception {
+                mockMvc.perform(delete("/api/v1/auth/sessions/current"))
+                                .andExpect(status().isUnauthorized())
+                                .andExpect(jsonPath("$.errorCode").value("UNAUTHORIZED"))
+                                .andExpect(jsonPath("$.message").value("Autenticacion requerida"));
     }
 }

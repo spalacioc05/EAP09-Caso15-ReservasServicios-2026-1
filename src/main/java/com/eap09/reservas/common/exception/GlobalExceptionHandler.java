@@ -116,10 +116,19 @@ public class GlobalExceptionHandler {
                 .body(build("RESERVATION_CREATION_FAILED", ex.getMessage(), List.of()));
     }
 
+    @ExceptionHandler(SessionNotActiveException.class)
+    public ResponseEntity<ErrorResponse> handleSessionNotActive(SessionNotActiveException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(build("SESSION_NOT_ACTIVE", ex.getMessage(), List.of()));
+    }
+
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<ErrorResponse> handleAuthentication(AuthenticationException ex) {
+        String message = (ex.getMessage() == null || ex.getMessage().isBlank())
+            ? "Autenticacion requerida"
+            : ex.getMessage();
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(build("UNAUTHORIZED", "Autenticacion requerida", List.of(ex.getMessage())));
+            .body(build("UNAUTHORIZED", message, List.of()));
     }
 
     @ExceptionHandler(AccessDeniedException.class)

@@ -2,6 +2,8 @@ package com.eap09.reservas.security.config;
 
 import com.eap09.reservas.config.ApiPaths;
 import com.eap09.reservas.security.infrastructure.JwtAuthenticationFilter;
+import com.eap09.reservas.security.infrastructure.RestAccessDeniedHandler;
+import com.eap09.reservas.security.infrastructure.RestAuthenticationEntryPoint;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -24,14 +26,20 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http,
                                                    JwtAuthenticationFilter jwtAuthenticationFilter,
-                                                   AuthenticationProvider authenticationProvider) throws Exception {
+                               AuthenticationProvider authenticationProvider,
+                               RestAuthenticationEntryPoint restAuthenticationEntryPoint,
+                               RestAccessDeniedHandler restAccessDeniedHandler) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .exceptionHandling(exceptions -> exceptions
+                .authenticationEntryPoint(restAuthenticationEntryPoint)
+                .accessDeniedHandler(restAccessDeniedHandler))
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(
                                 ApiPaths.PUBLIC + "/**",
-                            ApiPaths.AUTH + "/sessions",
+                    ApiPaths.AUTH + "/sessions",
+                    ApiPaths.AUTH + "/sessions/current",
                                 ApiPaths.API_V1 + "/clients",
                                 ApiPaths.API_V1 + "/providers",
                                 "/swagger-ui/**",

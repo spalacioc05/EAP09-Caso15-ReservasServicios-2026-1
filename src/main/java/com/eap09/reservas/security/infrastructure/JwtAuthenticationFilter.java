@@ -1,6 +1,8 @@
 package com.eap09.reservas.security.infrastructure;
 
+import com.eap09.reservas.config.ApiPaths;
 import com.eap09.reservas.security.application.JwtService;
+import com.eap09.reservas.security.application.SessionTokenValidationService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -19,10 +21,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
+    private final SessionTokenValidationService sessionTokenValidationService;
 
-    public JwtAuthenticationFilter(JwtService jwtService, UserDetailsService userDetailsService) {
+    public JwtAuthenticationFilter(JwtService jwtService,
+                                   UserDetailsService userDetailsService,
+                                   SessionTokenValidationService sessionTokenValidationService) {
         this.jwtService = jwtService;
         this.userDetailsService = userDetailsService;
+        this.sessionTokenValidationService = sessionTokenValidationService;
     }
 
     @Override
@@ -47,9 +53,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-            if (jwtService.isTokenValid(jwt, userDetails)
-                    && userDetails.isEnabled()
-                    && userDetails.isAccountNonLocked()) {
+            boolean tokenValid = jwtService.isTokenValid(jwt, userDetails);
+            boolean sessionActive = sessionTokenValidationService.isActiveSessionToken(jwtService.extractTokenId(jwt));
+            boolean allowForLogoutEndpoint = isCurrentSessionLogoutRequest(request);
+
+            if (tokenValid
+                && (sessionActive || allowForLogoutEndpoint)
+                && userDetails.isEnabled()
+                && userDetails.isAccountNonLocked()) {
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                         userDetails,
                         null,
@@ -60,5 +71,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    private boolean isCurrentSessionLogoutRequest(HttpServletRequest request) {
+        return "DELETE".equalsIgnoreCase(request.getMethod())
+                && ApiPaths.AUTH.concat("/sessions/current").equals(request.getServletPath());
     }
 }

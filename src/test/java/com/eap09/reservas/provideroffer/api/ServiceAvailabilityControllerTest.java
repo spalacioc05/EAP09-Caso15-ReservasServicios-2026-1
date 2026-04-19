@@ -16,6 +16,7 @@ import com.eap09.reservas.common.exception.ResourceNotFoundException;
 import com.eap09.reservas.provideroffer.api.dto.ServiceAvailabilityResponse;
 import com.eap09.reservas.provideroffer.application.ServiceAvailabilityService;
 import com.eap09.reservas.security.application.JwtService;
+import com.eap09.reservas.security.application.SessionTokenValidationService;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import org.junit.jupiter.api.Test;
@@ -45,6 +46,9 @@ class ServiceAvailabilityControllerTest {
 
     @MockBean
     private UserDetailsService userDetailsService;
+
+        @MockBean
+        private SessionTokenValidationService sessionTokenValidationService;
 
     @Test
     void shouldCreateAvailabilitySuccessfully() throws Exception {

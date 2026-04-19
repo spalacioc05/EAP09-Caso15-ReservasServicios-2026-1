@@ -17,9 +17,10 @@ public class LoggingSystemEventPublisher implements SystemEventPublisher {
     @Override
     public void publish(SystemEvent event) {
         systemEventJdbcRepository.save(event);
-        LOGGER.info("system_event type={} entityType={} entityId={} result={} traceId={} details={}",
+        LOGGER.info("system_event type={} entityType={} responsibleUserId={} entityId={} result={} traceId={} details={}",
                 event.type(),
                 event.entityType(),
+            event.responsibleUserId(),
                 event.entityId(),
                 event.result(),
                 event.traceId(),

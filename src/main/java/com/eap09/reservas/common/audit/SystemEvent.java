@@ -5,6 +5,7 @@ import java.time.OffsetDateTime;
 public record SystemEvent(
         String type,
         String entityType,
+        String responsibleUserId,
         String entityId,
         String result,
         String details,
@@ -17,6 +18,16 @@ public record SystemEvent(
                                   String result,
                                   String details,
                                   String traceId) {
-        return new SystemEvent(type, entityType, entityId, result, details, traceId, OffsetDateTime.now());
+        return new SystemEvent(type, entityType, entityId, entityId, result, details, traceId, OffsetDateTime.now());
+    }
+
+    public static SystemEvent now(String type,
+                                  String entityType,
+                                  String responsibleUserId,
+                                  String entityId,
+                                  String result,
+                                  String details,
+                                  String traceId) {
+        return new SystemEvent(type, entityType, responsibleUserId, entityId, result, details, traceId, OffsetDateTime.now());
     }
 }

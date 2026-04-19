@@ -11,6 +11,7 @@ import com.eap09.reservas.common.exception.GlobalExceptionHandler;
 import com.eap09.reservas.identityaccess.api.dto.ProviderRegistrationResponse;
 import com.eap09.reservas.identityaccess.application.ProviderRegistrationService;
 import com.eap09.reservas.security.application.JwtService;
+import com.eap09.reservas.security.application.SessionTokenValidationService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -37,6 +38,9 @@ class ProviderRegistrationControllerTest {
 
     @MockBean
     private UserDetailsService userDetailsService;
+
+    @MockBean
+    private SessionTokenValidationService sessionTokenValidationService;
 
     @Test
     void shouldRegisterProviderSuccessfully() throws Exception {

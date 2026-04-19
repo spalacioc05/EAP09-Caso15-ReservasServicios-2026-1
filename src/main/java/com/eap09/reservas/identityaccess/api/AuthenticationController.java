@@ -9,11 +9,18 @@ import com.eap09.reservas.identityaccess.application.AuthenticationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.InsufficientAuthenticationException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -47,5 +54,44 @@ public class AuthenticationController {
                 TraceIdUtil.currentTraceId());
 
         return ResponseEntity.ok(body);
+    }
+
+    @DeleteMapping("/current")
+    @Operation(
+            summary = "Cerrar de forma segura la sesion actual",
+            security = @SecurityRequirement(name = "bearerAuth"))
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Sesion cerrada correctamente")
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Autenticacion requerida",
+            content = @Content(schema = @Schema(implementation = com.eap09.reservas.common.response.ErrorResponse.class)))
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "409", description = "No existe una sesion activa valida",
+            content = @Content(schema = @Schema(implementation = com.eap09.reservas.common.response.ErrorResponse.class)))
+    public ResponseEntity<ApiResponse<String>> closeCurrentSession(
+            @RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String authorizationHeader,
+            Authentication authentication) {
+
+        Authentication resolvedAuthentication = authentication != null
+                ? authentication
+                : SecurityContextHolder.getContext().getAuthentication();
+
+        if (resolvedAuthentication == null || resolvedAuthentication.getName() == null) {
+            throw new InsufficientAuthenticationException("Autenticacion requerida");
+        }
+
+        String token = extractBearerToken(authorizationHeader);
+        authenticationService.closeCurrentSession(token, resolvedAuthentication.getName());
+
+        ApiResponse<String> body = new ApiResponse<>(
+                "Sesion cerrada correctamente",
+                "CERRADA",
+                TraceIdUtil.currentTraceId());
+
+        return ResponseEntity.ok(body);
+    }
+
+    private String extractBearerToken(String authorizationHeader) {
+        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+            throw new InsufficientAuthenticationException("Autenticacion requerida");
+        }
+        return authorizationHeader.substring(7);
     }
 }

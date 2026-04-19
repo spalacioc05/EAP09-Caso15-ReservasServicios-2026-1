@@ -78,6 +78,7 @@ class ServiceRegistrationE2ETest {
                 jdbcTemplate.update("DELETE FROM tbl_evento WHERE id_usuario_responsable = ? OR id_registro_afectado = ?", userId, userId);
             }
 
+            jdbcTemplate.update("DELETE FROM tbl_sesion_usuario WHERE id_usuario IN (SELECT id_usuario FROM tbl_usuario WHERE correo_usuario = ?)", email);
             jdbcTemplate.update("DELETE FROM tbl_usuario WHERE correo_usuario = ?", email);
         }
 

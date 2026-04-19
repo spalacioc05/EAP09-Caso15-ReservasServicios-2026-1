@@ -12,6 +12,7 @@ import com.eap09.reservas.common.exception.OfferQueryFailedException;
 import com.eap09.reservas.customerbooking.api.dto.OfferResponse;
 import com.eap09.reservas.customerbooking.application.CustomerBookingOfferService;
 import com.eap09.reservas.security.application.JwtService;
+import com.eap09.reservas.security.application.SessionTokenValidationService;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +40,9 @@ class CustomerBookingControllerTest {
 
     @MockBean
     private UserDetailsService userDetailsService;
+
+        @MockBean
+        private SessionTokenValidationService sessionTokenValidationService;
 
     @Test
     void shouldReturnOfferSuccessfully() throws Exception {

@@ -1,0 +1,19 @@
+spring:
+  config:
+    import: optional:file:.env[.properties]
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/eap09_reservas}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      # Keep DB usage low during full-suite runs against Supabase session mode.
+      maximum-pool-size: 2
+      minimum-idle: 0
+      idle-timeout: 10000
+      max-lifetime: 30000
+      connection-timeout: 30000
+
+app:
+  security:
+    jwt-secret: test_jwt_secret_for_ci_and_local_tests_min_32_chars

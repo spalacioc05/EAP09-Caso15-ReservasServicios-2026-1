@@ -13,6 +13,7 @@ import com.eap09.reservas.common.exception.ServiceNameAlreadyExistsException;
 import com.eap09.reservas.provideroffer.api.dto.ServiceRegistrationResponse;
 import com.eap09.reservas.provideroffer.application.ServiceRegistrationService;
 import com.eap09.reservas.security.application.JwtService;
+import com.eap09.reservas.security.application.SessionTokenValidationService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -40,6 +41,9 @@ class ServiceRegistrationControllerTest {
 
     @MockBean
     private UserDetailsService userDetailsService;
+
+        @MockBean
+        private SessionTokenValidationService sessionTokenValidationService;
 
     @Test
     void shouldRegisterServiceSuccessfully() throws Exception {

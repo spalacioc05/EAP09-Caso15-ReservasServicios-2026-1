@@ -72,6 +72,7 @@ class CustomerBookingReservationE2ETest {
                 jdbcTemplate.update("DELETE FROM tbl_reserva WHERE id_usuario_cliente = ?", userId);
             }
 
+            jdbcTemplate.update("DELETE FROM tbl_sesion_usuario WHERE id_usuario IN (SELECT id_usuario FROM tbl_usuario WHERE correo_usuario = ?)", email);
             jdbcTemplate.update("DELETE FROM tbl_usuario WHERE correo_usuario = ?", email);
         }
 
