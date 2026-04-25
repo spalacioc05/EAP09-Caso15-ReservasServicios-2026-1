@@ -11,4 +11,6 @@ public interface UserAccountRepository extends JpaRepository<UserAccountEntity, 
     Optional<UserAccountEntity> findByCorreoUsuarioIgnoreCase(String correoUsuario);
 
     boolean existsByCorreoUsuarioIgnoreCase(String correoUsuario);
+
+    boolean existsByCorreoUsuarioIgnoreCaseAndIdUsuarioNot(String correoUsuario, Long idUsuario);
 }

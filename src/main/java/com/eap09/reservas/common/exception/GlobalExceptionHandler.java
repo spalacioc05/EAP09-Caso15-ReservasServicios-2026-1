@@ -122,6 +122,12 @@ public class GlobalExceptionHandler {
                 .body(build("SESSION_NOT_ACTIVE", ex.getMessage(), List.of()));
     }
 
+    @ExceptionHandler(ProfileNoChangesException.class)
+    public ResponseEntity<ErrorResponse> handleProfileNoChanges(ProfileNoChangesException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(build("PROFILE_NO_CHANGES", ex.getMessage(), List.of()));
+    }
+
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<ErrorResponse> handleAuthentication(AuthenticationException ex) {
         String message = (ex.getMessage() == null || ex.getMessage().isBlank())
