@@ -24,6 +24,15 @@ public class ReservationEntity {
     @Column(name = "fecha_creacion_reserva", nullable = false)
     private OffsetDateTime fechaCreacionReserva;
 
+    @Column(name = "fecha_actualizacion_reserva")
+    private OffsetDateTime fechaActualizacionReserva;
+
+    @Column(name = "fecha_cancelacion_reserva")
+    private OffsetDateTime fechaCancelacionReserva;
+
+    @Column(name = "fecha_finalizacion_reserva")
+    private OffsetDateTime fechaFinalizacionReserva;
+
     // getters y setters
 
     public Long getIdReserva() {
@@ -60,5 +69,29 @@ public class ReservationEntity {
 
     public void setFechaCreacionReserva(OffsetDateTime fechaCreacionReserva) {
         this.fechaCreacionReserva = fechaCreacionReserva;
+    }
+
+    public OffsetDateTime getFechaActualizacionReserva() {
+        return fechaActualizacionReserva;
+    }
+
+    public void setFechaActualizacionReserva(OffsetDateTime fechaActualizacionReserva) {
+        this.fechaActualizacionReserva = fechaActualizacionReserva;
+    }
+
+    public OffsetDateTime getFechaCancelacionReserva() {
+        return fechaCancelacionReserva;
+    }
+
+    public void setFechaCancelacionReserva(OffsetDateTime fechaCancelacionReserva) {
+        this.fechaCancelacionReserva = fechaCancelacionReserva;
+    }
+
+    public OffsetDateTime getFechaFinalizacionReserva() {
+        return fechaFinalizacionReserva;
+    }
+
+    public void setFechaFinalizacionReserva(OffsetDateTime fechaFinalizacionReserva) {
+        this.fechaFinalizacionReserva = fechaFinalizacionReserva;
     }
 }

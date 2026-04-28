@@ -80,6 +80,12 @@ public class GlobalExceptionHandler {
                 .body(build("SERVICE_NAME_ALREADY_EXISTS", ex.getMessage(), List.of()));
     }
 
+    @ExceptionHandler(ServiceStatusAlreadySetException.class)
+    public ResponseEntity<ErrorResponse> handleServiceStatusAlreadySet(ServiceStatusAlreadySetException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(build("SERVICE_STATUS_ALREADY_SET", ex.getMessage(), List.of()));
+    }
+
     @ExceptionHandler(AvailabilityOverlapException.class)
     public ResponseEntity<ErrorResponse> handleAvailabilityOverlap(AvailabilityOverlapException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
@@ -114,6 +120,36 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleReservationCreationFailed(ReservationCreationFailedException ex) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(build("RESERVATION_CREATION_FAILED", ex.getMessage(), List.of()));
+    }
+
+    @ExceptionHandler(ServiceStatusChangeFailedException.class)
+    public ResponseEntity<ErrorResponse> handleServiceStatusChangeFailed(ServiceStatusChangeFailedException ex) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(build("SERVICE_STATUS_CHANGE_FAILED", ex.getMessage(), List.of()));
+    }
+
+    @ExceptionHandler(ProviderReservationQueryFailedException.class)
+    public ResponseEntity<ErrorResponse> handleProviderReservationQueryFailed(ProviderReservationQueryFailedException ex) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(build("PROVIDER_BOOKING_QUERY_FAILED", ex.getMessage(), List.of()));
+    }
+
+    @ExceptionHandler(CustomerReservationQueryFailedException.class)
+    public ResponseEntity<ErrorResponse> handleCustomerReservationQueryFailed(CustomerReservationQueryFailedException ex) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(build("CUSTOMER_BOOKING_QUERY_FAILED", ex.getMessage(), List.of()));
+    }
+
+    @ExceptionHandler(ReservationFinalizationFailedException.class)
+    public ResponseEntity<ErrorResponse> handleReservationFinalizationFailed(ReservationFinalizationFailedException ex) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(build("RESERVATION_FINALIZATION_FAILED", ex.getMessage(), List.of()));
+    }
+
+    @ExceptionHandler(ReservationCancellationFailedException.class)
+    public ResponseEntity<ErrorResponse> handleReservationCancellationFailed(ReservationCancellationFailedException ex) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(build("RESERVATION_CANCELLATION_FAILED", ex.getMessage(), List.of()));
     }
 
     @ExceptionHandler(SessionNotActiveException.class)
