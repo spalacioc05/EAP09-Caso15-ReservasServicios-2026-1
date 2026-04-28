@@ -10,6 +10,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -31,6 +32,14 @@ public class GlobalExceptionHandler {
                 .map(violation -> violation.getPropertyPath() + ": " + violation.getMessage())
                 .toList();
         return ResponseEntity.badRequest().body(build("VALIDATION_ERROR", "Validacion de la solicitud fallida", details));
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ErrorResponse> handleMethodArgumentTypeMismatch(MethodArgumentTypeMismatchException ex) {
+        String parameterName = ex.getName() == null ? "parametro" : ex.getName();
+        String detail = parameterName + ": valor invalido";
+        return ResponseEntity.badRequest()
+                .body(build("VALIDATION_ERROR", "Validacion de la solicitud fallida", List.of(detail)));
     }
 
     @ExceptionHandler(ApiException.class)
