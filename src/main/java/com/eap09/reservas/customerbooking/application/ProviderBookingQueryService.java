@@ -17,6 +17,7 @@ import com.eap09.reservas.identityaccess.infrastructure.UserAccountRepository;
 import com.eap09.reservas.provideroffer.domain.ServiceEntity;
 import com.eap09.reservas.provideroffer.infrastructure.ServiceRepository;
 import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Locale;
 import org.slf4j.Logger;
@@ -82,7 +83,7 @@ public class ProviderBookingQueryService {
             boolean hasAnyReservation = providerBookingQueryRepository.existsAnyReservationForProvider(providerUserId);
             String message = resolveMessage(bookings, hasAnyReservation);
 
-            publishEvent(providerUserId, "EXITO", buildSuccessDetail(date, status, serviceId, bookings.size()));
+            publishEventSafely(providerUserId, "EXITO", buildSuccessDetail(date, status, serviceId, bookings.size()));
 
             return new ProviderBookingQueryResult(message, bookings);
         } catch (DataAccessException ex) {
@@ -148,7 +149,7 @@ public class ProviderBookingQueryService {
                 projection.getCustomerFullName(),
                 projection.getCustomerEmail(),
                 projection.getBookingStatus(),
-                projection.getCreatedAt());
+                projection.getCreatedAt() == null ? null : projection.getCreatedAt().atOffset(ZoneOffset.UTC));
     }
 
     private String resolveMessage(List<ProviderBookingResponse> bookings, boolean hasAnyReservation) {

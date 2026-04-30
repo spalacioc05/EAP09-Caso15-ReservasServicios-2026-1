@@ -28,7 +28,7 @@ public interface ProviderBookingQueryRepository extends JpaRepository<com.eap09.
                 ds.hora_fin AS endTime,
                 c.id_usuario AS customerId,
                 CONCAT(c.nombres_usuario, ' ', c.apellidos_usuario) AS customerFullName,
-                c.correo_usuario AS customerEmail,
+                c.correo_usuario::text AS customerEmail,
                 er.nombre_estado AS bookingStatus,
                 r.fecha_creacion_reserva AS createdAt
             FROM tbl_reserva r
@@ -41,9 +41,9 @@ public interface ProviderBookingQueryRepository extends JpaRepository<com.eap09.
             JOIN tbl_estado er
                 ON er.id_estado = r.id_estado_reserva
             WHERE s.id_usuario_proveedor = :providerUserId
-                AND (:serviceId IS NULL OR s.id_servicio = :serviceId)
-                AND (:date IS NULL OR ds.fecha_disponibilidad = :date)
-                AND (:reservationStateId IS NULL OR r.id_estado_reserva = :reservationStateId)
+                AND s.id_servicio = COALESCE(:serviceId, s.id_servicio)
+                AND ds.fecha_disponibilidad = COALESCE(:date, ds.fecha_disponibilidad)
+                AND r.id_estado_reserva = COALESCE(:reservationStateId, r.id_estado_reserva)
             ORDER BY ds.fecha_disponibilidad DESC, ds.hora_inicio ASC, r.id_reserva DESC
             """, nativeQuery = true)
     List<ProviderBookingProjection> findProviderBookings(@Param("providerUserId") Long providerUserId,

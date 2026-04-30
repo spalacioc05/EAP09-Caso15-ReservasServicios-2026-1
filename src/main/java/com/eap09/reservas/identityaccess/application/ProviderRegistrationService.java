@@ -14,6 +14,8 @@ import com.eap09.reservas.identityaccess.infrastructure.StateRepository;
 import com.eap09.reservas.identityaccess.infrastructure.UserAccountRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
@@ -66,13 +68,7 @@ public class ProviderRegistrationService {
 
         UserAccountEntity createdUser = userAccountRepository.save(user);
 
-        systemEventPublisher.publish(SystemEvent.now(
-                "REGISTRO_PROVEEDOR",
-                "tbl_usuario",
-                String.valueOf(createdUser.getIdUsuario()),
-                "EXITO",
-                "Cuenta de proveedor creada",
-                TraceIdUtil.currentTraceId()));
+                publishRegistrationEventAfterCommit(createdUser.getIdUsuario());
 
         return new ProviderRegistrationResponse(
                 createdUser.getIdUsuario(),
@@ -81,4 +77,30 @@ public class ProviderRegistrationService {
                 ACTIVE_STATE
         );
     }
+
+        private void publishRegistrationEventAfterCommit(Long userId) {
+                if (!TransactionSynchronizationManager.isSynchronizationActive()) {
+                        systemEventPublisher.publish(SystemEvent.now(
+                                        "REGISTRO_PROVEEDOR",
+                                        "tbl_usuario",
+                                        String.valueOf(userId),
+                                        "EXITO",
+                                        "Cuenta de proveedor creada",
+                                        TraceIdUtil.currentTraceId()));
+                        return;
+                }
+
+                TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                        @Override
+                        public void afterCommit() {
+                                systemEventPublisher.publish(SystemEvent.now(
+                                                "REGISTRO_PROVEEDOR",
+                                                "tbl_usuario",
+                                                String.valueOf(userId),
+                                                "EXITO",
+                                                "Cuenta de proveedor creada",
+                                                TraceIdUtil.currentTraceId()));
+                        }
+                });
+        }
 }

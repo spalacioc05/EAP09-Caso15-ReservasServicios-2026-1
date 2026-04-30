@@ -1,8 +1,8 @@
 package com.eap09.reservas.customerbooking.infrastructure;
 
 import java.time.LocalDate;
+import java.time.Instant;
 import java.time.LocalTime;
-import java.time.OffsetDateTime;
 
 public interface ProviderBookingProjection {
 
@@ -28,5 +28,5 @@ public interface ProviderBookingProjection {
 
     String getBookingStatus();
 
-    OffsetDateTime getCreatedAt();
+    Instant getCreatedAt();
 }

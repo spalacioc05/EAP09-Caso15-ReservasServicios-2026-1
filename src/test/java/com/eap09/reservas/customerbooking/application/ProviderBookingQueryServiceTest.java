@@ -26,7 +26,7 @@ import com.eap09.reservas.provideroffer.domain.ServiceEntity;
 import com.eap09.reservas.provideroffer.infrastructure.ServiceRepository;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.time.OffsetDateTime;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
@@ -340,8 +340,8 @@ class ProviderBookingQueryServiceTest {
             }
 
             @Override
-            public OffsetDateTime getCreatedAt() {
-                return OffsetDateTime.now();
+                        public Instant getCreatedAt() {
+                                return Instant.now();
             }
         };
     }

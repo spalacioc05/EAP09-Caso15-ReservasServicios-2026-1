@@ -148,6 +148,7 @@ class BookingLifecycleAndCustomerQueryE2ETest {
 
         Long serviceId = createService(providerToken, "Servicio HU13-17-19", capacity);
         defineGeneralSchedule(providerToken, "LUNES", "08:00:00", "18:00:00");
+        defineGeneralSchedule(providerToken, "MARTES", "08:00:00", "18:00:00");
         LocalDate bookingDate = nextDate(DayOfWeek.MONDAY);
         Long availabilityOne = createAvailability(providerToken, serviceId, bookingDate, "09:00:00", "10:00:00");
         Long availabilityTwo = createAvailability(providerToken, serviceId, bookingDate.plusDays(1), "10:00:00", "11:00:00");
@@ -297,7 +298,7 @@ class BookingLifecycleAndCustomerQueryE2ETest {
             }
 
             JsonNode json = objectMapper.readTree(response.body());
-            return json.path("data").path("idDisponibilidadServicio").asLong();
+            return json.path("data").path("idDisponibilidad").asLong();
         } catch (Exception ex) {
             throw new IllegalStateException(ex);
         }
@@ -306,12 +307,12 @@ class BookingLifecycleAndCustomerQueryE2ETest {
     private String authenticate(String email, String password) {
         try {
             String body = objectMapper.writeValueAsString(Map.of(
-                    "email", email,
-                    "password", password
+                    "correo", email,
+                    "contrasena", password
             ));
 
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create("http://localhost:" + port + "/api/v1/auth/login"))
+                    .uri(URI.create("http://localhost:" + port + "/api/v1/auth/sessions"))
                     .header("Content-Type", "application/json")
                     .POST(HttpRequest.BodyPublishers.ofString(body))
                     .build();
@@ -360,20 +361,19 @@ class BookingLifecycleAndCustomerQueryE2ETest {
     private void defineGeneralSchedule(String token, String day, String start, String end) {
         try {
             String body = objectMapper.writeValueAsString(Map.of(
-                    "diaSemana", day,
-                    "horaInicio", start,
-                    "horaFin", end
+                "horaInicio", start,
+                "horaFin", end
             ));
 
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create("http://localhost:" + port + "/api/v1/providers/me/schedules"))
+                .uri(URI.create("http://localhost:" + port + "/api/v1/providers/me/general-schedule/" + day))
                     .header("Authorization", "Bearer " + token)
                     .header("Content-Type", "application/json")
-                    .POST(HttpRequest.BodyPublishers.ofString(body))
+                .PUT(HttpRequest.BodyPublishers.ofString(body))
                     .build();
 
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-            if (response.statusCode() != 201) {
+            if (response.statusCode() != 200) {
                 throw new IllegalStateException("No se pudo crear horario general: " + response.body());
             }
         } catch (Exception ex) {

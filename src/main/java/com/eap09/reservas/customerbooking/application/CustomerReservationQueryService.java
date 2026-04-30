@@ -10,6 +10,7 @@ import com.eap09.reservas.customerbooking.infrastructure.CustomerReservationProj
 import com.eap09.reservas.customerbooking.infrastructure.ReservationRepository;
 import com.eap09.reservas.identityaccess.domain.UserAccountEntity;
 import com.eap09.reservas.identityaccess.infrastructure.UserAccountRepository;
+import java.time.ZoneOffset;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,7 +50,7 @@ public class CustomerReservationQueryService {
                     ? "No existen reservas asociadas a tu cuenta"
                     : "Consulta de reservas del cliente exitosa";
 
-            publishQueryEvent(customer.getIdUsuario(), "EXITO", "Consulta de reservas del cliente completada. resultados=" + bookings.size());
+            publishQueryEventSafely(customer.getIdUsuario(), "EXITO", "Consulta de reservas del cliente completada. resultados=" + bookings.size());
             return new CustomerReservationQueryResult(message, bookings);
         } catch (DataAccessException ex) {
             publishQueryEventSafely(customer.getIdUsuario(), "FALLO", "No fue posible completar la consulta de reservas del cliente");
@@ -84,7 +85,7 @@ public class CustomerReservationQueryService {
                 projection.getStartTime(),
                 projection.getEndTime(),
                 projection.getBookingStatus(),
-                projection.getCreatedAt());
+                projection.getCreatedAt() == null ? null : projection.getCreatedAt().atOffset(ZoneOffset.UTC));
     }
 
     private void publishQueryEvent(Long customerUserId, String result, String detail) {

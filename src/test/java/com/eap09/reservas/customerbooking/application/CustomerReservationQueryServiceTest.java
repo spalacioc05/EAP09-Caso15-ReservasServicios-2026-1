@@ -16,7 +16,7 @@ import com.eap09.reservas.identityaccess.domain.UserAccountEntity;
 import com.eap09.reservas.identityaccess.infrastructure.UserAccountRepository;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.time.OffsetDateTime;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
@@ -137,8 +137,8 @@ class CustomerReservationQueryServiceTest {
             }
 
             @Override
-            public OffsetDateTime getCreatedAt() {
-                return OffsetDateTime.now();
+            public Instant getCreatedAt() {
+                return Instant.now();
             }
         };
     }

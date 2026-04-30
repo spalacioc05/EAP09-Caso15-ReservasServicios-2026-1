@@ -207,6 +207,7 @@ class ProviderBookingQueryE2ETest {
 
         Long ownServiceId = createService(providerToken, "Servicio HU12 Propio", 2);
         defineGeneralSchedule(providerToken, "LUNES", "08:00:00", "18:00:00");
+        defineGeneralSchedule(providerToken, "MARTES", "08:00:00", "18:00:00");
         LocalDate bookingDate = nextDate(DayOfWeek.MONDAY);
         Long ownAvailabilityId = createAvailability(providerToken, ownServiceId, bookingDate, "09:00:00", "10:00:00");
         Long ownAvailabilityIdTwo = createAvailability(providerToken, ownServiceId, bookingDate.plusDays(1), "09:00:00", "10:00:00");

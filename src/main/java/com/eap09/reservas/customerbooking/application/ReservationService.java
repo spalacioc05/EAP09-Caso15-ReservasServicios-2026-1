@@ -118,6 +118,7 @@ public class ReservationService {
             booking.setIdUsuarioCliente(customer.getIdUsuario());
             booking.setIdEstadoReserva(createdReservationState.getIdEstado());
             booking.setFechaCreacionReserva(OffsetDateTime.now());
+            booking.setFechaActualizacionReserva(OffsetDateTime.now());
 
             ReservationEntity savedBooking = reservationRepository.save(booking);
 

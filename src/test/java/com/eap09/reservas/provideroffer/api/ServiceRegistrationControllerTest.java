@@ -12,6 +12,7 @@ import com.eap09.reservas.common.exception.ProviderRoleRequiredException;
 import com.eap09.reservas.common.exception.ServiceNameAlreadyExistsException;
 import com.eap09.reservas.provideroffer.api.dto.ServiceRegistrationResponse;
 import com.eap09.reservas.provideroffer.application.ServiceRegistrationService;
+import com.eap09.reservas.provideroffer.application.ServiceStatusManagementService;
 import com.eap09.reservas.security.application.JwtService;
 import com.eap09.reservas.security.application.SessionTokenValidationService;
 import org.junit.jupiter.api.Test;
@@ -35,6 +36,9 @@ class ServiceRegistrationControllerTest {
 
     @MockBean
     private ServiceRegistrationService serviceRegistrationService;
+
+        @MockBean
+        private ServiceStatusManagementService serviceStatusManagementService;
 
     @MockBean
     private JwtService jwtService;
