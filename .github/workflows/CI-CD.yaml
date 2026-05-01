@@ -1,0 +1,114 @@
+name: CI/CD - Deploy to Azure Container Apps
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Descarga el código del repositorio
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # 2. ── SONARCLOUD (descomentar cuando lo configuremos) ──────────────────
+      # Requisitos previos:
+      #   - Crear cuenta en sonarcloud.io con tu GitHub
+      #   - Crear organización y proyecto en SonarCloud
+      #   - Agregar secret SONAR_TOKEN en GitHub (Settings → Secrets → Actions)
+      #   - Agregar en pom.xml:
+      #       <sonar.projectKey>TU_PROJECT_KEY</sonar.projectKey>
+      #       <sonar.organization>TU_ORGANIZATION</sonar.organization>
+      #
+      # - name: Set up Java 21
+      #   uses: actions/setup-java@v4
+      #   with:
+      #     java-version: '21'
+      #     distribution: 'temurin'
+      #
+      # - name: Analyze with SonarCloud
+      #   env:
+      #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   run: |
+      #     mvn sonar:sonar \
+      #       -Dsonar.projectKey=TU_PROJECT_KEY \
+      #       -Dsonar.organization=TU_ORGANIZATION \
+      #       -Dsonar.host.url=https://sonarcloud.io \
+      #       -Dsonar.token=${{ secrets.SONAR_TOKEN }}
+      # ────────────────────────────────────────────────────────────────────
+
+      # 3. Defino el nombre de la app según la rama
+      - name: Set app name by branch
+        run: |
+          if [ "${{ github.ref_name }}" == "main" ]; then
+            echo "APP_NAME=reservas-backend-prod" >> $GITHUB_ENV
+          else
+            echo "APP_NAME=reservas-backend-dev" >> $GITHUB_ENV
+          fi
+
+      # 4. Login al Container Registry
+      - name: Login to ACR
+        uses: docker/login-action@v3
+        with:
+          registry: reservasregistry.azurecr.io
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
+
+      # 5. Build de la imagen y push al ACR
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: |
+            reservasregistry.azurecr.io/${{ env.APP_NAME }}:${{ github.sha }}
+            reservasregistry.azurecr.io/${{ env.APP_NAME }}:latest
+
+      # 6. Instalar Azure CLI
+      - name: Install Azure CLI
+        run: |
+          curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+
+      # 7. Login a Azure con usuario y contraseña
+      - name: Login to Azure
+        run: |
+          az login --username ${{ secrets.AZURE_USER }} --password ${{ secrets.AZURE_PASSWORD }}
+
+      # 8. Crear la Container App si no existe, o actualizar si ya existe
+      - name: Deploy to Azure Container Apps
+        run: |
+          EXISTS=$(az containerapp show \
+            --name ${{ env.APP_NAME }} \
+            --resource-group ServicioReservas \
+            --query name -o tsv 2>/dev/null || echo "")
+
+          if [ -z "$EXISTS" ]; then
+            echo "Creando nueva Container App..."
+            az containerapp create \
+              --name ${{ env.APP_NAME }} \
+              --resource-group ServicioReservas \
+              --environment reservas-env \
+              --image reservasregistry.azurecr.io/${{ env.APP_NAME }}:${{ github.sha }} \
+              --registry-server reservasregistry.azurecr.io \
+              --registry-username ${{ secrets.ACR_USERNAME }} \
+              --registry-password ${{ secrets.ACR_PASSWORD }} \
+              --target-port 8080 \
+              --ingress external \
+              --min-replicas 0 \
+              --max-replicas 2 \
+              --cpu 0.5 \
+              --memory 1.0Gi
+          else
+            echo "Actualizando Container App existente..."
+            az containerapp update \
+              --name ${{ env.APP_NAME }} \
+              --resource-group ServicioReservas \
+              --image reservasregistry.azurecr.io/${{ env.APP_NAME }}:${{ github.sha }}
+          fi

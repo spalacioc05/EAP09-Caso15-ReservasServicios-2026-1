@@ -12,11 +12,8 @@ WORKDIR /app
 COPY --from=build /app/target/reservas-backend-0.0.1-SNAPSHOT.jar app.jar
 EXPOSE 8080
 ENTRYPOINT ["java", \
-  "-Xmx200m", \
-  "-Xms64m", \
+  "-Xmx512m", \
+  "-Xms128m", \
   "-XX:+UseSerialGC", \
-  "-XX:MaxMetaspaceSize=128m", \
-  "-XX:CompressedClassSpaceSize=48m", \
-  "-XX:TieredStopAtLevel=1", \
-  "-Xss256k", \
+  "-XX:MaxMetaspaceSize=256m", \
   "-jar", "app.jar"]
