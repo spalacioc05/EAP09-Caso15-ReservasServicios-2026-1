@@ -1,4 +1,4 @@
-name: CI/CD - Deploy to Azure Container Apps
+name: CI/CD - Build and Push to ACR
 
 on:
   push:
@@ -11,13 +11,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Descarga el código del repositorio
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      # 2. ── SONARCLOUD (descomentar cuando lo configuremos) ──────────────────
+      # ── SONARCLOUD (descomentar cuando se configure) ──────────────────
       # Requisitos previos:
       #   - Crear cuenta en sonarcloud.io con tu GitHub
       #   - Crear organización y proyecto en SonarCloud
@@ -44,7 +43,6 @@ jobs:
       #       -Dsonar.token=${{ secrets.SONAR_TOKEN }}
       # ────────────────────────────────────────────────────────────────────
 
-      # 3. Defino el nombre de la app según la rama
       - name: Set app name by branch
         run: |
           if [ "${{ github.ref_name }}" == "main" ]; then
@@ -53,7 +51,6 @@ jobs:
             echo "APP_NAME=reservas-backend-dev" >> $GITHUB_ENV
           fi
 
-      # 4. Login al Container Registry
       - name: Login to ACR
         uses: docker/login-action@v3
         with:
@@ -61,7 +58,6 @@ jobs:
           username: ${{ secrets.ACR_USERNAME }}
           password: ${{ secrets.ACR_PASSWORD }}
 
-      # 5. Build de la imagen y push al ACR
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
@@ -70,45 +66,3 @@ jobs:
           tags: |
             reservasregistry.azurecr.io/${{ env.APP_NAME }}:${{ github.sha }}
             reservasregistry.azurecr.io/${{ env.APP_NAME }}:latest
-
-      # 6. Instalar Azure CLI
-      - name: Install Azure CLI
-        run: |
-          curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
-
-      # 7. Login a Azure con usuario y contraseña
-      - name: Login to Azure
-        run: |
-          az login --username ${{ secrets.AZURE_USER }} --password ${{ secrets.AZURE_PASSWORD }}
-
-      # 8. Crear la Container App si no existe, o actualizar si ya existe
-      - name: Deploy to Azure Container Apps
-        run: |
-          EXISTS=$(az containerapp show \
-            --name ${{ env.APP_NAME }} \
-            --resource-group ServicioReservas \
-            --query name -o tsv 2>/dev/null || echo "")
-
-          if [ -z "$EXISTS" ]; then
-            echo "Creando nueva Container App..."
-            az containerapp create \
-              --name ${{ env.APP_NAME }} \
-              --resource-group ServicioReservas \
-              --environment reservas-env \
-              --image reservasregistry.azurecr.io/${{ env.APP_NAME }}:${{ github.sha }} \
-              --registry-server reservasregistry.azurecr.io \
-              --registry-username ${{ secrets.ACR_USERNAME }} \
-              --registry-password ${{ secrets.ACR_PASSWORD }} \
-              --target-port 8080 \
-              --ingress external \
-              --min-replicas 0 \
-              --max-replicas 2 \
-              --cpu 0.5 \
-              --memory 1.0Gi
-          else
-            echo "Actualizando Container App existente..."
-            az containerapp update \
-              --name ${{ env.APP_NAME }} \
-              --resource-group ServicioReservas \
-              --image reservasregistry.azurecr.io/${{ env.APP_NAME }}:${{ github.sha }}
-          fi
