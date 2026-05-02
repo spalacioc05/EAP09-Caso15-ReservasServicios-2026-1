@@ -16,7 +16,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      # ── SONARCLOUD (descomentar cuando se configure) ──────────────────
+      #── SONARCLOUD (descomentar cuando se configure) ──────────────────
       # Requisitos previos:
       #   - Crear cuenta en sonarcloud.io con tu GitHub
       #   - Crear organización y proyecto en SonarCloud
@@ -24,23 +24,23 @@ jobs:
       #   - Agregar en pom.xml:
       #       <sonar.projectKey>TU_PROJECT_KEY</sonar.projectKey>
       #       <sonar.organization>TU_ORGANIZATION</sonar.organization>
-      #
-      # - name: Set up Java 21
-      #   uses: actions/setup-java@v4
-      #   with:
-      #     java-version: '21'
-      #     distribution: 'temurin'
-      #
-      # - name: Analyze with SonarCloud
-      #   env:
-      #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #   run: |
-      #     mvn sonar:sonar \
-      #       -Dsonar.projectKey=TU_PROJECT_KEY \
-      #       -Dsonar.organization=TU_ORGANIZATION \
-      #       -Dsonar.host.url=https://sonarcloud.io \
-      #       -Dsonar.token=${{ secrets.SONAR_TOKEN }}
+      
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+      
+      - name: Analyze with SonarCloud
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run:
+          mvn verify sonar:sonar \
+            -Dsonar.projectKey= EAP09-Caso15-ReservasServicios-2026-1
+            -Dsonar.organization= ReservasServicios - Fabrica2026-1
+            -Dsonar.host.url=https://sonarcloud.io \
+            -Dsonar.token=${{ secrets.SONAR_TOKEN }}
       # ────────────────────────────────────────────────────────────────────
 
       - name: Set app name by branch
