@@ -20,7 +20,7 @@ import org.springframework.test.context.TestPropertySource;
 
 @SpringBootTest
 @TestPropertySource(properties = {
-        "spring.flyway.enabled=false",
+        "spring.flyway.enabled=true",
         "spring.jpa.hibernate.ddl-auto=none"
 })
 class DbReadDiagnosticsIntegrationTest {
