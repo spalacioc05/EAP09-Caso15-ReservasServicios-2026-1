@@ -46,8 +46,8 @@ jobs:
           SPRING_DATASOURCE_PASSWORD: reservas
         run: |
           mvn verify sonar:sonar \
-            -Dsonar.projectKey=EAP09-Caso15-ReservasServicios-2026-1 \
-            -Dsonar.organization=ReservasServicios-Fabrica2026-1 \
+            -Dsonar.projectKey=spalacioc05_EAP09-Caso15-ReservasServicios-2026-1 \
+            -Dsonar.organization=spalacioc05 \
             -Dsonar.host.url=https://sonarcloud.io \
             -Dsonar.token=${{ secrets.SONAR_TOKEN }}
 
