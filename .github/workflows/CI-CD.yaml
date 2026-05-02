@@ -10,38 +10,46 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: reservas_test
+          POSTGRES_USER: reservas
+          POSTGRES_PASSWORD: reservas
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      #── SONARCLOUD (descomentar cuando se configure) ──────────────────
-      # Requisitos previos:
-      #   - Crear cuenta en sonarcloud.io con tu GitHub
-      #   - Crear organización y proyecto en SonarCloud
-      #   - Agregar secret SONAR_TOKEN en GitHub (Settings → Secrets → Actions)
-      #   - Agregar en pom.xml:
-      #       <sonar.projectKey>TU_PROJECT_KEY</sonar.projectKey>
-      #       <sonar.organization>TU_ORGANIZATION</sonar.organization>
-      
       - name: Set up Java 21
         uses: actions/setup-java@v4
         with:
           java-version: '21'
           distribution: 'temurin'
-      
+
       - name: Analyze with SonarCloud
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run:
+          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/reservas_test
+          SPRING_DATASOURCE_USERNAME: reservas
+          SPRING_DATASOURCE_PASSWORD: reservas
+        run: |
           mvn verify sonar:sonar \
-            -Dsonar.projectKey= EAP09-Caso15-ReservasServicios-2026-1
-            -Dsonar.organization= ReservasServicios - Fabrica2026-1
+            -Dsonar.projectKey=EAP09-Caso15-ReservasServicios-2026-1 \
+            -Dsonar.organization=ReservasServicios-Fabrica2026-1 \
             -Dsonar.host.url=https://sonarcloud.io \
             -Dsonar.token=${{ secrets.SONAR_TOKEN }}
-      # ────────────────────────────────────────────────────────────────────
 
       - name: Set app name by branch
         run: |
