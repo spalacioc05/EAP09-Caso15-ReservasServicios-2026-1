@@ -5,6 +5,9 @@ on:
     branches:
       - main
       - dev
+  pull_request:
+    branches:
+      - main
 
 jobs:
   deploy:
@@ -45,12 +48,15 @@ jobs:
           SPRING_DATASOURCE_USERNAME: reservas
           SPRING_DATASOURCE_PASSWORD: reservas
         run: |
-          mvn verify sonar:sonar \
+            mvn verify sonar:sonar \
             -Dsonar.projectKey=spalacioc05_EAP09-Caso15-ReservasServicios-2026-1 \
             -Dsonar.organization=spalacioc05 \
             -Dsonar.host.url=https://sonarcloud.io \
             -Dsonar.token=${{ secrets.SONAR_TOKEN }} \
             -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
+            -Dsonar.pullrequest.key=${{ github.event.pull_request.number }} \
+            -Dsonar.pullrequest.branch=${{ github.head_ref }} \
+            -Dsonar.pullrequest.base=${{ github.base_ref }}
 
       - name: Set app name by branch
         run: |
