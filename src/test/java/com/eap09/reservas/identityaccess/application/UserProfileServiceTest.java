@@ -102,6 +102,66 @@ class UserProfileServiceTest {
     }
 
     @Test
+    void shouldRejectEmailWithoutDomainDot() {
+        UserAccountEntity user = buildUser(10L, "cliente@reservas.test", "Ana", "Cliente");
+        when(userAccountRepository.findByCorreoUsuarioIgnoreCase("cliente@reservas.test"))
+                .thenReturn(java.util.Optional.of(user));
+
+        ApiException ex = assertThrows(ApiException.class,
+                () -> userProfileService.updateOwnProfile(
+                        "cliente@reservas.test",
+                        new UpdateOwnProfileRequest(null, null, "cliente@reservas")));
+
+        assertEquals("El correo ingresado no es valido", ex.getMessage());
+        verify(userAccountRepository, never()).save(any(UserAccountEntity.class));
+    }
+
+    @Test
+    void shouldRejectEmailWhenDotIsImmediatelyAfterAt() {
+        UserAccountEntity user = buildUser(10L, "cliente@reservas.test", "Ana", "Cliente");
+        when(userAccountRepository.findByCorreoUsuarioIgnoreCase("cliente@reservas.test"))
+                .thenReturn(java.util.Optional.of(user));
+
+        ApiException ex = assertThrows(ApiException.class,
+                () -> userProfileService.updateOwnProfile(
+                        "cliente@reservas.test",
+                        new UpdateOwnProfileRequest(null, null, "cliente@.test")));
+
+        assertEquals("El correo ingresado no es valido", ex.getMessage());
+        verify(userAccountRepository, never()).save(any(UserAccountEntity.class));
+    }
+
+    @Test
+    void shouldRejectEmailEndingWithDot() {
+        UserAccountEntity user = buildUser(10L, "cliente@reservas.test", "Ana", "Cliente");
+        when(userAccountRepository.findByCorreoUsuarioIgnoreCase("cliente@reservas.test"))
+                .thenReturn(java.util.Optional.of(user));
+
+        ApiException ex = assertThrows(ApiException.class,
+                () -> userProfileService.updateOwnProfile(
+                        "cliente@reservas.test",
+                        new UpdateOwnProfileRequest(null, null, "cliente@reservas.test.")));
+
+        assertEquals("El correo ingresado no es valido", ex.getMessage());
+        verify(userAccountRepository, never()).save(any(UserAccountEntity.class));
+    }
+
+    @Test
+    void shouldRejectEmailContainingSpaces() {
+        UserAccountEntity user = buildUser(10L, "cliente@reservas.test", "Ana", "Cliente");
+        when(userAccountRepository.findByCorreoUsuarioIgnoreCase("cliente@reservas.test"))
+                .thenReturn(java.util.Optional.of(user));
+
+        ApiException ex = assertThrows(ApiException.class,
+                () -> userProfileService.updateOwnProfile(
+                        "cliente@reservas.test",
+                        new UpdateOwnProfileRequest(null, null, "cliente @reservas.test")));
+
+        assertEquals("El correo ingresado no es valido", ex.getMessage());
+        verify(userAccountRepository, never()).save(any(UserAccountEntity.class));
+    }
+
+    @Test
     void shouldRejectEmailAlreadyUsedByAnotherAccount() {
         UserAccountEntity user = buildUser(10L, "cliente@reservas.test", "Ana", "Cliente");
         when(userAccountRepository.findByCorreoUsuarioIgnoreCase("cliente@reservas.test"))
