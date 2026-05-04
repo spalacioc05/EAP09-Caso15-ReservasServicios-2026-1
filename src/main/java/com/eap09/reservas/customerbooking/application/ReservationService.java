@@ -124,7 +124,7 @@ public class ReservationService {
 
             systemEventPublisher.publish(SystemEvent.now(
                     "CREACION_RESERVA",
-                    "tbl_reserva",
+                    RESERVATION_STATE_CATEGORY,
                     String.valueOf(customer.getIdUsuario()),
                     "EXITO",
                     "Reserva creada con id " + savedBooking.getIdReserva(),

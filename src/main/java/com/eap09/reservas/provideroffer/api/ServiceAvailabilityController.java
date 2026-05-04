@@ -26,9 +26,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping(ApiPaths.API_V1 + "/providers/me/services/{serviceId}/availabilities")
+@RequestMapping(ServiceAvailabilityController.PROVIDER_SERVICES_BASE_PATH + "{serviceId}/availabilities")
 @Tag(name = "Provider Offer")
 public class ServiceAvailabilityController {
+
+        static final String PROVIDER_SERVICES_BASE_PATH = ApiPaths.API_V1 + "/providers/me/services/";
 
     private final ServiceAvailabilityService serviceAvailabilityService;
 
@@ -63,8 +65,8 @@ public class ServiceAvailabilityController {
 
         EntityModel<ApiResponse<ServiceAvailabilityResponse>> model = EntityModel.of(
                 payload,
-                Link.of(ApiPaths.API_V1 + "/providers/me/services/" + serviceId + "/availabilities").withSelfRel(),
-                Link.of(ApiPaths.API_V1 + "/providers/me/services/" + serviceId + "/availabilities/"
+                Link.of(PROVIDER_SERVICES_BASE_PATH + serviceId + "/availabilities").withSelfRel(),
+                Link.of(PROVIDER_SERVICES_BASE_PATH + serviceId + "/availabilities/"
                         + response.idDisponibilidad() + "/block").withRel("block"),
                 Link.of(ApiPaths.PROTECTED + "/provider-offer/bootstrap").withRel("provider-offer-bootstrap")
         );
@@ -95,9 +97,9 @@ public class ServiceAvailabilityController {
 
         EntityModel<ApiResponse<ServiceAvailabilityResponse>> model = EntityModel.of(
                 payload,
-                Link.of(ApiPaths.API_V1 + "/providers/me/services/" + serviceId + "/availabilities/"
+                Link.of(PROVIDER_SERVICES_BASE_PATH + serviceId + "/availabilities/"
                         + availabilityId + "/block").withSelfRel(),
-                Link.of(ApiPaths.API_V1 + "/providers/me/services/" + serviceId + "/availabilities").withRel("service-availabilities"),
+                Link.of(PROVIDER_SERVICES_BASE_PATH + serviceId + "/availabilities").withRel("service-availabilities"),
                 Link.of(ApiPaths.PROTECTED + "/provider-offer/bootstrap").withRel("provider-offer-bootstrap")
         );
 

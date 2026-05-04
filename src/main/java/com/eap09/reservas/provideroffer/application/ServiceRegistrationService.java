@@ -53,7 +53,7 @@ public class ServiceRegistrationService {
         }
 
         StateEntity activeServiceState = stateRepository.findByCategoryAndStateName(SERVICE_STATE_CATEGORY, ACTIVE_STATE)
-                .orElseThrow(() -> new IllegalStateException("Required state ACTIVO for tbl_servicio was not found"));
+            .orElseThrow(() -> new IllegalStateException("Required state ACTIVO for " + SERVICE_STATE_CATEGORY + " was not found"));
 
         OffsetDateTime now = OffsetDateTime.now();
 
@@ -71,7 +71,7 @@ public class ServiceRegistrationService {
 
         systemEventPublisher.publish(SystemEvent.now(
                 "REGISTRO_SERVICIO",
-                "tbl_servicio",
+            SERVICE_STATE_CATEGORY,
                 String.valueOf(provider.getIdUsuario()),
                 "EXITO",
                 "Servicio registrado por proveedor",

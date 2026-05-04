@@ -188,7 +188,7 @@ public class ProviderBookingQueryService {
     private void publishEvent(Long providerUserId, String result, String details) {
         systemEventPublisher.publish(SystemEvent.now(
                 PROVIDER_BOOKING_QUERY_EVENT,
-                "tbl_reserva",
+                RESERVATION_STATE_CATEGORY,
                 String.valueOf(providerUserId),
                 String.valueOf(providerUserId),
                 result,

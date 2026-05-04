@@ -54,7 +54,7 @@ public class ProviderRegistrationService {
                 .orElseThrow(() -> new IllegalStateException("Required role PROVEEDOR was not found"));
 
         StateEntity activeUserState = stateRepository.findByCategoryAndStateName(USER_STATE_CATEGORY, ACTIVE_STATE)
-                .orElseThrow(() -> new IllegalStateException("Required state ACTIVA for tbl_usuario was not found"));
+                .orElseThrow(() -> new IllegalStateException("Required state ACTIVA for " + USER_STATE_CATEGORY + " was not found"));
 
         UserAccountEntity user = new UserAccountEntity();
         user.setNombresUsuario(request.nombres().trim());
@@ -82,7 +82,7 @@ public class ProviderRegistrationService {
                 if (!TransactionSynchronizationManager.isSynchronizationActive()) {
                         systemEventPublisher.publish(SystemEvent.now(
                                         "REGISTRO_PROVEEDOR",
-                                        "tbl_usuario",
+                                        USER_STATE_CATEGORY,
                                         String.valueOf(userId),
                                         "EXITO",
                                         "Cuenta de proveedor creada",
@@ -95,7 +95,7 @@ public class ProviderRegistrationService {
                         public void afterCommit() {
                                 systemEventPublisher.publish(SystemEvent.now(
                                                 "REGISTRO_PROVEEDOR",
-                                                "tbl_usuario",
+                                                USER_STATE_CATEGORY,
                                                 String.valueOf(userId),
                                                 "EXITO",
                                                 "Cuenta de proveedor creada",
