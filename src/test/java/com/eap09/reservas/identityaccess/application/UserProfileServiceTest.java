@@ -2,6 +2,7 @@ package com.eap09.reservas.identityaccess.application;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -17,7 +18,10 @@ import com.eap09.reservas.identityaccess.api.dto.UpdateOwnProfileResponse;
 import com.eap09.reservas.identityaccess.domain.RoleEntity;
 import com.eap09.reservas.identityaccess.domain.UserAccountEntity;
 import com.eap09.reservas.identityaccess.infrastructure.UserAccountRepository;
+import java.util.stream.Stream;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -67,16 +71,16 @@ class UserProfileServiceTest {
         assertEquals("EXITO", eventCaptor.getValue().result());
     }
 
-    @Test
-    void shouldRejectWhenProvidedFieldIsBlank() {
+        @ParameterizedTest
+        @MethodSource("blankFieldRequests")
+        void shouldRejectWhenProvidedFieldIsBlank(UpdateOwnProfileRequest request, String expectedMessage) {
         UserAccountEntity user = buildUser(10L, "cliente@reservas.test", "Ana", "Cliente");
         when(userAccountRepository.findByCorreoUsuarioIgnoreCase("cliente@reservas.test"))
                 .thenReturn(java.util.Optional.of(user));
-        UpdateOwnProfileRequest request = new UpdateOwnProfileRequest("   ", null, null);
 
         ApiException ex = assertThrows(ApiException.class,
                 () -> userProfileService.updateOwnProfile("cliente@reservas.test", request));
-        assertEquals("nombres no puede estar vacio", ex.getMessage());
+                assertEquals(expectedMessage, ex.getMessage());
 
         verify(userAccountRepository, never()).save(any(UserAccountEntity.class));
 
@@ -136,34 +140,6 @@ class UserProfileServiceTest {
                 () -> userProfileService.updateOwnProfile("cliente@reservas.test", request));
 
         assertEquals("Debe enviar al menos un campo para actualizar", ex.getMessage());
-        verify(userAccountRepository, never()).save(any(UserAccountEntity.class));
-    }
-
-    @Test
-    void shouldRejectWhenLastNameIsBlank() {
-        UserAccountEntity user = buildUser(10L, "cliente@reservas.test", "Ana", "Cliente");
-        when(userAccountRepository.findByCorreoUsuarioIgnoreCase("cliente@reservas.test"))
-                .thenReturn(java.util.Optional.of(user));
-        UpdateOwnProfileRequest request = new UpdateOwnProfileRequest(null, "   ", null);
-
-        ApiException ex = assertThrows(ApiException.class,
-                () -> userProfileService.updateOwnProfile("cliente@reservas.test", request));
-
-        assertEquals("apellidos no puede estar vacio", ex.getMessage());
-        verify(userAccountRepository, never()).save(any(UserAccountEntity.class));
-    }
-
-    @Test
-    void shouldRejectWhenEmailIsBlankAfterTrim() {
-        UserAccountEntity user = buildUser(10L, "cliente@reservas.test", "Ana", "Cliente");
-        when(userAccountRepository.findByCorreoUsuarioIgnoreCase("cliente@reservas.test"))
-                .thenReturn(java.util.Optional.of(user));
-        UpdateOwnProfileRequest request = new UpdateOwnProfileRequest(null, null, "   ");
-
-        ApiException ex = assertThrows(ApiException.class,
-                () -> userProfileService.updateOwnProfile("cliente@reservas.test", request));
-
-        assertEquals("correo no puede estar vacio", ex.getMessage());
         verify(userAccountRepository, never()).save(any(UserAccountEntity.class));
     }
 
@@ -271,4 +247,12 @@ class UserProfileServiceTest {
         user.setHashContrasenaUsuario("hash");
         return user;
     }
+
+        private static Stream<Arguments> blankFieldRequests() {
+                return Stream.of(
+                                arguments(new UpdateOwnProfileRequest("   ", null, null), "nombres no puede estar vacio"),
+                                arguments(new UpdateOwnProfileRequest(null, "   ", null), "apellidos no puede estar vacio"),
+                                arguments(new UpdateOwnProfileRequest(null, null, "   "), "correo no puede estar vacio")
+                );
+        }
 }
