@@ -91,6 +91,8 @@ class ServiceRegistrationServiceTest {
     @Test
     void shouldRejectDuplicateServiceNameForSameProvider() {
         UserAccountEntity provider = providerUser();
+        ServiceRegistrationRequest request = new ServiceRegistrationRequest(
+                "Masaje terapeutico", "Sesion de relajacion", 60, 2);
 
         when(userAccountRepository.findByCorreoUsuarioIgnoreCase("provider@test.local"))
                 .thenReturn(Optional.of(provider));
@@ -98,10 +100,7 @@ class ServiceRegistrationServiceTest {
                 .thenReturn(true);
 
         assertThrows(ServiceNameAlreadyExistsException.class,
-                () -> serviceRegistrationService.registerService(
-                        "provider@test.local",
-                        new ServiceRegistrationRequest("Masaje terapeutico", "Sesion de relajacion", 60, 2)
-                ));
+                () -> serviceRegistrationService.registerService("provider@test.local", request));
 
         verify(serviceRepository, never()).save(any(ServiceEntity.class));
         verify(systemEventPublisher, never()).publish(any());
@@ -141,44 +140,41 @@ class ServiceRegistrationServiceTest {
     @Test
     void shouldRejectInvalidDuration() {
         UserAccountEntity provider = providerUser();
+        ServiceRegistrationRequest request = new ServiceRegistrationRequest(
+                "Masaje terapeutico", "Sesion de relajacion", 0, 2);
 
         when(userAccountRepository.findByCorreoUsuarioIgnoreCase("provider@test.local"))
                 .thenReturn(Optional.of(provider));
 
         assertThrows(ApiException.class,
-                () -> serviceRegistrationService.registerService(
-                        "provider@test.local",
-                        new ServiceRegistrationRequest("Masaje terapeutico", "Sesion de relajacion", 0, 2)
-                ));
+                () -> serviceRegistrationService.registerService("provider@test.local", request));
     }
 
     @Test
     void shouldRejectInvalidCapacity() {
         UserAccountEntity provider = providerUser();
+        ServiceRegistrationRequest request = new ServiceRegistrationRequest(
+                "Masaje terapeutico", "Sesion de relajacion", 60, 0);
 
         when(userAccountRepository.findByCorreoUsuarioIgnoreCase("provider@test.local"))
                 .thenReturn(Optional.of(provider));
 
         assertThrows(ApiException.class,
-                () -> serviceRegistrationService.registerService(
-                        "provider@test.local",
-                        new ServiceRegistrationRequest("Masaje terapeutico", "Sesion de relajacion", 60, 0)
-                ));
+                () -> serviceRegistrationService.registerService("provider@test.local", request));
     }
 
     @Test
     void shouldRejectNonProviderUser() {
         UserAccountEntity client = providerUser();
         client.getRol().setNombreRol("CLIENTE");
+        ServiceRegistrationRequest request = new ServiceRegistrationRequest(
+                "Masaje terapeutico", "Sesion de relajacion", 60, 2);
 
         when(userAccountRepository.findByCorreoUsuarioIgnoreCase("provider@test.local"))
                 .thenReturn(Optional.of(client));
 
         assertThrows(ProviderRoleRequiredException.class,
-                () -> serviceRegistrationService.registerService(
-                        "provider@test.local",
-                        new ServiceRegistrationRequest("Masaje terapeutico", "Sesion de relajacion", 60, 2)
-                ));
+                () -> serviceRegistrationService.registerService("provider@test.local", request));
     }
 
     private UserAccountEntity providerUser() {

@@ -138,6 +138,7 @@ class ServiceStatusManagementServiceTest {
         UserAccountEntity provider = providerUser();
         ServiceEntity service = ownService(203L, 10L, 1L, "Servicio Activo");
         StateEntity activeState = serviceState(1L, "ACTIVO");
+                ServiceStatusUpdateRequest request = new ServiceStatusUpdateRequest("ACTIVO");
 
         when(userAccountRepository.findByCorreoUsuarioIgnoreCase("provider@test.local"))
                 .thenReturn(Optional.of(provider));
@@ -147,10 +148,7 @@ class ServiceStatusManagementServiceTest {
                 .thenReturn(Optional.of(service));
 
         ServiceStatusAlreadySetException exception = assertThrows(ServiceStatusAlreadySetException.class,
-                () -> serviceStatusManagementService.updateOwnServiceStatus(
-                        "provider@test.local",
-                        203L,
-                        new ServiceStatusUpdateRequest("ACTIVO")));
+                () -> serviceStatusManagementService.updateOwnServiceStatus("provider@test.local", 203L, request));
 
         assertEquals("El servicio ya se encuentra activo", exception.getMessage());
 
@@ -166,6 +164,7 @@ class ServiceStatusManagementServiceTest {
         UserAccountEntity provider = providerUser();
         ServiceEntity service = ownService(204L, 10L, 2L, "Servicio Inactivo");
         StateEntity inactiveState = serviceState(2L, "INACTIVO");
+                ServiceStatusUpdateRequest request = new ServiceStatusUpdateRequest("INACTIVO");
 
         when(userAccountRepository.findByCorreoUsuarioIgnoreCase("provider@test.local"))
                 .thenReturn(Optional.of(provider));
@@ -175,10 +174,7 @@ class ServiceStatusManagementServiceTest {
                 .thenReturn(Optional.of(service));
 
         ServiceStatusAlreadySetException exception = assertThrows(ServiceStatusAlreadySetException.class,
-                () -> serviceStatusManagementService.updateOwnServiceStatus(
-                        "provider@test.local",
-                        204L,
-                        new ServiceStatusUpdateRequest("INACTIVO")));
+                () -> serviceStatusManagementService.updateOwnServiceStatus("provider@test.local", 204L, request));
 
         assertEquals("El servicio ya se encuentra inactivo", exception.getMessage());
         verify(serviceRepository, never()).save(any(ServiceEntity.class));
@@ -190,6 +186,7 @@ class ServiceStatusManagementServiceTest {
         UserAccountEntity provider = providerUser();
         ServiceEntity service = ownService(205L, 99L, 1L, "Servicio Ajeno");
         StateEntity inactiveState = serviceState(2L, "INACTIVO");
+                ServiceStatusUpdateRequest request = new ServiceStatusUpdateRequest("INACTIVO");
 
         when(userAccountRepository.findByCorreoUsuarioIgnoreCase("provider@test.local"))
                 .thenReturn(Optional.of(provider));
@@ -199,10 +196,7 @@ class ServiceStatusManagementServiceTest {
                 .thenReturn(Optional.of(service));
 
         AccessDeniedException exception = assertThrows(AccessDeniedException.class,
-                () -> serviceStatusManagementService.updateOwnServiceStatus(
-                        "provider@test.local",
-                        205L,
-                        new ServiceStatusUpdateRequest("INACTIVO")));
+                () -> serviceStatusManagementService.updateOwnServiceStatus("provider@test.local", 205L, request));
 
         assertEquals("No tiene permisos para cambiar el estado de este servicio", exception.getMessage());
         verify(serviceRepository, never()).save(any(ServiceEntity.class));
@@ -217,6 +211,7 @@ class ServiceStatusManagementServiceTest {
     void shouldRejectWhenServiceDoesNotExist() {
         UserAccountEntity provider = providerUser();
         StateEntity activeState = serviceState(1L, "ACTIVO");
+                ServiceStatusUpdateRequest request = new ServiceStatusUpdateRequest("ACTIVO");
 
         when(userAccountRepository.findByCorreoUsuarioIgnoreCase("provider@test.local"))
                 .thenReturn(Optional.of(provider));
@@ -226,10 +221,7 @@ class ServiceStatusManagementServiceTest {
                 .thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class,
-                () -> serviceStatusManagementService.updateOwnServiceStatus(
-                        "provider@test.local",
-                        999L,
-                        new ServiceStatusUpdateRequest("ACTIVO")));
+                () -> serviceStatusManagementService.updateOwnServiceStatus("provider@test.local", 999L, request));
 
         verify(serviceRepository, never()).save(any(ServiceEntity.class));
         verify(systemEventPublisher).publish(any(SystemEvent.class));
@@ -240,6 +232,7 @@ class ServiceStatusManagementServiceTest {
         UserAccountEntity provider = providerUser();
         ServiceEntity service = ownService(206L, 10L, 2L, "Servicio Fallido");
         StateEntity activeState = serviceState(1L, "ACTIVO");
+                ServiceStatusUpdateRequest request = new ServiceStatusUpdateRequest("ACTIVO");
 
         when(userAccountRepository.findByCorreoUsuarioIgnoreCase("provider@test.local"))
                 .thenReturn(Optional.of(provider));
@@ -251,10 +244,7 @@ class ServiceStatusManagementServiceTest {
                 .thenThrow(new DataAccessResourceFailureException("db unavailable"));
 
         ServiceStatusChangeFailedException exception = assertThrows(ServiceStatusChangeFailedException.class,
-                () -> serviceStatusManagementService.updateOwnServiceStatus(
-                        "provider@test.local",
-                        206L,
-                        new ServiceStatusUpdateRequest("ACTIVO")));
+                () -> serviceStatusManagementService.updateOwnServiceStatus("provider@test.local", 206L, request));
 
         assertEquals("No fue posible completar el cambio de estado del servicio. Intenta nuevamente mas tarde", exception.getMessage());
         verify(systemEventPublisher).publish(any(SystemEvent.class));
@@ -264,15 +254,13 @@ class ServiceStatusManagementServiceTest {
     void shouldRejectWhenAuthenticatedUserIsNotProvider() {
         UserAccountEntity client = providerUser();
         client.getRol().setNombreRol("CLIENTE");
+        ServiceStatusUpdateRequest request = new ServiceStatusUpdateRequest("ACTIVO");
 
         when(userAccountRepository.findByCorreoUsuarioIgnoreCase("provider@test.local"))
                 .thenReturn(Optional.of(client));
 
         assertThrows(ProviderRoleRequiredException.class,
-                () -> serviceStatusManagementService.updateOwnServiceStatus(
-                        "provider@test.local",
-                        207L,
-                        new ServiceStatusUpdateRequest("ACTIVO")));
+                () -> serviceStatusManagementService.updateOwnServiceStatus("provider@test.local", 207L, request));
     }
 
     private UserAccountEntity providerUser() {

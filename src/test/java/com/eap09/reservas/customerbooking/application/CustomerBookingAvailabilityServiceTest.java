@@ -82,8 +82,10 @@ class CustomerBookingAvailabilityServiceTest {
 
     @Test
     void shouldFailWhenRequiredFieldsAreMissing() {
+        LocalDate requestedDate = LocalDate.of(2026, 4, 20);
+
         ApiException ex = assertThrows(ApiException.class,
-                () -> service.getAvailability(10L, null, LocalDate.of(2026, 4, 20), "client@test.local"));
+            () -> service.getAvailability(10L, null, requestedDate, "client@test.local"));
 
         assertEquals("REQUIRED_FIELDS_MISSING", ex.getErrorCode());
         assertEquals("Proveedor, servicio y fecha son requeridos", ex.getMessage());
@@ -93,9 +95,10 @@ class CustomerBookingAvailabilityServiceTest {
     void shouldRejectNonClientRole() {
         when(userAccountRepository.findByCorreoUsuarioIgnoreCase("provider@test.local"))
                 .thenReturn(Optional.of(user("provider@test.local", "PROVEEDOR")));
+        LocalDate requestedDate = LocalDate.of(2026, 4, 20);
 
         ClientRoleRequiredException ex = assertThrows(ClientRoleRequiredException.class,
-                () -> service.getAvailability(10L, 20L, LocalDate.of(2026, 4, 20), "provider@test.local"));
+            () -> service.getAvailability(10L, 20L, requestedDate, "provider@test.local"));
         assertNotNull(ex);
     }
 
@@ -105,9 +108,10 @@ class CustomerBookingAvailabilityServiceTest {
                 .thenReturn(Optional.of(user("client@test.local", "CLIENTE")));
         when(repository.existsValidProviderServiceRelation(10L, 20L))
                 .thenThrow(new DataAccessResourceFailureException("db down"));
+        LocalDate requestedDate = LocalDate.of(2026, 4, 20);
 
         AvailabilityQueryFailedException ex = assertThrows(AvailabilityQueryFailedException.class,
-                () -> service.getAvailability(10L, 20L, LocalDate.of(2026, 4, 20), "client@test.local"));
+            () -> service.getAvailability(10L, 20L, requestedDate, "client@test.local"));
         assertNotNull(ex);
     }
 

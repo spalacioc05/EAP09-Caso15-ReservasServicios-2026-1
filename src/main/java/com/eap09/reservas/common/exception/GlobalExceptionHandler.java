@@ -41,7 +41,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<ErrorResponse> handleMethodArgumentTypeMismatch(MethodArgumentTypeMismatchException ex) {
         String parameterName = ex.getName();
-        if (parameterName == null || parameterName.isBlank()) {
+        if (parameterName.isBlank()) {
             parameterName = DEFAULT_PARAMETER_NAME;
         }
         String detail = parameterName + ": valor invalido";

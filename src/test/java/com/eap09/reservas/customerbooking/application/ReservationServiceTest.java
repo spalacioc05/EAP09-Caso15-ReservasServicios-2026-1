@@ -155,8 +155,10 @@ class ReservationServiceTest {
 
     @Test
     void shouldRejectWhenRequiredFieldsAreMissing() {
+        CreateReservationRequest request = new CreateReservationRequest(null, 300L, 400L);
+
         ApiException ex = assertThrows(ApiException.class,
-                () -> reservationService.createReservation(new CreateReservationRequest(null, 300L, 400L), "client@test.local"));
+                () -> reservationService.createReservation(request, "client@test.local"));
 
         assertEquals("REQUIRED_FIELDS_MISSING", ex.getErrorCode());
         assertEquals("Proveedor, servicio y franja son requeridos", ex.getMessage());
@@ -216,9 +218,10 @@ class ReservationServiceTest {
     void shouldRejectWhenAuthenticatedUserIsNotClient() {
         when(userAccountRepository.findByCorreoUsuarioIgnoreCase("provider@test.local"))
                 .thenReturn(Optional.of(user(100L, "provider@test.local", "PROVEEDOR", activeUserState.getIdEstado())));
+        CreateReservationRequest request = new CreateReservationRequest(200L, 300L, 400L);
 
         ClientRoleRequiredException ex = assertThrows(ClientRoleRequiredException.class,
-                () -> reservationService.createReservation(new CreateReservationRequest(200L, 300L, 400L), "provider@test.local"));
+                () -> reservationService.createReservation(request, "provider@test.local"));
 
         assertNotNull(ex);
         verify(reservationRepository, never()).save(any(ReservationEntity.class));

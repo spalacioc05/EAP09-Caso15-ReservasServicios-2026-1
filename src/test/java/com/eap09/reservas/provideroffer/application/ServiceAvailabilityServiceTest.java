@@ -102,41 +102,41 @@ class ServiceAvailabilityServiceTest {
     @Test
     void shouldRejectWhenServiceNotFound() {
         UserAccountEntity provider = providerUser(10L, "provider@test.local");
+        ServiceAvailabilityCreateRequest request = new ServiceAvailabilityCreateRequest(
+            LocalDate.of(2026, 4, 6), LocalTime.of(9, 0), LocalTime.of(10, 0));
         when(userAccountRepository.findByCorreoUsuarioIgnoreCase("provider@test.local")).thenReturn(Optional.of(provider));
         when(serviceRepository.findByIdServicio(999L)).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class, () -> serviceAvailabilityService.createAvailability(
-                "provider@test.local", 999L,
-                new ServiceAvailabilityCreateRequest(LocalDate.of(2026, 4, 6), LocalTime.of(9, 0), LocalTime.of(10, 0))
-        ));
+        assertThrows(ResourceNotFoundException.class,
+            () -> serviceAvailabilityService.createAvailability("provider@test.local", 999L, request));
     }
 
     @Test
     void shouldRejectWhenServiceBelongsToAnotherProvider() {
         UserAccountEntity provider = providerUser(10L, "provider@test.local");
         ServiceEntity foreignService = serviceEntity(200L, 99L);
+        ServiceAvailabilityCreateRequest request = new ServiceAvailabilityCreateRequest(
+            LocalDate.of(2026, 4, 6), LocalTime.of(9, 0), LocalTime.of(10, 0));
 
         when(userAccountRepository.findByCorreoUsuarioIgnoreCase("provider@test.local")).thenReturn(Optional.of(provider));
         when(serviceRepository.findByIdServicio(200L)).thenReturn(Optional.of(foreignService));
 
-        assertThrows(AccessDeniedException.class, () -> serviceAvailabilityService.createAvailability(
-                "provider@test.local", 200L,
-                new ServiceAvailabilityCreateRequest(LocalDate.of(2026, 4, 6), LocalTime.of(9, 0), LocalTime.of(10, 0))
-        ));
+        assertThrows(AccessDeniedException.class,
+            () -> serviceAvailabilityService.createAvailability("provider@test.local", 200L, request));
     }
 
     @Test
     void shouldRejectInvalidRange() {
         UserAccountEntity provider = providerUser(10L, "provider@test.local");
         ServiceEntity service = serviceEntity(200L, 10L);
+        ServiceAvailabilityCreateRequest request = new ServiceAvailabilityCreateRequest(
+            LocalDate.of(2026, 4, 6), LocalTime.of(10, 0), LocalTime.of(10, 0));
 
         when(userAccountRepository.findByCorreoUsuarioIgnoreCase("provider@test.local")).thenReturn(Optional.of(provider));
         when(serviceRepository.findByIdServicio(200L)).thenReturn(Optional.of(service));
 
-        assertThrows(ApiException.class, () -> serviceAvailabilityService.createAvailability(
-                "provider@test.local", 200L,
-                new ServiceAvailabilityCreateRequest(LocalDate.of(2026, 4, 6), LocalTime.of(10, 0), LocalTime.of(10, 0))
-        ));
+        assertThrows(ApiException.class,
+            () -> serviceAvailabilityService.createAvailability("provider@test.local", 200L, request));
     }
 
     @Test
@@ -146,16 +146,16 @@ class ServiceAvailabilityServiceTest {
         ServiceEntity service = serviceEntity(200L, 10L);
         WeekDayEntity monday = weekDay(1L, "LUNES");
         GeneralScheduleEntity schedule = scheduleEntity(10L, monday, LocalTime.of(8, 0), LocalTime.of(12, 0));
+        ServiceAvailabilityCreateRequest request = new ServiceAvailabilityCreateRequest(
+            mondayDate, LocalTime.of(11, 0), LocalTime.of(13, 0));
 
         when(userAccountRepository.findByCorreoUsuarioIgnoreCase("provider@test.local")).thenReturn(Optional.of(provider));
         when(serviceRepository.findByIdServicio(200L)).thenReturn(Optional.of(service));
         when(weekDayRepository.findByNombreDiaSemana("LUNES")).thenReturn(Optional.of(monday));
         when(generalScheduleRepository.findByIdUsuarioProveedorAndDiaSemana_IdDiaSemana(10L, 1L)).thenReturn(List.of(schedule));
 
-        assertThrows(ApiException.class, () -> serviceAvailabilityService.createAvailability(
-                "provider@test.local", 200L,
-                new ServiceAvailabilityCreateRequest(mondayDate, LocalTime.of(11, 0), LocalTime.of(13, 0))
-        ));
+        assertThrows(ApiException.class,
+            () -> serviceAvailabilityService.createAvailability("provider@test.local", 200L, request));
     }
 
     @Test
@@ -165,6 +165,8 @@ class ServiceAvailabilityServiceTest {
         ServiceEntity service = serviceEntity(200L, 10L);
         WeekDayEntity monday = weekDay(1L, "LUNES");
         GeneralScheduleEntity schedule = scheduleEntity(10L, monday, LocalTime.of(8, 0), LocalTime.of(18, 0));
+        ServiceAvailabilityCreateRequest request = new ServiceAvailabilityCreateRequest(
+            mondayDate, LocalTime.of(9, 0), LocalTime.of(10, 0));
 
         when(userAccountRepository.findByCorreoUsuarioIgnoreCase("provider@test.local")).thenReturn(Optional.of(provider));
         when(serviceRepository.findByIdServicio(200L)).thenReturn(Optional.of(service));
@@ -172,10 +174,8 @@ class ServiceAvailabilityServiceTest {
         when(generalScheduleRepository.findByIdUsuarioProveedorAndDiaSemana_IdDiaSemana(10L, 1L)).thenReturn(List.of(schedule));
         when(serviceAvailabilityRepository.existsOverlappingRange(200L, mondayDate, LocalTime.of(9, 0), LocalTime.of(10, 0))).thenReturn(true);
 
-        assertThrows(AvailabilityOverlapException.class, () -> serviceAvailabilityService.createAvailability(
-                "provider@test.local", 200L,
-                new ServiceAvailabilityCreateRequest(mondayDate, LocalTime.of(9, 0), LocalTime.of(10, 0))
-        ));
+        assertThrows(AvailabilityOverlapException.class,
+            () -> serviceAvailabilityService.createAvailability("provider@test.local", 200L, request));
     }
 
     @Test
@@ -236,13 +236,12 @@ class ServiceAvailabilityServiceTest {
     void shouldRejectNonProviderUser() {
         UserAccountEntity client = providerUser(10L, "client@test.local");
         client.getRol().setNombreRol("CLIENTE");
+        ServiceAvailabilityCreateRequest request = new ServiceAvailabilityCreateRequest(
+            LocalDate.of(2026, 4, 6), LocalTime.of(9, 0), LocalTime.of(10, 0));
         when(userAccountRepository.findByCorreoUsuarioIgnoreCase("client@test.local")).thenReturn(Optional.of(client));
 
         assertThrows(ProviderRoleRequiredException.class,
-                () -> serviceAvailabilityService.createAvailability(
-                        "client@test.local", 200L,
-                        new ServiceAvailabilityCreateRequest(LocalDate.of(2026, 4, 6), LocalTime.of(9, 0), LocalTime.of(10, 0))
-                ));
+            () -> serviceAvailabilityService.createAvailability("client@test.local", 200L, request));
 
         verify(serviceAvailabilityRepository, never()).save(any(ServiceAvailabilityEntity.class));
     }

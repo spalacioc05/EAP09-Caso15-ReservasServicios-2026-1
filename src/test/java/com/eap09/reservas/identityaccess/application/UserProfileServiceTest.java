@@ -70,11 +70,10 @@ class UserProfileServiceTest {
         UserAccountEntity user = buildUser(10L, "cliente@reservas.test", "Ana", "Cliente");
         when(userAccountRepository.findByCorreoUsuarioIgnoreCase("cliente@reservas.test"))
                 .thenReturn(java.util.Optional.of(user));
+        UpdateOwnProfileRequest request = new UpdateOwnProfileRequest("   ", null, null);
 
         ApiException ex = assertThrows(ApiException.class,
-                () -> userProfileService.updateOwnProfile(
-                        "cliente@reservas.test",
-                        new UpdateOwnProfileRequest("   ", null, null)));
+                () -> userProfileService.updateOwnProfile("cliente@reservas.test", request));
         assertEquals("nombres no puede estar vacio", ex.getMessage());
 
         verify(userAccountRepository, never()).save(any(UserAccountEntity.class));
@@ -89,11 +88,10 @@ class UserProfileServiceTest {
         UserAccountEntity user = buildUser(10L, "cliente@reservas.test", "Ana", "Cliente");
         when(userAccountRepository.findByCorreoUsuarioIgnoreCase("cliente@reservas.test"))
                 .thenReturn(java.util.Optional.of(user));
+        UpdateOwnProfileRequest request = new UpdateOwnProfileRequest(null, null, "correo-invalido");
 
         ApiException ex = assertThrows(ApiException.class,
-                () -> userProfileService.updateOwnProfile(
-                        "cliente@reservas.test",
-                        new UpdateOwnProfileRequest(null, null, "correo-invalido")));
+                () -> userProfileService.updateOwnProfile("cliente@reservas.test", request));
 
         assertEquals("El correo ingresado no es valido", ex.getMessage());
         verify(userAccountRepository, never()).save(any(UserAccountEntity.class));
@@ -110,11 +108,10 @@ class UserProfileServiceTest {
                 .thenReturn(java.util.Optional.of(user));
         when(userAccountRepository.existsByCorreoUsuarioIgnoreCaseAndIdUsuarioNot("duplicado@reservas.test", 10L))
                 .thenReturn(true);
+        UpdateOwnProfileRequest request = new UpdateOwnProfileRequest(null, null, "duplicado@reservas.test");
 
         EmailAlreadyRegisteredException ex = assertThrows(EmailAlreadyRegisteredException.class,
-                () -> userProfileService.updateOwnProfile(
-                        "cliente@reservas.test",
-                        new UpdateOwnProfileRequest(null, null, "duplicado@reservas.test")));
+                () -> userProfileService.updateOwnProfile("cliente@reservas.test", request));
         assertEquals("El correo ingresado ya esta registrado", ex.getMessage());
 
         verify(userAccountRepository, never()).save(any(UserAccountEntity.class));
@@ -129,11 +126,10 @@ class UserProfileServiceTest {
         UserAccountEntity user = buildUser(10L, "cliente@reservas.test", "Ana", "Cliente");
         when(userAccountRepository.findByCorreoUsuarioIgnoreCase("cliente@reservas.test"))
                 .thenReturn(java.util.Optional.of(user));
+        UpdateOwnProfileRequest request = new UpdateOwnProfileRequest("Ana", "Cliente", "cliente@reservas.test");
 
         ProfileNoChangesException ex = assertThrows(ProfileNoChangesException.class,
-                () -> userProfileService.updateOwnProfile(
-                        "cliente@reservas.test",
-                        new UpdateOwnProfileRequest("Ana", "Cliente", "cliente@reservas.test")));
+                () -> userProfileService.updateOwnProfile("cliente@reservas.test", request));
         assertEquals("No existen cambios para aplicar", ex.getMessage());
 
         verify(userAccountRepository, never()).save(any(UserAccountEntity.class));
@@ -145,8 +141,10 @@ class UserProfileServiceTest {
 
     @Test
     void shouldRejectWhenAuthenticationIsMissing() {
+        UpdateOwnProfileRequest request = new UpdateOwnProfileRequest("Ana", null, null);
+
         InsufficientAuthenticationException ex = assertThrows(InsufficientAuthenticationException.class,
-                () -> userProfileService.updateOwnProfile("  ", new UpdateOwnProfileRequest("Ana", null, null)));
+                () -> userProfileService.updateOwnProfile("  ", request));
         assertEquals("Autenticacion requerida", ex.getMessage());
 
         verify(userAccountRepository, never()).findByCorreoUsuarioIgnoreCase(any());
