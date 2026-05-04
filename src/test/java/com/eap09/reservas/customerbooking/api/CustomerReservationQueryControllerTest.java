@@ -1,6 +1,5 @@
 package com.eap09.reservas.customerbooking.api;
 
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -50,7 +49,7 @@ class CustomerReservationQueryControllerTest {
 
     @Test
     void shouldReturnOwnBookings() throws Exception {
-        when(customerReservationQueryService.getOwnBookings(eq("customer@test.local")))
+        when(customerReservationQueryService.getOwnBookings("customer@test.local"))
                 .thenReturn(new CustomerReservationQueryResult(
                         "Consulta de reservas del cliente exitosa",
                         List.of(response())));
@@ -65,7 +64,7 @@ class CustomerReservationQueryControllerTest {
 
     @Test
     void shouldReturnEmptyListMessage() throws Exception {
-        when(customerReservationQueryService.getOwnBookings(eq("customer@test.local")))
+                when(customerReservationQueryService.getOwnBookings("customer@test.local"))
                 .thenReturn(new CustomerReservationQueryResult("No existen reservas asociadas a tu cuenta", List.of()));
 
         mockMvc.perform(get("/api/v1/bookings/me")
@@ -77,7 +76,7 @@ class CustomerReservationQueryControllerTest {
 
     @Test
     void shouldRejectWhenRoleIsNotClient() throws Exception {
-        when(customerReservationQueryService.getOwnBookings(eq("provider@test.local")))
+                when(customerReservationQueryService.getOwnBookings("provider@test.local"))
                 .thenThrow(new ClientRoleRequiredException("Solo un cliente autenticado puede consultar sus reservas"));
 
         mockMvc.perform(get("/api/v1/bookings/me")
@@ -88,7 +87,7 @@ class CustomerReservationQueryControllerTest {
 
     @Test
     void shouldReturnControlledInternalError() throws Exception {
-        when(customerReservationQueryService.getOwnBookings(eq("customer@test.local")))
+        when(customerReservationQueryService.getOwnBookings("customer@test.local"))
                 .thenThrow(new CustomerReservationQueryFailedException(
                         "No fue posible completar la consulta de reservas. Intenta nuevamente mas tarde"));
 

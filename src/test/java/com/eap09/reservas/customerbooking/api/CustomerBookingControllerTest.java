@@ -1,6 +1,5 @@
 package com.eap09.reservas.customerbooking.api;
 
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -46,7 +45,7 @@ class CustomerBookingControllerTest {
 
     @Test
     void shouldReturnOfferSuccessfully() throws Exception {
-        when(customerBookingOfferService.getAvailableOffers(eq("client@test.local")))
+                when(customerBookingOfferService.getAvailableOffers("client@test.local"))
                 .thenReturn(List.of(new OfferResponse(10L, "Servicio", "Descripcion", "Proveedor")));
 
         mockMvc.perform(get("/api/v1/offers")
@@ -59,7 +58,7 @@ class CustomerBookingControllerTest {
 
     @Test
     void shouldReturnEmptyOfferMessageWhenNoResults() throws Exception {
-        when(customerBookingOfferService.getAvailableOffers(eq("client@test.local")))
+                when(customerBookingOfferService.getAvailableOffers("client@test.local"))
                 .thenReturn(List.of());
 
         mockMvc.perform(get("/api/v1/offers")
@@ -78,7 +77,7 @@ class CustomerBookingControllerTest {
 
     @Test
     void shouldRejectWhenRoleIsNotClient() throws Exception {
-        when(customerBookingOfferService.getAvailableOffers(eq("provider@test.local")))
+                when(customerBookingOfferService.getAvailableOffers("provider@test.local"))
                 .thenThrow(new ClientRoleRequiredException("Solo un cliente autenticado puede consultar la oferta"));
 
         mockMvc.perform(get("/api/v1/offers")
@@ -89,7 +88,7 @@ class CustomerBookingControllerTest {
 
     @Test
     void shouldReturnControlledInternalError() throws Exception {
-        when(customerBookingOfferService.getAvailableOffers(eq("client@test.local")))
+                when(customerBookingOfferService.getAvailableOffers("client@test.local"))
                 .thenThrow(new OfferQueryFailedException("No fue posible obtener la oferta. Intenta nuevamente mas tarde"));
 
         mockMvc.perform(get("/api/v1/offers")
