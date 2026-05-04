@@ -108,7 +108,9 @@ class UserProfileServiceTest {
             "cliente@reservas",
             "cliente@.test",
             "cliente@reservas.test.",
-            "cliente @reservas.test"
+            "cliente @reservas.test",
+            "cliente@@reservas.test",
+            "cliente@"
     })
     void shouldRejectDuplicatedInvalidEmailCases(String invalidEmail) {
         UserAccountEntity user = buildUser(10L, "cliente@reservas.test", "Ana", "Cliente");
@@ -121,6 +123,87 @@ class UserProfileServiceTest {
 
         assertEquals("El correo ingresado no es valido", ex.getMessage());
         verify(userAccountRepository, never()).save(any(UserAccountEntity.class));
+    }
+
+    @Test
+    void shouldRejectWhenPayloadDoesNotContainAnyFieldToUpdate() {
+        UserAccountEntity user = buildUser(10L, "cliente@reservas.test", "Ana", "Cliente");
+        when(userAccountRepository.findByCorreoUsuarioIgnoreCase("cliente@reservas.test"))
+                .thenReturn(java.util.Optional.of(user));
+        UpdateOwnProfileRequest request = new UpdateOwnProfileRequest(null, null, null);
+
+        ApiException ex = assertThrows(ApiException.class,
+                () -> userProfileService.updateOwnProfile("cliente@reservas.test", request));
+
+        assertEquals("Debe enviar al menos un campo para actualizar", ex.getMessage());
+        verify(userAccountRepository, never()).save(any(UserAccountEntity.class));
+    }
+
+    @Test
+    void shouldRejectWhenLastNameIsBlank() {
+        UserAccountEntity user = buildUser(10L, "cliente@reservas.test", "Ana", "Cliente");
+        when(userAccountRepository.findByCorreoUsuarioIgnoreCase("cliente@reservas.test"))
+                .thenReturn(java.util.Optional.of(user));
+        UpdateOwnProfileRequest request = new UpdateOwnProfileRequest(null, "   ", null);
+
+        ApiException ex = assertThrows(ApiException.class,
+                () -> userProfileService.updateOwnProfile("cliente@reservas.test", request));
+
+        assertEquals("apellidos no puede estar vacio", ex.getMessage());
+        verify(userAccountRepository, never()).save(any(UserAccountEntity.class));
+    }
+
+    @Test
+    void shouldRejectWhenEmailIsBlankAfterTrim() {
+        UserAccountEntity user = buildUser(10L, "cliente@reservas.test", "Ana", "Cliente");
+        when(userAccountRepository.findByCorreoUsuarioIgnoreCase("cliente@reservas.test"))
+                .thenReturn(java.util.Optional.of(user));
+        UpdateOwnProfileRequest request = new UpdateOwnProfileRequest(null, null, "   ");
+
+        ApiException ex = assertThrows(ApiException.class,
+                () -> userProfileService.updateOwnProfile("cliente@reservas.test", request));
+
+        assertEquals("correo no puede estar vacio", ex.getMessage());
+        verify(userAccountRepository, never()).save(any(UserAccountEntity.class));
+    }
+
+    @Test
+    void shouldUpdateOwnProfileWithoutChangingEmail() {
+        UserAccountEntity user = buildUser(10L, "cliente@reservas.test", "Ana", "Cliente");
+        when(userAccountRepository.findByCorreoUsuarioIgnoreCase("cliente@reservas.test"))
+                .thenReturn(java.util.Optional.of(user));
+        when(userAccountRepository.save(any(UserAccountEntity.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+        UpdateOwnProfileRequest request = new UpdateOwnProfileRequest(null, "Cliente Actualizado", null);
+
+        UpdateOwnProfileResponse response = userProfileService.updateOwnProfile("cliente@reservas.test", request);
+
+        assertEquals("Ana", response.nombres());
+        assertEquals("Cliente Actualizado", response.apellidos());
+        assertEquals("cliente@reservas.test", response.correo());
+        verify(userAccountRepository, never())
+                .existsByCorreoUsuarioIgnoreCaseAndIdUsuarioNot(any(), any());
+    }
+
+    @Test
+    void shouldPublishGenericFailureMessageWhenUnexpectedRuntimeExceptionOccurs() {
+        UserAccountEntity user = buildUser(10L, "cliente@reservas.test", "Ana", "Cliente");
+        RuntimeException unexpectedException = new RuntimeException("boom");
+        when(userAccountRepository.findByCorreoUsuarioIgnoreCase("cliente@reservas.test"))
+                .thenReturn(java.util.Optional.of(user));
+        when(userAccountRepository.save(any(UserAccountEntity.class)))
+                .thenThrow(unexpectedException);
+        UpdateOwnProfileRequest request = new UpdateOwnProfileRequest("Ana Maria", null, null);
+
+        RuntimeException ex = assertThrows(RuntimeException.class,
+                () -> userProfileService.updateOwnProfile("cliente@reservas.test", request));
+
+        assertEquals("boom", ex.getMessage());
+
+        ArgumentCaptor<SystemEvent> eventCaptor = ArgumentCaptor.forClass(SystemEvent.class);
+        verify(systemEventPublisher).publish(eventCaptor.capture());
+        assertEquals("FALLO", eventCaptor.getValue().result());
+        assertEquals("No fue posible completar la actualizacion del perfil", eventCaptor.getValue().details());
     }
 
     @Test
