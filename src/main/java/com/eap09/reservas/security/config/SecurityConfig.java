@@ -34,6 +34,7 @@ public class SecurityConfig {
                                RestAuthenticationEntryPoint restAuthenticationEntryPoint,
                                RestAccessDeniedHandler restAccessDeniedHandler) throws Exception {
         http
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .exceptionHandling(exceptions -> exceptions
@@ -78,7 +79,7 @@ public class SecurityConfig {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOrigins(List.of(
             "http://localhost:5173",
-            "https://reservas-de-servicios.vercel.app/"
+            "https://reservas-de-servicios.vercel.app"
         ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
