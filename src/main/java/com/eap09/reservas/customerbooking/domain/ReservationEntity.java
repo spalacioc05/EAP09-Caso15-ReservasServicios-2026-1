@@ -2,7 +2,11 @@ package com.eap09.reservas.customerbooking.domain;
 
 import jakarta.persistence.*;
 import java.time.OffsetDateTime;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
 @Entity
 @Table(name = "tbl_reserva")
 public class ReservationEntity {
@@ -33,65 +37,4 @@ public class ReservationEntity {
     @Column(name = "fecha_finalizacion_reserva")
     private OffsetDateTime fechaFinalizacionReserva;
 
-    // getters y setters
-
-    public Long getIdReserva() {
-        return idReserva;
-    }
-
-    public Long getIdDisponibilidadServicio() {
-        return idDisponibilidadServicio;
-    }
-
-    public void setIdDisponibilidadServicio(Long idDisponibilidadServicio) {
-        this.idDisponibilidadServicio = idDisponibilidadServicio;
-    }
-
-    public Long getIdUsuarioCliente() {
-        return idUsuarioCliente;
-    }
-
-    public void setIdUsuarioCliente(Long idUsuarioCliente) {
-        this.idUsuarioCliente = idUsuarioCliente;
-    }
-
-    public Long getIdEstadoReserva() {
-        return idEstadoReserva;
-    }
-
-    public void setIdEstadoReserva(Long idEstadoReserva) {
-        this.idEstadoReserva = idEstadoReserva;
-    }
-
-    public OffsetDateTime getFechaCreacionReserva() {
-        return fechaCreacionReserva;
-    }
-
-    public void setFechaCreacionReserva(OffsetDateTime fechaCreacionReserva) {
-        this.fechaCreacionReserva = fechaCreacionReserva;
-    }
-
-    public OffsetDateTime getFechaActualizacionReserva() {
-        return fechaActualizacionReserva;
-    }
-
-    public void setFechaActualizacionReserva(OffsetDateTime fechaActualizacionReserva) {
-        this.fechaActualizacionReserva = fechaActualizacionReserva;
-    }
-
-    public OffsetDateTime getFechaCancelacionReserva() {
-        return fechaCancelacionReserva;
-    }
-
-    public void setFechaCancelacionReserva(OffsetDateTime fechaCancelacionReserva) {
-        this.fechaCancelacionReserva = fechaCancelacionReserva;
-    }
-
-    public OffsetDateTime getFechaFinalizacionReserva() {
-        return fechaFinalizacionReserva;
-    }
-
-    public void setFechaFinalizacionReserva(OffsetDateTime fechaFinalizacionReserva) {
-        this.fechaFinalizacionReserva = fechaFinalizacionReserva;
-    }
 }

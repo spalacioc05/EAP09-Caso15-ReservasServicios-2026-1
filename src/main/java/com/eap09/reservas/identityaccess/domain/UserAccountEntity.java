@@ -10,7 +10,11 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
 @Entity
 @Table(name = "tbl_usuario")
 public class UserAccountEntity {
@@ -44,76 +48,4 @@ public class UserAccountEntity {
 
     @Column(name = "fecha_fin_restriccion_acceso")
     private LocalDateTime fechaFinRestriccionAcceso;
-
-    public Long getIdUsuario() {
-        return idUsuario;
-    }
-
-    public void setIdUsuario(Long idUsuario) {
-        this.idUsuario = idUsuario;
-    }
-
-    public RoleEntity getRol() {
-        return rol;
-    }
-
-    public void setRol(RoleEntity rol) {
-        this.rol = rol;
-    }
-
-    public Long getIdEstado() {
-        return idEstado;
-    }
-
-    public void setIdEstado(Long idEstado) {
-        this.idEstado = idEstado;
-    }
-
-    public String getNombresUsuario() {
-        return nombresUsuario;
-    }
-
-    public void setNombresUsuario(String nombresUsuario) {
-        this.nombresUsuario = nombresUsuario;
-    }
-
-    public String getApellidosUsuario() {
-        return apellidosUsuario;
-    }
-
-    public void setApellidosUsuario(String apellidosUsuario) {
-        this.apellidosUsuario = apellidosUsuario;
-    }
-
-    public String getCorreoUsuario() {
-        return correoUsuario;
-    }
-
-    public void setCorreoUsuario(String correoUsuario) {
-        this.correoUsuario = correoUsuario;
-    }
-
-    public String getHashContrasenaUsuario() {
-        return hashContrasenaUsuario;
-    }
-
-    public void setHashContrasenaUsuario(String hashContrasenaUsuario) {
-        this.hashContrasenaUsuario = hashContrasenaUsuario;
-    }
-
-    public Integer getIntentosFallidosConsecutivos() {
-        return intentosFallidosConsecutivos;
-    }
-
-    public void setIntentosFallidosConsecutivos(Integer intentosFallidosConsecutivos) {
-        this.intentosFallidosConsecutivos = intentosFallidosConsecutivos;
-    }
-
-    public LocalDateTime getFechaFinRestriccionAcceso() {
-        return fechaFinRestriccionAcceso;
-    }
-
-    public void setFechaFinRestriccionAcceso(LocalDateTime fechaFinRestriccionAcceso) {
-        this.fechaFinRestriccionAcceso = fechaFinRestriccionAcceso;
-    }
 }

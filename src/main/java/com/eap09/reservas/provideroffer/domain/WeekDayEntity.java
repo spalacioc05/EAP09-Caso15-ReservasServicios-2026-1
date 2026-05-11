@@ -6,7 +6,11 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
 @Entity
 @Table(name = "tbl_dia_semana")
 public class WeekDayEntity {
@@ -21,28 +25,4 @@ public class WeekDayEntity {
 
     @Column(name = "orden_dia_semana", nullable = false)
     private Integer ordenDiaSemana;
-
-    public Long getIdDiaSemana() {
-        return idDiaSemana;
-    }
-
-    public void setIdDiaSemana(Long idDiaSemana) {
-        this.idDiaSemana = idDiaSemana;
-    }
-
-    public String getNombreDiaSemana() {
-        return nombreDiaSemana;
-    }
-
-    public void setNombreDiaSemana(String nombreDiaSemana) {
-        this.nombreDiaSemana = nombreDiaSemana;
-    }
-
-    public Integer getOrdenDiaSemana() {
-        return ordenDiaSemana;
-    }
-
-    public void setOrdenDiaSemana(Integer ordenDiaSemana) {
-        this.ordenDiaSemana = ordenDiaSemana;
-    }
 }
