@@ -44,9 +44,9 @@ public class ServiceStatusManagementService {
     private final SystemEventPublisher systemEventPublisher;
 
     public ServiceStatusManagementService(UserAccountRepository userAccountRepository,
-                                          StateRepository stateRepository,
-                                          ServiceRepository serviceRepository,
-                                          SystemEventPublisher systemEventPublisher) {
+            StateRepository stateRepository,
+            ServiceRepository serviceRepository,
+            SystemEventPublisher systemEventPublisher) {
         this.userAccountRepository = userAccountRepository;
         this.stateRepository = stateRepository;
         this.serviceRepository = serviceRepository;
@@ -61,8 +61,8 @@ public class ServiceStatusManagementService {
             ApiException.class
     })
     public ServiceStatusUpdateResponse updateOwnServiceStatus(String authenticatedUsername,
-                                                              Long serviceId,
-                                                              ServiceStatusUpdateRequest request) {
+            Long serviceId,
+            ServiceStatusUpdateRequest request) {
         String targetStatus = normalizeTargetStatus(request.targetStatus());
         String eventType = resolveEventType(targetStatus);
         UserAccountEntity provider = resolveAuthenticatedProvider(authenticatedUsername);
@@ -125,7 +125,8 @@ public class ServiceStatusManagementService {
                         "Solo un proveedor autenticado puede cambiar el estado de sus servicios"));
 
         if (!PROVIDER_ROLE.equalsIgnoreCase(user.getRol().getNombreRol())) {
-            throw new ProviderRoleRequiredException("Solo un proveedor autenticado puede cambiar el estado de sus servicios");
+            throw new ProviderRoleRequiredException(
+                    "Solo un proveedor autenticado puede cambiar el estado de sus servicios");
         }
 
         return user;
@@ -187,10 +188,10 @@ public class ServiceStatusManagementService {
     }
 
     private void publishEvent(String eventType,
-                              Long providerUserId,
-                              Long serviceId,
-                              String result,
-                              String details) {
+            Long providerUserId,
+            Long serviceId,
+            String result,
+            String details) {
         systemEventPublisher.publish(SystemEvent.now(
                 eventType,
                 SERVICE_ENTITY_TYPE,
@@ -202,14 +203,15 @@ public class ServiceStatusManagementService {
     }
 
     private void publishEventSafely(String eventType,
-                                    Long providerUserId,
-                                    Long serviceId,
-                                    String result,
-                                    String details) {
+            Long providerUserId,
+            Long serviceId,
+            String result,
+            String details) {
         try {
             publishEvent(eventType, providerUserId, serviceId, result, details);
         } catch (RuntimeException publishFailure) {
-            log.warn("No fue posible registrar evento de auditoria {} para el servicio {}", eventType, serviceId, publishFailure);
+            log.warn("No fue posible registrar evento de auditoria {} para el servicio {}", eventType, serviceId,
+                    publishFailure);
         }
     }
 }
