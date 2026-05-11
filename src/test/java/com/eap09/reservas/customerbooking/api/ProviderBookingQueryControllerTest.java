@@ -1,6 +1,5 @@
 package com.eap09.reservas.customerbooking.api;
 
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -51,7 +50,7 @@ class ProviderBookingQueryControllerTest {
 
     @Test
     void shouldReturnOwnBookingsWithoutFilters() throws Exception {
-        when(providerBookingQueryService.getOwnBookings(eq("provider@test.local"), eq(null), eq(null), eq(null)))
+        when(providerBookingQueryService.getOwnBookings("provider@test.local", null, null, null))
                 .thenReturn(new ProviderBookingQueryResult(
                         "Consulta operativa de reservas exitosa",
                         List.of(response())));
@@ -67,10 +66,10 @@ class ProviderBookingQueryControllerTest {
     @Test
     void shouldReturnOwnBookingsWithCombinedFilters() throws Exception {
         when(providerBookingQueryService.getOwnBookings(
-                eq("provider@test.local"),
-                eq(LocalDate.of(2026, 5, 1)),
-                eq("CREADA"),
-                eq(200L)))
+                "provider@test.local",
+                LocalDate.of(2026, 5, 1),
+                "CREADA",
+                200L))
                 .thenReturn(new ProviderBookingQueryResult(
                         "Consulta operativa de reservas exitosa",
                         List.of(response())));
@@ -86,7 +85,7 @@ class ProviderBookingQueryControllerTest {
 
     @Test
     void shouldReturnEmptyListWithControlledMessage() throws Exception {
-        when(providerBookingQueryService.getOwnBookings(eq("provider@test.local"), eq(null), eq(null), eq(null)))
+        when(providerBookingQueryService.getOwnBookings("provider@test.local", null, null, null))
                 .thenReturn(new ProviderBookingQueryResult(
                         "No existen reservas registradas para sus servicios",
                         List.of()));
@@ -109,7 +108,7 @@ class ProviderBookingQueryControllerTest {
 
     @Test
     void shouldRejectInvalidStatusFilter() throws Exception {
-        when(providerBookingQueryService.getOwnBookings(eq("provider@test.local"), eq(null), eq("NO_VALIDO"), eq(null)))
+                when(providerBookingQueryService.getOwnBookings("provider@test.local", null, "NO_VALIDO", null))
                 .thenThrow(new ApiException("INVALID_RESERVATION_STATUS", "El estado de reserva consultado no es valido"));
 
         mockMvc.perform(get("/api/v1/providers/me/bookings")
@@ -128,7 +127,7 @@ class ProviderBookingQueryControllerTest {
 
     @Test
     void shouldRejectWhenRoleIsNotProvider() throws Exception {
-        when(providerBookingQueryService.getOwnBookings(eq("client@test.local"), eq(null), eq(null), eq(null)))
+                when(providerBookingQueryService.getOwnBookings("client@test.local", null, null, null))
                 .thenThrow(new ProviderRoleRequiredException("Solo un proveedor autenticado puede consultar reservas operativas"));
 
         mockMvc.perform(get("/api/v1/providers/me/bookings")
@@ -139,7 +138,7 @@ class ProviderBookingQueryControllerTest {
 
     @Test
     void shouldRejectForeignServiceFilter() throws Exception {
-        when(providerBookingQueryService.getOwnBookings(eq("provider@test.local"), eq(null), eq(null), eq(999L)))
+        when(providerBookingQueryService.getOwnBookings("provider@test.local", null, null, 999L))
                 .thenThrow(new org.springframework.security.access.AccessDeniedException(
                         "No tiene permisos para consultar reservas de este servicio"));
 
@@ -152,7 +151,7 @@ class ProviderBookingQueryControllerTest {
 
     @Test
     void shouldReturnControlledInternalError() throws Exception {
-        when(providerBookingQueryService.getOwnBookings(eq("provider@test.local"), eq(null), eq(null), eq(null)))
+        when(providerBookingQueryService.getOwnBookings("provider@test.local", null, null, null))
                 .thenThrow(new ProviderReservationQueryFailedException(
                         "No fue posible completar la consulta de reservas. Intenta nuevamente mas tarde"));
 

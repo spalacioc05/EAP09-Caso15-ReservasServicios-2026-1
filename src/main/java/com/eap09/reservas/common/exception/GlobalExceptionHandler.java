@@ -17,13 +17,17 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    private static final String VALIDATION_ERROR_CODE = "VALIDATION_ERROR";
+    private static final String VALIDATION_FAILED_MESSAGE = "Validacion de la solicitud fallida";
+    private static final String DEFAULT_PARAMETER_NAME = "parametro";
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidation(MethodArgumentNotValidException ex) {
         List<String> details = ex.getBindingResult().getFieldErrors().stream()
                 .map(this::formatFieldError)
                 .toList();
 
-        return ResponseEntity.badRequest().body(build("VALIDATION_ERROR", "Validacion de la solicitud fallida", details));
+        return buildValidationError(details);
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
@@ -31,15 +35,17 @@ public class GlobalExceptionHandler {
         List<String> details = ex.getConstraintViolations().stream()
                 .map(violation -> violation.getPropertyPath() + ": " + violation.getMessage())
                 .toList();
-        return ResponseEntity.badRequest().body(build("VALIDATION_ERROR", "Validacion de la solicitud fallida", details));
+        return buildValidationError(details);
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<ErrorResponse> handleMethodArgumentTypeMismatch(MethodArgumentTypeMismatchException ex) {
-        String parameterName = ex.getName() == null ? "parametro" : ex.getName();
+        String parameterName = ex.getName();
+        if (parameterName.isBlank()) {
+            parameterName = DEFAULT_PARAMETER_NAME;
+        }
         String detail = parameterName + ": valor invalido";
-        return ResponseEntity.badRequest()
-                .body(build("VALIDATION_ERROR", "Validacion de la solicitud fallida", List.of(detail)));
+        return buildValidationError(List.of(detail));
     }
 
     @ExceptionHandler(ApiException.class)
@@ -196,6 +202,10 @@ public class GlobalExceptionHandler {
 
     private ErrorResponse build(String errorCode, String message, List<String> details) {
         return new ErrorResponse(errorCode, message, details, MDC.get("traceId"));
+    }
+
+    private ResponseEntity<ErrorResponse> buildValidationError(List<String> details) {
+        return ResponseEntity.badRequest().body(build(VALIDATION_ERROR_CODE, VALIDATION_FAILED_MESSAGE, details));
     }
 
     private String formatFieldError(FieldError fieldError) {

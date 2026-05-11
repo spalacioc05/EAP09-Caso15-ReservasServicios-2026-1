@@ -156,9 +156,10 @@ class AuthenticationServiceTest {
     void shouldRejectUnknownEmailWithInvalidCredentials() {
         when(userAccountRepository.findByCorreoUsuarioIgnoreCase("unknown@example.com"))
                 .thenReturn(Optional.empty());
+        AuthenticationRequest request = new AuthenticationRequest("unknown@example.com", "Password1!");
 
         assertThrows(InvalidCredentialsException.class,
-                () -> authenticationService.createSession(new AuthenticationRequest("unknown@example.com", "Password1!")));
+                () -> authenticationService.createSession(request));
 
         verify(systemEventPublisher).publish(any());
     }
@@ -173,9 +174,10 @@ class AuthenticationServiceTest {
 
         when(userAccountRepository.findByCorreoUsuarioIgnoreCase("user@example.com")).thenReturn(Optional.of(user));
         when(passwordEncoder.matches("wrong", "hash")).thenReturn(false);
+        AuthenticationRequest request = new AuthenticationRequest("user@example.com", "wrong");
 
         assertThrows(InvalidCredentialsException.class,
-                () -> authenticationService.createSession(new AuthenticationRequest("user@example.com", "wrong")));
+                () -> authenticationService.createSession(request));
 
         ArgumentCaptor<UserAccountEntity> captor = ArgumentCaptor.forClass(UserAccountEntity.class);
         verify(userAccountRepository).save(captor.capture());
@@ -192,9 +194,10 @@ class AuthenticationServiceTest {
 
         when(userAccountRepository.findByCorreoUsuarioIgnoreCase("user@example.com")).thenReturn(Optional.of(user));
         when(passwordEncoder.matches("wrong", "hash")).thenReturn(false);
+        AuthenticationRequest request = new AuthenticationRequest("user@example.com", "wrong");
 
         assertThrows(InvalidCredentialsException.class,
-                () -> authenticationService.createSession(new AuthenticationRequest("user@example.com", "wrong")));
+                () -> authenticationService.createSession(request));
 
         ArgumentCaptor<UserAccountEntity> captor = ArgumentCaptor.forClass(UserAccountEntity.class);
         verify(userAccountRepository).save(captor.capture());
@@ -210,9 +213,10 @@ class AuthenticationServiceTest {
         user.setFechaFinRestriccionAcceso(LocalDateTime.now().plusMinutes(5));
 
         when(userAccountRepository.findByCorreoUsuarioIgnoreCase("user@example.com")).thenReturn(Optional.of(user));
+        AuthenticationRequest request = new AuthenticationRequest("user@example.com", "Password1!");
 
         assertThrows(TemporaryAccessRestrictedException.class,
-                () -> authenticationService.createSession(new AuthenticationRequest("user@example.com", "Password1!")));
+                () -> authenticationService.createSession(request));
     }
 
     @Test
@@ -223,9 +227,10 @@ class AuthenticationServiceTest {
         UserAccountEntity user = buildUser("user@example.com", "CLIENTE", 2L);
 
         when(userAccountRepository.findByCorreoUsuarioIgnoreCase("user@example.com")).thenReturn(Optional.of(user));
+        AuthenticationRequest request = new AuthenticationRequest("user@example.com", "Password1!");
 
         assertThrows(AccountInactiveException.class,
-                () -> authenticationService.createSession(new AuthenticationRequest("user@example.com", "Password1!")));
+                () -> authenticationService.createSession(request));
     }
 
     @Test
