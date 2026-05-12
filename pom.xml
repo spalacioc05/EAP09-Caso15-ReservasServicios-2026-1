@@ -113,6 +113,13 @@
             <artifactId>spring-security-test</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+			<groupId>com.intuit.karate</groupId>
+			<artifactId>karate-junit5</artifactId>
+			<version>1.4.0</version>
+			<scope>test</scope>
+		</dependency>
     </dependencies>
 
     <build>
@@ -144,5 +151,19 @@
 			</plugin>
             
         </plugins>
+
+        <!-- Incluir archivos .feature de src/test/java en el classpath -->
+        <testResources>
+            <testResource>
+                <directory>src/test/java</directory>
+                <excludes>
+                    <exclude>**/*.java</exclude>
+                </excludes>
+            </testResource>
+            <testResource>
+                <directory>src/test/resources</directory>
+            </testResource>
+        </testResources>
     </build>
+
 </project>

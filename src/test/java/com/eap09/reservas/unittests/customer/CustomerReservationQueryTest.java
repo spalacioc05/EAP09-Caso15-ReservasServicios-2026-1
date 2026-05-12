@@ -1,9 +1,7 @@
 package com.eap09.reservas.unittests.customer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
@@ -17,11 +15,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import com.eap09.reservas.common.audit.SystemEvent;
 import com.eap09.reservas.common.audit.SystemEventPublisher;
 import com.eap09.reservas.customerbooking.application.CustomerReservationQueryResult;
 import com.eap09.reservas.customerbooking.application.CustomerReservationQueryService;
-import com.eap09.reservas.customerbooking.infrastructure.BookingLifecycleProjection;
 import com.eap09.reservas.customerbooking.infrastructure.CustomerReservationProjection;
 import com.eap09.reservas.customerbooking.infrastructure.ReservationRepository;
 import com.eap09.reservas.identityaccess.domain.RoleEntity;
@@ -119,14 +115,15 @@ public class CustomerReservationQueryTest {
     }
 
     @Test
-    void shouldReturnControlledMessageWhenNoBookings() {
-        when(userAccountRepository.findByCorreoUsuarioIgnoreCase("customer@test.local"))
-                .thenReturn(Optional.of(clientUser()));
+    void ReturnControlledMessageWhenNoBookings() {
+        when(userAccountRepository.findByCorreoUsuarioIgnoreCase("juan.empresa@gmail.com"))
+                .thenReturn(Optional.of(user));
         when(reservationRepository.findByCustomerUserId(50L)).thenReturn(List.of());
 
-        CustomerReservationQueryResult result = service.getOwnBookings("customer@test.local");
+        CustomerReservationQueryResult result = service.getOwnBookings("juan.empresa@gmail.com");
 
         assertEquals("No existen reservas asociadas a tu cuenta", result.message());
         assertEquals(0, result.bookings().size());
     }
+
 }
