@@ -33,166 +33,168 @@ import com.eap09.reservas.security.config.SecurityProperties;
 
 public class AuthenticationServiceTest {
 
-    @Mock
-    private UserAccountRepository userAccountRepository;
+        @Mock
+        private UserAccountRepository userAccountRepository;
 
-    @Mock
-    private StateRepository stateRepository;
+        @Mock
+        private StateRepository stateRepository;
 
-    @Mock
-    private UserSessionRepository userSessionRepository;
+        @Mock
+        private UserSessionRepository userSessionRepository;
 
-    @Mock
-    private PasswordEncoder passwordEncoder;
+        @Mock
+        private PasswordEncoder passwordEncoder;
 
-    @Mock
-    private JwtService jwtService;
+        @Mock
+        private JwtService jwtService;
 
-    @Mock
-    private SecurityProperties securityProperties;
+        @Mock
+        private SecurityProperties securityProperties;
 
-    @Mock
-    private SystemEventPublisher systemEventPublisher;
+        @Mock
+        private SystemEventPublisher systemEventPublisher;
 
-    @InjectMocks
-    private AuthenticationService authenticationService;
+        @InjectMocks
+        private AuthenticationService authenticationService;
 
-    private AuthenticationRequest request;
-    private StateEntity userActiveState;
-    private StateEntity sessionActiveState;
-    private StateEntity sessionClosedState;
-    private RoleEntity role;
-    private UserAccountEntity user;
-    private UserSessionEntity session;
+        private AuthenticationRequest request;
+        private StateEntity userActiveState;
+        private StateEntity sessionActiveState;
+        private StateEntity sessionClosedState;
+        private RoleEntity role;
+        private UserAccountEntity user;
+        private UserSessionEntity session;
 
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
+        @BeforeEach
+        void setUp() {
+                MockitoAnnotations.openMocks(this);
 
-        request = new AuthenticationRequest("camila@udea.edu.co", "Camila123$");
+                request = new AuthenticationRequest("camila@udea.edu.co", "Camila123$");
 
-        userActiveState = new StateEntity();
-        userActiveState.setIdEstado(1L);
-        userActiveState.setNombreEstado("ACTIVA");
+                userActiveState = new StateEntity();
+                userActiveState.setIdEstado(1L);
+                userActiveState.setNombreEstado("ACTIVA");
 
-        sessionActiveState = new StateEntity();
-        sessionActiveState.setIdEstado(10L);
-        sessionActiveState.setNombreEstado("ACTIVA");
+                sessionActiveState = new StateEntity();
+                sessionActiveState.setIdEstado(10L);
+                sessionActiveState.setNombreEstado("ACTIVA");
 
-        role = new RoleEntity();
-        role.setIdRol(1L);
-        role.setNombreRol("CLIENTE");
+                role = new RoleEntity();
+                role.setIdRol(1L);
+                role.setNombreRol("CLIENTE");
 
-        user = new UserAccountEntity();
-        user.setIdUsuario(1L);
-        user.setCorreoUsuario("camila@udea.edu.co");
-        user.setHashContrasenaUsuario("$2a$hash");
-        user.setRol(role);
-        user.setIdEstado(1L);
-        user.setIntentosFallidosConsecutivos(0);
+                user = new UserAccountEntity();
+                user.setIdUsuario(1L);
+                user.setCorreoUsuario("camila@udea.edu.co");
+                user.setHashContrasenaUsuario("$2a$hash");
+                user.setRol(role);
+                user.setIdEstado(1L);
+                user.setIntentosFallidosConsecutivos(0);
 
-        session = new UserSessionEntity();
-        session.setIdSesionUsuario(100L);
-        session.setIdEstadoSesion(10L);
-        session.setIdUsuario(1L);
+                session = new UserSessionEntity();
+                session.setIdSesionUsuario(100L);
+                session.setIdEstadoSesion(10L);
+                session.setIdUsuario(1L);
 
-        sessionClosedState = new StateEntity();
-        sessionClosedState.setIdEstado(11L);
-        sessionClosedState.setNombreEstado("CERRADA");
-    }
+                sessionClosedState = new StateEntity();
+                sessionClosedState.setIdEstado(11L);
+                sessionClosedState.setNombreEstado("CERRADA");
+        }
 
-    @Test
-    void createSession_Success() {
-        when(stateRepository.findByCategoryAndStateName("tbl_usuario", "ACTIVA"))
-                .thenReturn(Optional.of(userActiveState));
-        when(stateRepository.findByCategoryAndStateName("tbl_sesion_usuario", "ACTIVA"))
-                .thenReturn(Optional.of(sessionActiveState));
-        when(securityProperties.getJwtExpirationSeconds()).thenReturn(1800L);
-        when(userAccountRepository.findByCorreoUsuarioIgnoreCase("camila@udea.edu.co"))
-                .thenReturn(Optional.of(user));
-        when(passwordEncoder.matches("Camila123$", "$2a$hash")).thenReturn(true);
-        when(jwtService.generateToken(any(), any())).thenReturn("jwt-token");
+        @Test
+        void createSession_Success() {
+                when(stateRepository.findByCategoryAndStateName("tbl_usuario", "ACTIVA"))
+                                .thenReturn(Optional.of(userActiveState));
+                when(stateRepository.findByCategoryAndStateName("tbl_sesion_usuario", "ACTIVA"))
+                                .thenReturn(Optional.of(sessionActiveState));
+                when(securityProperties.getJwtExpirationSeconds()).thenReturn(1800L);
+                when(userAccountRepository.findByCorreoUsuarioIgnoreCase("camila@udea.edu.co"))
+                                .thenReturn(Optional.of(user));
+                when(passwordEncoder.matches("Camila123$", "$2a$hash")).thenReturn(true);
+                when(jwtService.generateToken(any(), any())).thenReturn("jwt-token");
 
-        AuthenticationResponse response = authenticationService.createSession(request);
+                AuthenticationResponse response = authenticationService.createSession(request);
 
-        assertEquals("jwt-token", response.accessToken());
-        assertEquals("Bearer", response.tokenType());
-        assertEquals(1800L, response.expiresIn());
-        assertEquals("CLIENTE", response.role());
-    }
+                assertEquals("jwt-token", response.accessToken());
+                assertEquals("Bearer", response.tokenType());
+                assertEquals(1800L, response.expiresIn());
+                assertEquals("CLIENTE", response.role());
+        }
 
-    @Test
-    void createSession_UnknownEmail_Exception() {
-        request = new AuthenticationRequest("sebas@gmail.com", "Sebastian1!");
-        when(userAccountRepository.findByCorreoUsuarioIgnoreCase("sebas@gmail.com"))
-                .thenReturn(Optional.empty());
+        @Test
+        void createSession_UnknownEmail_Exception() {
+                request = new AuthenticationRequest("sebas@gmail.com", "Sebastian1!");
+                when(userAccountRepository.findByCorreoUsuarioIgnoreCase("sebas@gmail.com"))
+                                .thenReturn(Optional.empty());
 
-        assertThrows(InvalidCredentialsException.class,
-                () -> authenticationService.createSession(request));
-    }
+                assertThrows(InvalidCredentialsException.class,
+                                () -> authenticationService.createSession(request));
+        }
 
-    @Test
-    void createSession_WrongPassword_Exception() {
-        when(stateRepository.findByCategoryAndStateName("tbl_usuario", "ACTIVA"))
-                .thenReturn(Optional.of(userActiveState));
-        when(userAccountRepository.findByCorreoUsuarioIgnoreCase("camila@gmail.com"))
-                .thenReturn(Optional.of(user));
-        when(passwordEncoder.matches("Camila191!", "$2a$hash")).thenReturn(false);
+        @Test
+        void createSession_WrongPassword_Exception() {
+                when(stateRepository.findByCategoryAndStateName("tbl_usuario", "ACTIVA"))
+                                .thenReturn(Optional.of(userActiveState));
+                when(userAccountRepository.findByCorreoUsuarioIgnoreCase("camila@gmail.com"))
+                                .thenReturn(Optional.of(user));
+                when(passwordEncoder.matches("Camila191!", "$2a$hash")).thenReturn(false);
 
-        assertThrows(InvalidCredentialsException.class,
-                () -> authenticationService.createSession(request));
-    }
+                assertThrows(InvalidCredentialsException.class,
+                                () -> authenticationService.createSession(request));
+        }
 
-    @Test
-    void createSession_InactiveAccount_Exception() {
-        user.setIdEstado(2L);
-        when(stateRepository.findByCategoryAndStateName("tbl_usuario", "ACTIVA"))
-                .thenReturn(Optional.of(userActiveState));
-        when(userAccountRepository.findByCorreoUsuarioIgnoreCase("camila@gmail.com"))
-                .thenReturn(Optional.of(user));
+        @Test
+        void createSession_InactiveAccount_Exception() {
+                user.setIdEstado(2L);
+                when(stateRepository.findByCategoryAndStateName("tbl_usuario", "ACTIVA"))
+                                .thenReturn(Optional.of(userActiveState));
+                when(userAccountRepository.findByCorreoUsuarioIgnoreCase("camila@gmail.com"))
+                                .thenReturn(Optional.of(user));
 
-        assertThrows(AccountInactiveException.class,
-                () -> authenticationService.createSession(request));
-    }
+                assertThrows(AccountInactiveException.class,
+                                () -> authenticationService.createSession(request));
+        }
 
-    @Test
-    void EmptyPassword_Exception() {
-        request = new AuthenticationRequest("camila@udea.edu.co", "");
+        @Test
+        void EmptyPassword_Exception() {
+                request = new AuthenticationRequest("camila@udea.edu.co", "");
 
-        assertThrows(UnsupportedOperationException.class,
-                () -> authenticationService.createSession(request));
-    }
+                assertThrows(UnsupportedOperationException.class,
+                                () -> authenticationService.createSession(request));
+        }
 
-    @Test
-    void closeCurrentSession_Success() {
-        java.util.UUID jti = java.util.UUID.randomUUID();
-        when(jwtService.extractUsername("token")).thenReturn("camila@udea.edu.co");
-        when(jwtService.extractTokenId("token")).thenReturn(jti.toString());
-        when(userAccountRepository.findByCorreoUsuarioIgnoreCase("camila@udea.edu.co")).thenReturn(Optional.of(user));
-        when(userSessionRepository.findByJtiTokenAndIdUsuario(jti, 1L)).thenReturn(Optional.of(session));
-        when(stateRepository.findByCategoryAndStateName("tbl_sesion_usuario", "ACTIVA"))
-                .thenReturn(Optional.of(sessionActiveState));
-        when(stateRepository.findByCategoryAndStateName("tbl_sesion_usuario", "CERRADA"))
-                .thenReturn(Optional.of(sessionClosedState));
+        @Test
+        void closeCurrentSession_Success() {
+                java.util.UUID jti = java.util.UUID.randomUUID();
+                when(jwtService.extractUsername("token")).thenReturn("camila@udea.edu.co");
+                when(jwtService.extractTokenId("token")).thenReturn(jti.toString());
+                when(userAccountRepository.findByCorreoUsuarioIgnoreCase("camila@udea.edu.co"))
+                                .thenReturn(Optional.of(user));
+                when(userSessionRepository.findByJtiTokenAndIdUsuario(jti, 1L)).thenReturn(Optional.of(session));
+                when(stateRepository.findByCategoryAndStateName("tbl_sesion_usuario", "ACTIVA"))
+                                .thenReturn(Optional.of(sessionActiveState));
+                when(stateRepository.findByCategoryAndStateName("tbl_sesion_usuario", "CERRADA"))
+                                .thenReturn(Optional.of(sessionClosedState));
 
-        authenticationService.closeCurrentSession("token", "camila@udea.edu.co");
+                authenticationService.closeCurrentSession("token", "camila@udea.edu.co");
 
-        assertEquals(11L, session.getIdEstadoSesion());
-    }
+                assertEquals(11L, session.getIdEstadoSesion());
+        }
 
-    @Test
-    void closeCurrentSession_NotActive_Exception() {
-        java.util.UUID jti = java.util.UUID.randomUUID();
-        session.setIdEstadoSesion(11L);
+        @Test
+        void closeCurrentSession_NotActive_Exception() {
+                java.util.UUID jti = java.util.UUID.randomUUID();
+                session.setIdEstadoSesion(11L);
 
-        when(jwtService.extractUsername("token")).thenReturn("camila@udea.edu.co");
-        when(jwtService.extractTokenId("token")).thenReturn(jti.toString());
-        when(userAccountRepository.findByCorreoUsuarioIgnoreCase("camila@udea.edu.co")).thenReturn(Optional.of(user));
-        when(userSessionRepository.findByJtiTokenAndIdUsuario(jti, 1L)).thenReturn(Optional.of(session));
-        when(stateRepository.findByCategoryAndStateName("tbl_sesion_usuario", "ACTIVA"))
-                .thenReturn(Optional.of(sessionActiveState));
+                when(jwtService.extractUsername("token")).thenReturn("camila@udea.edu.co");
+                when(jwtService.extractTokenId("token")).thenReturn(jti.toString());
+                when(userAccountRepository.findByCorreoUsuarioIgnoreCase("camila@udea.edu.co"))
+                                .thenReturn(Optional.of(user));
+                when(userSessionRepository.findByJtiTokenAndIdUsuario(jti, 1L)).thenReturn(Optional.of(session));
+                when(stateRepository.findByCategoryAndStateName("tbl_sesion_usuario", "ACTIVA"))
+                                .thenReturn(Optional.of(sessionActiveState));
 
-        assertThrows(SessionNotActiveException.class,
-                () -> authenticationService.closeCurrentSession("token", "camila@udea.edu.co"));
-    }
+                assertThrows(SessionNotActiveException.class,
+                                () -> authenticationService.closeCurrentSession("token", "camila@udea.edu.co"));
+        }
 }
