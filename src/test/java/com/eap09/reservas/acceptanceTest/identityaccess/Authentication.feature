@@ -4,7 +4,7 @@ Feature: Autenticación de usuarios
     * url baseUrl
     # callonce: registra el usuario UNA sola vez y comparte el resultado entre todos los escenarios
     * def setup = callonce read('classpath:com/eap09/reservas/acceptanceTest/auth-setup.feature')
-    * def testEmail = setup.clienteEmail
+    * def testEmail = setup.Email
     * def testPassword = 'Password123!'
 
   Scenario: Autenticación exitosa de un cliente registrado
@@ -30,3 +30,9 @@ Feature: Autenticación de usuarios
     When method post
     Then status 401
     And match response.message == 'Credenciales no validas'
+
+   Scenario: Autenticación fallida por correo vacío
+    Given path '/api/v1/auth/sessions'
+    And request { correo: '', contrasena: '#(testPassword)' }
+    When method post
+    Then status 400
