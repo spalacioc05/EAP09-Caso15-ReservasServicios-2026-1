@@ -159,7 +159,7 @@ public class AuthenticationServiceTest {
         void EmptyPassword_Exception() {
                 request = new AuthenticationRequest("camila@udea.edu.co", "");
 
-                assertThrows(UnsupportedOperationException.class,
+                assertThrows(InvalidCredentialsException.class,
                                 () -> authenticationService.createSession(request));
         }
 
