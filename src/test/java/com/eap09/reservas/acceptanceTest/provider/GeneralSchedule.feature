@@ -1,4 +1,4 @@
-Feature: Definición de horario general de atención (HU-08)
+Feature: Definición de horario general de atención
 
   Background:
     * url baseUrl

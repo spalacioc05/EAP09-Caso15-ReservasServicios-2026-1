@@ -12,6 +12,6 @@ class AcceptanceTestRunner {
     @Karate.Test
     Karate testIdentityAccess() {
         return Karate.run("identityaccess/Authentication.feature", "identityaccess/Registration.feature",
-                "provider/GeneralSchedule.feature").relativeTo(getClass());
+                "identityaccess/UpdateProfile.feature", "provider/GeneralSchedule.feature").relativeTo(getClass());
     }
 }

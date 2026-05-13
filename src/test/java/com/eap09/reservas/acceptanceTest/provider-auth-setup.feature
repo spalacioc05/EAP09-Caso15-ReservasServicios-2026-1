@@ -1,5 +1,5 @@
 @ignore
-Feature: Configuración de autenticación para proveedor de pruebas
+Feature: Configuración de registro y autenticación de un proveedor
 
   Scenario: Registrar proveedor y obtener token
     * url baseUrl
