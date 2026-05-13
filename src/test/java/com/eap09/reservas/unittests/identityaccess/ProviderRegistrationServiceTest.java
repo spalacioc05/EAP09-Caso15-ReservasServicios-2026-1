@@ -76,9 +76,9 @@ public class ProviderRegistrationServiceTest {
 
         UserAccountEntity user = new UserAccountEntity();
         user.setIdUsuario(102L);
-        user.setApellidosUsuario("Lopez");
-        user.setNombresUsuario("Camilo");
-        user.setCorreoUsuario("camilo.lopez@gmail.com");
+        user.setApellidosUsuario(request.apellidos());
+        user.setNombresUsuario(request.nombres());
+        user.setCorreoUsuario(request.correo());
         user.setHashContrasenaUsuario("$2a$hash");
         user.setRol(role);
         user.setIdEstado(state.getIdEstado());
@@ -96,7 +96,7 @@ public class ProviderRegistrationServiceTest {
 
     @Test
     void DuplicateEmail_Exception() {
-        when(userAccountRepository.existsByCorreoUsuarioIgnoreCase("salome.giraldo@gmail.com")).thenReturn(true);
+        when(userAccountRepository.existsByCorreoUsuarioIgnoreCase("camilo.lopez@gmail.com")).thenReturn(true);
 
         assertThrows(EmailAlreadyRegisteredException.class,
                 () -> providerRegistrationService.registerProvider(request));
@@ -109,6 +109,8 @@ public class ProviderRegistrationServiceTest {
                 "Lopez",
                 "camilo.lopez@gmail.com",
                 "");
+        when(roleRepository.findByNombreRol("PROVEEDOR")).thenReturn(Optional.of(role));
+        when(stateRepository.findByCategoryAndStateName("tbl_usuario", "ACTIVA")).thenReturn(Optional.of(state));
 
         assertThrows(UnsupportedOperationException.class,
                 () -> providerRegistrationService.registerProvider(request));
