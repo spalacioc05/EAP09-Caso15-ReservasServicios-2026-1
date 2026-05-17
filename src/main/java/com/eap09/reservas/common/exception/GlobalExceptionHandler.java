@@ -3,6 +3,8 @@ package com.eap09.reservas.common.exception;
 import com.eap09.reservas.common.response.ErrorResponse;
 import jakarta.validation.ConstraintViolationException;
 import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import org.slf4j.MDC;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,9 +25,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidation(MethodArgumentNotValidException ex) {
-        List<String> details = ex.getBindingResult().getFieldErrors().stream()
-                .map(this::formatFieldError)
-                .toList();
+        List<String> details = collectFieldValidationDetails(ex.getBindingResult().getFieldErrors());
 
         return buildValidationError(details);
     }
@@ -210,5 +210,37 @@ public class GlobalExceptionHandler {
 
     private String formatFieldError(FieldError fieldError) {
         return fieldError.getField() + ": " + fieldError.getDefaultMessage();
+    }
+
+    private List<String> collectFieldValidationDetails(List<FieldError> fieldErrors) {
+        Map<String, FieldError> selectedErrorsByField = new LinkedHashMap<>();
+
+        for (FieldError fieldError : fieldErrors) {
+            selectedErrorsByField.merge(fieldError.getField(), fieldError, this::preferHigherPriorityError);
+        }
+
+        return selectedErrorsByField.values().stream()
+                .map(this::formatFieldError)
+                .toList();
+    }
+
+    private FieldError preferHigherPriorityError(FieldError currentError, FieldError candidateError) {
+        return validationPriority(candidateError) < validationPriority(currentError)
+                ? candidateError
+                : currentError;
+    }
+
+    private int validationPriority(FieldError fieldError) {
+        String validationCode = fieldError.getCode();
+        if (validationCode == null) {
+            return Integer.MAX_VALUE;
+        }
+
+        return switch (validationCode) {
+            case "NotBlank", "NotNull" -> 0;
+            case "Email", "Pattern" -> 1;
+            case "Size" -> 2;
+            default -> 10;
+        };
     }
 }
