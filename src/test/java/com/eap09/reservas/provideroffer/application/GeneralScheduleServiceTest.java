@@ -118,15 +118,13 @@ class GeneralScheduleServiceTest {
     @Test
     void shouldRejectInvalidTimeRange() {
         UserAccountEntity provider = providerUser();
+        GeneralScheduleUpsertRequest request = new GeneralScheduleUpsertRequest(LocalTime.of(14, 0), LocalTime.of(10, 0));
 
         when(userAccountRepository.findByCorreoUsuarioIgnoreCase("provider@test.local"))
                 .thenReturn(Optional.of(provider));
 
-        assertThrows(ApiException.class, () -> generalScheduleService.upsertGeneralSchedule(
-                "provider@test.local",
-                "LUNES",
-                new GeneralScheduleUpsertRequest(LocalTime.of(14, 0), LocalTime.of(10, 0))
-        ));
+        assertThrows(ApiException.class,
+                () -> generalScheduleService.upsertGeneralSchedule("provider@test.local", "LUNES", request));
 
         verify(generalScheduleRepository, never()).save(any());
     }
@@ -135,30 +133,26 @@ class GeneralScheduleServiceTest {
     void shouldRejectNonProviderUser() {
         UserAccountEntity client = providerUser();
         client.getRol().setNombreRol("CLIENTE");
+        GeneralScheduleUpsertRequest request = new GeneralScheduleUpsertRequest(LocalTime.of(8, 0), LocalTime.of(12, 0));
 
         when(userAccountRepository.findByCorreoUsuarioIgnoreCase("provider@test.local"))
                 .thenReturn(Optional.of(client));
 
-        assertThrows(ProviderRoleRequiredException.class, () -> generalScheduleService.upsertGeneralSchedule(
-                "provider@test.local",
-                "LUNES",
-                new GeneralScheduleUpsertRequest(LocalTime.of(8, 0), LocalTime.of(12, 0))
-        ));
+        assertThrows(ProviderRoleRequiredException.class,
+                () -> generalScheduleService.upsertGeneralSchedule("provider@test.local", "LUNES", request));
     }
 
     @Test
     void shouldRejectInvalidDay() {
         UserAccountEntity provider = providerUser();
+        GeneralScheduleUpsertRequest request = new GeneralScheduleUpsertRequest(LocalTime.of(8, 0), LocalTime.of(12, 0));
 
         when(userAccountRepository.findByCorreoUsuarioIgnoreCase("provider@test.local"))
                 .thenReturn(Optional.of(provider));
         when(weekDayRepository.findByNombreDiaSemana("INVALIDO")).thenReturn(Optional.empty());
 
-        assertThrows(ApiException.class, () -> generalScheduleService.upsertGeneralSchedule(
-                "provider@test.local",
-                "INVALIDO",
-                new GeneralScheduleUpsertRequest(LocalTime.of(8, 0), LocalTime.of(12, 0))
-        ));
+        assertThrows(ApiException.class,
+                () -> generalScheduleService.upsertGeneralSchedule("provider@test.local", "INVALIDO", request));
     }
 
     private UserAccountEntity providerUser() {

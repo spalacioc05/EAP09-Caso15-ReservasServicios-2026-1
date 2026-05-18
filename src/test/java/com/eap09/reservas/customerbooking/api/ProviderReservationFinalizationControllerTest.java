@@ -1,6 +1,5 @@
 package com.eap09.reservas.customerbooking.api;
 
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -46,7 +45,7 @@ class ProviderReservationFinalizationControllerTest {
 
     @Test
     void shouldFinalizeBooking() throws Exception {
-        when(providerReservationFinalizationService.finalizeOwnBooking(eq("provider@test.local"), eq(100L)))
+                when(providerReservationFinalizationService.finalizeOwnBooking("provider@test.local", 100L))
                 .thenReturn(new ReservationFinalizationResponse(100L, "FINALIZADA", OffsetDateTime.now()));
 
         mockMvc.perform(patch("/api/v1/providers/me/bookings/100/finalization")
@@ -59,7 +58,7 @@ class ProviderReservationFinalizationControllerTest {
 
     @Test
     void shouldReturnConflictWhenNotFinalizable() throws Exception {
-        when(providerReservationFinalizationService.finalizeOwnBooking(eq("provider@test.local"), eq(100L)))
+                when(providerReservationFinalizationService.finalizeOwnBooking("provider@test.local", 100L))
                 .thenThrow(new ReservationConflictException("BOOKING_SLOT_NOT_FINISHED", "La reserva solo puede finalizarse una vez concluida su franja"));
 
         mockMvc.perform(patch("/api/v1/providers/me/bookings/100/finalization")
@@ -70,7 +69,7 @@ class ProviderReservationFinalizationControllerTest {
 
     @Test
     void shouldRejectWhenRoleIsNotProvider() throws Exception {
-        when(providerReservationFinalizationService.finalizeOwnBooking(eq("client@test.local"), eq(100L)))
+                when(providerReservationFinalizationService.finalizeOwnBooking("client@test.local", 100L))
                 .thenThrow(new ProviderRoleRequiredException("Solo un proveedor autenticado puede finalizar reservas"));
 
         mockMvc.perform(patch("/api/v1/providers/me/bookings/100/finalization")

@@ -123,13 +123,13 @@ public class CustomerReservationCancellationService {
     private StateEntity resolveReservationState(String stateName) {
         return stateRepository.findByCategoryAndStateName(RESERVATION_STATE_CATEGORY, stateName)
                 .orElseThrow(() -> new IllegalStateException(
-                        "Required state " + stateName + " for tbl_reserva was not found"));
+                "Required state " + stateName + " for " + RESERVATION_STATE_CATEGORY + " was not found"));
     }
 
     private void publishCancellationEvent(Long customerUserId, Long bookingId, String result, String detail) {
         systemEventPublisher.publish(SystemEvent.now(
                 "CANCELACION_RESERVA",
-                "tbl_reserva",
+                RESERVATION_STATE_CATEGORY,
                 String.valueOf(customerUserId),
                 String.valueOf(bookingId),
                 result,

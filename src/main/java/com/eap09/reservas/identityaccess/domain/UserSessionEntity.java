@@ -10,7 +10,11 @@ import java.time.OffsetDateTime;
 import java.util.UUID;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
 @Entity
 @Table(name = "tbl_sesion_usuario")
 public class UserSessionEntity {
@@ -47,84 +51,4 @@ public class UserSessionEntity {
 
     @Column(name = "user_agent")
     private String userAgent;
-
-    public Long getIdSesionUsuario() {
-        return idSesionUsuario;
-    }
-
-    public void setIdSesionUsuario(Long idSesionUsuario) {
-        this.idSesionUsuario = idSesionUsuario;
-    }
-
-    public Long getIdUsuario() {
-        return idUsuario;
-    }
-
-    public void setIdUsuario(Long idUsuario) {
-        this.idUsuario = idUsuario;
-    }
-
-    public Long getIdEstadoSesion() {
-        return idEstadoSesion;
-    }
-
-    public void setIdEstadoSesion(Long idEstadoSesion) {
-        this.idEstadoSesion = idEstadoSesion;
-    }
-
-    public UUID getJtiToken() {
-        return jtiToken;
-    }
-
-    public void setJtiToken(UUID jtiToken) {
-        this.jtiToken = jtiToken;
-    }
-
-    public OffsetDateTime getFechaCreacionSesion() {
-        return fechaCreacionSesion;
-    }
-
-    public void setFechaCreacionSesion(OffsetDateTime fechaCreacionSesion) {
-        this.fechaCreacionSesion = fechaCreacionSesion;
-    }
-
-    public OffsetDateTime getFechaActualizacionSesion() {
-        return fechaActualizacionSesion;
-    }
-
-    public void setFechaActualizacionSesion(OffsetDateTime fechaActualizacionSesion) {
-        this.fechaActualizacionSesion = fechaActualizacionSesion;
-    }
-
-    public OffsetDateTime getFechaExpiracionSesion() {
-        return fechaExpiracionSesion;
-    }
-
-    public void setFechaExpiracionSesion(OffsetDateTime fechaExpiracionSesion) {
-        this.fechaExpiracionSesion = fechaExpiracionSesion;
-    }
-
-    public OffsetDateTime getFechaCierreSesion() {
-        return fechaCierreSesion;
-    }
-
-    public void setFechaCierreSesion(OffsetDateTime fechaCierreSesion) {
-        this.fechaCierreSesion = fechaCierreSesion;
-    }
-
-    public String getDireccionIp() {
-        return direccionIp;
-    }
-
-    public void setDireccionIp(String direccionIp) {
-        this.direccionIp = direccionIp;
-    }
-
-    public String getUserAgent() {
-        return userAgent;
-    }
-
-    public void setUserAgent(String userAgent) {
-        this.userAgent = userAgent;
-    }
 }

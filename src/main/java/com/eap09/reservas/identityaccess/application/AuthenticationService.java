@@ -37,6 +37,9 @@ public class AuthenticationService {
 
     private static final int MAX_FAILED_ATTEMPTS = 5;
     private static final int RESTRICTION_MINUTES = 15;
+    private static final String INVALID_CREDENTIALS_MESSAGE = "Credenciales no validas";
+    private static final String EVENT_RESULT_SUCCESS = "EXITO";
+    private static final String EVENT_RESULT_FAILURE = "FALLO";
     private static final String USER_STATE_CATEGORY = "tbl_usuario";
     private static final String ACTIVE_STATE = "ACTIVA";
     private static final String SESSION_STATE_CATEGORY = "tbl_sesion_usuario";
@@ -71,21 +74,21 @@ public class AuthenticationService {
     public AuthenticationResponse createSession(AuthenticationRequest request) {
         String normalizedEmail = request.correo().trim().toLowerCase();
         UserAccountEntity user = userAccountRepository.findByCorreoUsuarioIgnoreCase(normalizedEmail)
-                .orElseThrow(() -> invalidCredentials(null, "Credenciales no validas"));
+                .orElseThrow(() -> invalidCredentials(null, INVALID_CREDENTIALS_MESSAGE));
 
         if (isTemporarilyRestricted(user)) {
-            publishAuthEvent(user, "FALLO", "Autenticacion rechazada por restriccion temporal");
+            publishAuthEvent(user, EVENT_RESULT_FAILURE, "Autenticacion rechazada por restriccion temporal");
             throw new TemporaryAccessRestrictedException("La cuenta tiene una restriccion temporal de acceso");
         }
 
         if (!isActive(user)) {
-            publishAuthEvent(user, "FALLO", "Autenticacion rechazada por cuenta inactiva");
+            publishAuthEvent(user, EVENT_RESULT_FAILURE, "Autenticacion rechazada por cuenta inactiva");
             throw new AccountInactiveException("La cuenta se encuentra inactiva");
         }
 
         if (!passwordEncoder.matches(request.contrasena(), user.getHashContrasenaUsuario())) {
             handleFailedAttempt(user);
-            throw invalidCredentials(user, "Credenciales no validas");
+            throw invalidCredentials(user, INVALID_CREDENTIALS_MESSAGE);
         }
 
         user.setIntentosFallidosConsecutivos(0);
@@ -109,7 +112,7 @@ public class AuthenticationService {
 
         registerActiveSession(user.getIdUsuario(), sessionJti);
 
-        publishAuthEvent(user, "EXITO", "Autenticacion exitosa");
+        publishAuthEvent(user, EVENT_RESULT_SUCCESS, "Autenticacion exitosa");
 
         return new AuthenticationResponse(
                 token,
@@ -140,19 +143,19 @@ public class AuthenticationService {
 
         UUID sessionJti = parseSessionJti(accessToken);
         if (sessionJti == null) {
-            publishLogoutEvent(user.getIdUsuario(), null, "FALLO", "Token sin identificador de sesion");
+            publishLogoutEvent(user.getIdUsuario(), null, EVENT_RESULT_FAILURE, "Token sin identificador de sesion");
             throw new BadCredentialsException("Token invalido o expirado");
         }
 
         UserSessionEntity session = userSessionRepository.findByJtiTokenAndIdUsuario(sessionJti, user.getIdUsuario())
                 .orElseThrow(() -> {
-                    publishLogoutEvent(user.getIdUsuario(), null, "FALLO", "No existe sesion para el token solicitado");
+                    publishLogoutEvent(user.getIdUsuario(), null, EVENT_RESULT_FAILURE, "No existe sesion para el token solicitado");
                     return new SessionNotActiveException("No existe una sesion activa valida para cerrar");
                 });
 
         Long activeSessionStateId = findStateId(SESSION_STATE_CATEGORY, SESSION_ACTIVE_STATE);
         if (!activeSessionStateId.equals(session.getIdEstadoSesion())) {
-            publishLogoutEvent(user.getIdUsuario(), session.getIdSesionUsuario(), "FALLO", "La sesion asociada al token ya no esta activa");
+            publishLogoutEvent(user.getIdUsuario(), session.getIdSesionUsuario(), EVENT_RESULT_FAILURE, "La sesion asociada al token ya no esta activa");
             throw new SessionNotActiveException("No existe una sesion activa valida para cerrar");
         }
 
@@ -163,11 +166,11 @@ public class AuthenticationService {
         session.setFechaActualizacionSesion(now);
         userSessionRepository.save(session);
 
-        publishLogoutEvent(user.getIdUsuario(), session.getIdSesionUsuario(), "EXITO", "Sesion cerrada de forma segura");
+        publishLogoutEvent(user.getIdUsuario(), session.getIdSesionUsuario(), EVENT_RESULT_SUCCESS, "Sesion cerrada de forma segura");
     }
 
     private InvalidCredentialsException invalidCredentials(UserAccountEntity user, String message) {
-        publishAuthEvent(user, "FALLO", "Credenciales no validas");
+        publishAuthEvent(user, EVENT_RESULT_FAILURE, INVALID_CREDENTIALS_MESSAGE);
         return new InvalidCredentialsException(message);
     }
 
@@ -287,12 +290,13 @@ public class AuthenticationService {
         }
 
         int zoneIndex = sanitized.indexOf('%');
-        if (zoneIndex > 0) {
+        if (zoneIndex >= 0) {
             sanitized = sanitized.substring(0, zoneIndex);
         }
 
-        if (sanitized.contains(".") && sanitized.indexOf(':') == sanitized.lastIndexOf(':') && sanitized.indexOf(':') > 0) {
-            sanitized = sanitized.substring(0, sanitized.indexOf(':'));
+        int colonIndex = sanitized.indexOf(':');
+        if (sanitized.contains(".") && colonIndex >= 0 && colonIndex == sanitized.lastIndexOf(':')) {
+            sanitized = sanitized.substring(0, colonIndex);
         }
 
         if (!INET_LITERAL_PATTERN.matcher(sanitized).matches()) {
@@ -317,7 +321,7 @@ public class AuthenticationService {
     private void publishAuthEvent(UserAccountEntity user, String result, String details) {
         systemEventPublisher.publish(SystemEvent.now(
                 "AUTENTICACION_USUARIO",
-                "tbl_usuario",
+                USER_STATE_CATEGORY,
                 user == null ? null : String.valueOf(user.getIdUsuario()),
                 result,
                 details,
@@ -327,9 +331,9 @@ public class AuthenticationService {
     private void publishRestrictionEvent(UserAccountEntity user, LocalDateTime restrictionEndsAt) {
         systemEventPublisher.publish(SystemEvent.now(
                 "APLICACION_RESTRICCION_ACCESO",
-                "tbl_usuario",
+                USER_STATE_CATEGORY,
                 String.valueOf(user.getIdUsuario()),
-                "EXITO",
+                EVENT_RESULT_SUCCESS,
                 "Restriccion temporal aplicada hasta " + restrictionEndsAt,
                 TraceIdUtil.currentTraceId()));
     }
@@ -337,7 +341,7 @@ public class AuthenticationService {
     private void publishLogoutEvent(Long responsibleUserId, Long affectedSessionId, String result, String details) {
         systemEventPublisher.publish(SystemEvent.now(
                 "CIERRE_SESION_USUARIO",
-                "tbl_sesion_usuario",
+                SESSION_STATE_CATEGORY,
                 responsibleUserId == null ? null : String.valueOf(responsibleUserId),
                 affectedSessionId == null ? null : String.valueOf(affectedSessionId),
                 result,

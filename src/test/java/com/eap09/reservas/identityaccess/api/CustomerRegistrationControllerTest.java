@@ -1,6 +1,9 @@
 package com.eap09.reservas.identityaccess.api;
 
+import static org.hamcrest.Matchers.hasItems;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -95,7 +98,29 @@ class CustomerRegistrationControllerTest {
     }
 
     @Test
-    void shouldRejectMissingRequiredFields() throws Exception {
+        void shouldRejectBlankPasswordWithoutInvokingService() throws Exception {
+      mockMvc.perform(post("/api/v1/clients")
+          .contentType(MediaType.APPLICATION_JSON)
+          .content("""
+            {
+              "nombres":"Ana",
+              "apellidos":"Perez",
+              "correo":"ana@example.com",
+              "contrasena":""
+            }
+            """))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.errorCode").value("VALIDATION_ERROR"))
+        .andExpect(jsonPath("$.message").value("Validacion de la solicitud fallida"))
+        .andExpect(jsonPath("$.details", hasItems(
+          "contrasena: contrasena es obligatoria"
+        )));
+
+      verify(customerRegistrationService, never()).registerCustomer(any());
+        }
+
+        @Test
+        void shouldRejectMultipleBlankRequiredFieldsWithoutInvokingService() throws Exception {
         mockMvc.perform(post("/api/v1/clients")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -109,7 +134,14 @@ class CustomerRegistrationControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errorCode").value("VALIDATION_ERROR"))
                 .andExpect(jsonPath("$.message").value("Validacion de la solicitud fallida"))
-                .andExpect(jsonPath("$.details").isArray());
+                            .andExpect(jsonPath("$.details", hasItems(
+                              "nombres: nombres es obligatorio",
+                              "apellidos: apellidos es obligatorio",
+                              "correo: correo es obligatorio",
+                              "contrasena: contrasena es obligatoria"
+                            )));
+
+                          verify(customerRegistrationService, never()).registerCustomer(any());
     }
 
     @Test

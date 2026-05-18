@@ -96,7 +96,7 @@ public class ServiceAvailabilityService {
         }
 
         StateEntity enabledState = stateRepository.findByCategoryAndStateName(AVAILABILITY_STATE_CATEGORY, ENABLED_STATE)
-                .orElseThrow(() -> new IllegalStateException("Required state HABILITADA for tbl_disponibilidad_servicio was not found"));
+            .orElseThrow(() -> new IllegalStateException("Required state HABILITADA for " + AVAILABILITY_STATE_CATEGORY + " was not found"));
 
         OffsetDateTime now = OffsetDateTime.now();
         ServiceAvailabilityEntity entity = new ServiceAvailabilityEntity();
@@ -112,7 +112,7 @@ public class ServiceAvailabilityService {
 
         systemEventPublisher.publish(SystemEvent.now(
                 "CREACION_DISPONIBILIDAD",
-                "tbl_disponibilidad_servicio",
+            AVAILABILITY_STATE_CATEGORY,
                 String.valueOf(provider.getIdUsuario()),
                 "EXITO",
                 "Disponibilidad creada para el servicio " + targetService.getIdServicio(),
@@ -144,7 +144,7 @@ public class ServiceAvailabilityService {
         }
 
         StateEntity blockedState = stateRepository.findByCategoryAndStateName(AVAILABILITY_STATE_CATEGORY, BLOCKED_STATE)
-                .orElseThrow(() -> new IllegalStateException("Required state BLOQUEADA for tbl_disponibilidad_servicio was not found"));
+            .orElseThrow(() -> new IllegalStateException("Required state BLOQUEADA for " + AVAILABILITY_STATE_CATEGORY + " was not found"));
 
         availability.setIdEstadoDisponibilidad(blockedState.getIdEstado());
         availability.setFechaActualizacionDisponibilidad(OffsetDateTime.now());
@@ -153,7 +153,7 @@ public class ServiceAvailabilityService {
 
         systemEventPublisher.publish(SystemEvent.now(
                 "BLOQUEO_DISPONIBILIDAD",
-                "tbl_disponibilidad_servicio",
+            AVAILABILITY_STATE_CATEGORY,
                 String.valueOf(provider.getIdUsuario()),
                 "EXITO",
                 "Disponibilidad bloqueada para el servicio " + targetService.getIdServicio(),

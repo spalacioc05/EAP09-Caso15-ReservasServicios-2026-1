@@ -7,7 +7,11 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.OffsetDateTime;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
 @Entity
 @Table(name = "tbl_servicio")
 public class ServiceEntity {
@@ -40,76 +44,4 @@ public class ServiceEntity {
 
     @Column(name = "fecha_actualizacion_servicio", nullable = false)
     private OffsetDateTime fechaActualizacionServicio;
-
-    public Long getIdServicio() {
-        return idServicio;
-    }
-
-    public void setIdServicio(Long idServicio) {
-        this.idServicio = idServicio;
-    }
-
-    public Long getIdUsuarioProveedor() {
-        return idUsuarioProveedor;
-    }
-
-    public void setIdUsuarioProveedor(Long idUsuarioProveedor) {
-        this.idUsuarioProveedor = idUsuarioProveedor;
-    }
-
-    public Long getIdEstadoServicio() {
-        return idEstadoServicio;
-    }
-
-    public void setIdEstadoServicio(Long idEstadoServicio) {
-        this.idEstadoServicio = idEstadoServicio;
-    }
-
-    public String getNombreServicio() {
-        return nombreServicio;
-    }
-
-    public void setNombreServicio(String nombreServicio) {
-        this.nombreServicio = nombreServicio;
-    }
-
-    public String getDescripcionServicio() {
-        return descripcionServicio;
-    }
-
-    public void setDescripcionServicio(String descripcionServicio) {
-        this.descripcionServicio = descripcionServicio;
-    }
-
-    public Integer getDuracionMinutos() {
-        return duracionMinutos;
-    }
-
-    public void setDuracionMinutos(Integer duracionMinutos) {
-        this.duracionMinutos = duracionMinutos;
-    }
-
-    public Integer getCapacidadMaximaConcurrente() {
-        return capacidadMaximaConcurrente;
-    }
-
-    public void setCapacidadMaximaConcurrente(Integer capacidadMaximaConcurrente) {
-        this.capacidadMaximaConcurrente = capacidadMaximaConcurrente;
-    }
-
-    public OffsetDateTime getFechaCreacionServicio() {
-        return fechaCreacionServicio;
-    }
-
-    public void setFechaCreacionServicio(OffsetDateTime fechaCreacionServicio) {
-        this.fechaCreacionServicio = fechaCreacionServicio;
-    }
-
-    public OffsetDateTime getFechaActualizacionServicio() {
-        return fechaActualizacionServicio;
-    }
-
-    public void setFechaActualizacionServicio(OffsetDateTime fechaActualizacionServicio) {
-        this.fechaActualizacionServicio = fechaActualizacionServicio;
-    }
 }

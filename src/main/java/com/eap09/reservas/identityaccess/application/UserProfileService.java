@@ -13,7 +13,6 @@ import com.eap09.reservas.identityaccess.domain.UserAccountEntity;
 import com.eap09.reservas.identityaccess.infrastructure.UserAccountRepository;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Pattern;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,7 +22,6 @@ public class UserProfileService {
 
     private static final String PROFILE_EVENT_TYPE = "ACTUALIZACION_PERFIL_USUARIO";
     private static final String USER_ENTITY_TYPE = "tbl_usuario";
-    private static final Pattern EMAIL_PATTERN = Pattern.compile("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$");
 
     private final UserAccountRepository userAccountRepository;
     private final SystemEventPublisher systemEventPublisher;
@@ -104,10 +102,47 @@ public class UserProfileService {
             if (correo.isEmpty()) {
                 throw new ApiException("PROFILE_EMAIL_REQUIRED", "correo no puede estar vacio");
             }
-            if (!EMAIL_PATTERN.matcher(correo).matches()) {
+            if (!isValidEmail(correo)) {
                 throw new ApiException("PROFILE_EMAIL_INVALID", "El correo ingresado no es valido");
             }
         }
+    }
+
+    private boolean isValidEmail(String correo) {
+        if (correo == null) {
+            return false;
+        }
+
+        String normalizedEmail = correo.trim();
+        if (normalizedEmail.isEmpty()) {
+            return false;
+        }
+
+        int atIndex = -1;
+        for (int index = 0; index < normalizedEmail.length(); index++) {
+            char currentChar = normalizedEmail.charAt(index);
+            if (Character.isWhitespace(currentChar)) {
+                return false;
+            }
+            if (currentChar == '@') {
+                if (atIndex >= 0) {
+                    return false;
+                }
+                atIndex = index;
+            }
+        }
+
+        if (atIndex <= 0 || atIndex == normalizedEmail.length() - 1) {
+            return false;
+        }
+
+        String domain = normalizedEmail.substring(atIndex + 1);
+        int dotIndex = domain.indexOf('.');
+        if (dotIndex <= 0) {
+            return false;
+        }
+
+        return domain.charAt(domain.length() - 1) != '.';
     }
 
     private String normalize(String value) {

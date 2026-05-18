@@ -11,7 +11,11 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
 @Entity
 @Table(name = "tbl_horario_general_proveedor")
 public class GeneralScheduleEntity {
@@ -40,59 +44,4 @@ public class GeneralScheduleEntity {
     @Column(name = "fecha_actualizacion_horario_general", nullable = false)
     private OffsetDateTime fechaActualizacionHorarioGeneral;
 
-    public Long getIdHorarioGeneralProveedor() {
-        return idHorarioGeneralProveedor;
-    }
-
-    public void setIdHorarioGeneralProveedor(Long idHorarioGeneralProveedor) {
-        this.idHorarioGeneralProveedor = idHorarioGeneralProveedor;
-    }
-
-    public Long getIdUsuarioProveedor() {
-        return idUsuarioProveedor;
-    }
-
-    public void setIdUsuarioProveedor(Long idUsuarioProveedor) {
-        this.idUsuarioProveedor = idUsuarioProveedor;
-    }
-
-    public WeekDayEntity getDiaSemana() {
-        return diaSemana;
-    }
-
-    public void setDiaSemana(WeekDayEntity diaSemana) {
-        this.diaSemana = diaSemana;
-    }
-
-    public LocalTime getHoraInicio() {
-        return horaInicio;
-    }
-
-    public void setHoraInicio(LocalTime horaInicio) {
-        this.horaInicio = horaInicio;
-    }
-
-    public LocalTime getHoraFin() {
-        return horaFin;
-    }
-
-    public void setHoraFin(LocalTime horaFin) {
-        this.horaFin = horaFin;
-    }
-
-    public OffsetDateTime getFechaCreacionHorarioGeneral() {
-        return fechaCreacionHorarioGeneral;
-    }
-
-    public void setFechaCreacionHorarioGeneral(OffsetDateTime fechaCreacionHorarioGeneral) {
-        this.fechaCreacionHorarioGeneral = fechaCreacionHorarioGeneral;
-    }
-
-    public OffsetDateTime getFechaActualizacionHorarioGeneral() {
-        return fechaActualizacionHorarioGeneral;
-    }
-
-    public void setFechaActualizacionHorarioGeneral(OffsetDateTime fechaActualizacionHorarioGeneral) {
-        this.fechaActualizacionHorarioGeneral = fechaActualizacionHorarioGeneral;
-    }
 }

@@ -1,7 +1,5 @@
 package com.eap09.reservas.customerbooking.api;
 
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -52,7 +50,7 @@ class CustomerBookingAvailabilityControllerTest {
     @Test
     void shouldReturnAvailableSlotsSuccessfully() throws Exception {
         when(customerBookingAvailabilityService.getAvailability(
-                eq(10L), eq(20L), eq(LocalDate.of(2026, 4, 20)), eq("client@test.local")))
+                10L, 20L, LocalDate.of(2026, 4, 20), "client@test.local"))
                 .thenReturn(new AvailabilityQueryResult(
                         "Consulta de horarios y cupos exitosa",
                         List.of(new AvailabilityResponse(100L, LocalTime.of(9, 0), LocalTime.of(10, 0), 2))));
@@ -69,7 +67,7 @@ class CustomerBookingAvailabilityControllerTest {
     @Test
     void shouldReturnInvalidRelationMessage() throws Exception {
         when(customerBookingAvailabilityService.getAvailability(
-                eq(10L), eq(20L), eq(LocalDate.of(2026, 4, 20)), eq("client@test.local")))
+                                10L, 20L, LocalDate.of(2026, 4, 20), "client@test.local"))
                 .thenReturn(new AvailabilityQueryResult("No existe disponibilidad para la seleccion realizada", List.of()));
 
         mockMvc.perform(get("/api/v1/providers/10/services/20/availabilities")
@@ -84,7 +82,7 @@ class CustomerBookingAvailabilityControllerTest {
     @Test
     void shouldReturnNoAvailabilityMessageForDate() throws Exception {
         when(customerBookingAvailabilityService.getAvailability(
-                eq(10L), eq(20L), eq(LocalDate.of(2026, 4, 20)), eq("client@test.local")))
+                                10L, 20L, LocalDate.of(2026, 4, 20), "client@test.local"))
                 .thenReturn(new AvailabilityQueryResult("No hay disponibilidad para reserva en la fecha seleccionada", List.of()));
 
         mockMvc.perform(get("/api/v1/providers/10/services/20/availabilities")
@@ -96,7 +94,7 @@ class CustomerBookingAvailabilityControllerTest {
 
     @Test
     void shouldRejectWhenRequiredFieldsAreMissing() throws Exception {
-        when(customerBookingAvailabilityService.getAvailability(eq(10L), eq(20L), isNull(), eq("client@test.local")))
+                when(customerBookingAvailabilityService.getAvailability(10L, 20L, null, "client@test.local"))
                 .thenThrow(new ApiException("REQUIRED_FIELDS_MISSING", "Proveedor, servicio y fecha son requeridos"));
 
         mockMvc.perform(get("/api/v1/providers/10/services/20/availabilities")
@@ -115,7 +113,7 @@ class CustomerBookingAvailabilityControllerTest {
     @Test
     void shouldRejectWhenRoleIsNotClient() throws Exception {
         when(customerBookingAvailabilityService.getAvailability(
-                eq(10L), eq(20L), eq(LocalDate.of(2026, 4, 20)), eq("provider@test.local")))
+                                10L, 20L, LocalDate.of(2026, 4, 20), "provider@test.local"))
                 .thenThrow(new ClientRoleRequiredException("Solo un cliente autenticado puede consultar horarios y cupos"));
 
         mockMvc.perform(get("/api/v1/providers/10/services/20/availabilities")
@@ -128,7 +126,7 @@ class CustomerBookingAvailabilityControllerTest {
     @Test
     void shouldReturnControlledInternalError() throws Exception {
         when(customerBookingAvailabilityService.getAvailability(
-                eq(10L), eq(20L), eq(LocalDate.of(2026, 4, 20)), eq("client@test.local")))
+                                10L, 20L, LocalDate.of(2026, 4, 20), "client@test.local"))
                 .thenThrow(new AvailabilityQueryFailedException("No fue posible obtener la disponibilidad. Intenta nuevamente mas tarde"));
 
         mockMvc.perform(get("/api/v1/providers/10/services/20/availabilities")

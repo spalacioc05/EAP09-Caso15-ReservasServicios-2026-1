@@ -155,14 +155,14 @@ class AuthenticationServiceTest {
                 assertEquals("198.51.100.90", sessionCaptor.getValue().getDireccionIp());
         }
 
-        @Test
-        void shouldRejectUnknownEmailWithInvalidCredentials() {
-                when(userAccountRepository.findByCorreoUsuarioIgnoreCase("unknown@example.com"))
-                                .thenReturn(Optional.empty());
+    @Test
+    void shouldRejectUnknownEmailWithInvalidCredentials() {
+        when(userAccountRepository.findByCorreoUsuarioIgnoreCase("unknown@example.com"))
+                .thenReturn(Optional.empty());
+        AuthenticationRequest request = new AuthenticationRequest("unknown@example.com", "Password1!");
 
-                assertThrows(InvalidCredentialsException.class,
-                                () -> authenticationService.createSession(
-                                                new AuthenticationRequest("unknown@example.com", "Password1!")));
+        assertThrows(InvalidCredentialsException.class,
+                () -> authenticationService.createSession(request));
 
                 verify(systemEventPublisher).publish(any());
         }
@@ -175,13 +175,12 @@ class AuthenticationServiceTest {
                 UserAccountEntity user = buildUser("user@example.com", "CLIENTE", 1L);
                 user.setIntentosFallidosConsecutivos(2);
 
-                when(userAccountRepository.findByCorreoUsuarioIgnoreCase("user@example.com"))
-                                .thenReturn(Optional.of(user));
-                when(passwordEncoder.matches("wrong", "hash")).thenReturn(false);
+        when(userAccountRepository.findByCorreoUsuarioIgnoreCase("user@example.com")).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches("wrong", "hash")).thenReturn(false);
+        AuthenticationRequest request = new AuthenticationRequest("user@example.com", "wrong");
 
-                assertThrows(InvalidCredentialsException.class,
-                                () -> authenticationService
-                                                .createSession(new AuthenticationRequest("user@example.com", "wrong")));
+        assertThrows(InvalidCredentialsException.class,
+                () -> authenticationService.createSession(request));
 
                 ArgumentCaptor<UserAccountEntity> captor = ArgumentCaptor.forClass(UserAccountEntity.class);
                 verify(userAccountRepository).save(captor.capture());
@@ -196,13 +195,12 @@ class AuthenticationServiceTest {
                 UserAccountEntity user = buildUser("user@example.com", "CLIENTE", 1L);
                 user.setIntentosFallidosConsecutivos(4);
 
-                when(userAccountRepository.findByCorreoUsuarioIgnoreCase("user@example.com"))
-                                .thenReturn(Optional.of(user));
-                when(passwordEncoder.matches("wrong", "hash")).thenReturn(false);
+        when(userAccountRepository.findByCorreoUsuarioIgnoreCase("user@example.com")).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches("wrong", "hash")).thenReturn(false);
+        AuthenticationRequest request = new AuthenticationRequest("user@example.com", "wrong");
 
-                assertThrows(InvalidCredentialsException.class,
-                                () -> authenticationService
-                                                .createSession(new AuthenticationRequest("user@example.com", "wrong")));
+        assertThrows(InvalidCredentialsException.class,
+                () -> authenticationService.createSession(request));
 
                 ArgumentCaptor<UserAccountEntity> captor = ArgumentCaptor.forClass(UserAccountEntity.class);
                 verify(userAccountRepository).save(captor.capture());
@@ -217,13 +215,12 @@ class AuthenticationServiceTest {
                 UserAccountEntity user = buildUser("user@example.com", "CLIENTE", 1L);
                 user.setFechaFinRestriccionAcceso(LocalDateTime.now().plusMinutes(5));
 
-                when(userAccountRepository.findByCorreoUsuarioIgnoreCase("user@example.com"))
-                                .thenReturn(Optional.of(user));
+        when(userAccountRepository.findByCorreoUsuarioIgnoreCase("user@example.com")).thenReturn(Optional.of(user));
+        AuthenticationRequest request = new AuthenticationRequest("user@example.com", "Password1!");
 
-                assertThrows(TemporaryAccessRestrictedException.class,
-                                () -> authenticationService.createSession(
-                                                new AuthenticationRequest("user@example.com", "Password1!")));
-        }
+        assertThrows(TemporaryAccessRestrictedException.class,
+                () -> authenticationService.createSession(request));
+    }
 
         @Test
         void shouldRejectInactiveAccount() {
@@ -232,13 +229,12 @@ class AuthenticationServiceTest {
 
                 UserAccountEntity user = buildUser("user@example.com", "CLIENTE", 2L);
 
-                when(userAccountRepository.findByCorreoUsuarioIgnoreCase("user@example.com"))
-                                .thenReturn(Optional.of(user));
+        when(userAccountRepository.findByCorreoUsuarioIgnoreCase("user@example.com")).thenReturn(Optional.of(user));
+        AuthenticationRequest request = new AuthenticationRequest("user@example.com", "Password1!");
 
-                assertThrows(AccountInactiveException.class,
-                                () -> authenticationService.createSession(
-                                                new AuthenticationRequest("user@example.com", "Password1!")));
-        }
+        assertThrows(AccountInactiveException.class,
+                () -> authenticationService.createSession(request));
+    }
 
         @Test
         void shouldCloseActiveSessionSuccessfully() {

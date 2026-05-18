@@ -7,7 +7,11 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
 @Entity
 @Table(name = "tbl_estado")
 public class StateEntity {
@@ -22,28 +26,4 @@ public class StateEntity {
 
     @Column(name = "nombre_estado", nullable = false)
     private String nombreEstado;
-
-    public Long getIdEstado() {
-        return idEstado;
-    }
-
-    public void setIdEstado(Long idEstado) {
-        this.idEstado = idEstado;
-    }
-
-    public StateCategoryEntity getCategoriaEstado() {
-        return categoriaEstado;
-    }
-
-    public void setCategoriaEstado(StateCategoryEntity categoriaEstado) {
-        this.categoriaEstado = categoriaEstado;
-    }
-
-    public String getNombreEstado() {
-        return nombreEstado;
-    }
-
-    public void setNombreEstado(String nombreEstado) {
-        this.nombreEstado = nombreEstado;
-    }
 }

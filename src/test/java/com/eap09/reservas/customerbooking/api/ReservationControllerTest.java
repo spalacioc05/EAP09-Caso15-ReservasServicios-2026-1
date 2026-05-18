@@ -1,6 +1,5 @@
 package com.eap09.reservas.customerbooking.api;
 
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -52,8 +51,8 @@ class ReservationControllerTest {
     @Test
     void shouldCreateReservationSuccessfully() throws Exception {
         when(reservationService.createReservation(
-                eq(new CreateReservationRequest(10L, 20L, 30L)),
-                eq("client@test.local")))
+                                new CreateReservationRequest(10L, 20L, 30L),
+                                "client@test.local"))
                 .thenReturn(new CreateReservationResponse(
                         901L,
                         10L,
@@ -84,8 +83,8 @@ class ReservationControllerTest {
     @Test
     void shouldRejectWhenRequiredFieldsAreMissing() throws Exception {
         when(reservationService.createReservation(
-                eq(new CreateReservationRequest(null, 20L, 30L)),
-                eq("client@test.local")))
+                                new CreateReservationRequest(null, 20L, 30L),
+                                "client@test.local"))
                 .thenThrow(new ApiException("REQUIRED_FIELDS_MISSING", "Proveedor, servicio y franja son requeridos"));
 
         mockMvc.perform(post("/api/v1/bookings")
@@ -105,8 +104,8 @@ class ReservationControllerTest {
     @Test
     void shouldRejectWhenServiceIsInactive() throws Exception {
         when(reservationService.createReservation(
-                eq(new CreateReservationRequest(10L, 20L, 30L)),
-                eq("client@test.local")))
+                                new CreateReservationRequest(10L, 20L, 30L),
+                                "client@test.local"))
                 .thenThrow(new ReservationConflictException("SERVICE_NOT_AVAILABLE", "El servicio no esta disponible"));
 
         mockMvc.perform(post("/api/v1/bookings")
@@ -126,8 +125,8 @@ class ReservationControllerTest {
     @Test
     void shouldRejectWhenProviderIsInactive() throws Exception {
         when(reservationService.createReservation(
-                eq(new CreateReservationRequest(10L, 20L, 30L)),
-                eq("client@test.local")))
+                                new CreateReservationRequest(10L, 20L, 30L),
+                                "client@test.local"))
                 .thenThrow(new ReservationConflictException("PROVIDER_NOT_AVAILABLE", "El proveedor no esta disponible"));
 
         mockMvc.perform(post("/api/v1/bookings")
@@ -147,8 +146,8 @@ class ReservationControllerTest {
     @Test
     void shouldRejectWhenAvailabilityIsNotReservable() throws Exception {
         when(reservationService.createReservation(
-                eq(new CreateReservationRequest(10L, 20L, 30L)),
-                eq("client@test.local")))
+                                new CreateReservationRequest(10L, 20L, 30L),
+                                "client@test.local"))
                 .thenThrow(new ReservationConflictException("AVAILABILITY_NOT_RESERVABLE", "La franja seleccionada ya no puede reservarse"));
 
         mockMvc.perform(post("/api/v1/bookings")
@@ -183,8 +182,8 @@ class ReservationControllerTest {
     @Test
     void shouldRejectWhenRoleIsNotClient() throws Exception {
         when(reservationService.createReservation(
-                eq(new CreateReservationRequest(10L, 20L, 30L)),
-                eq("provider@test.local")))
+                                new CreateReservationRequest(10L, 20L, 30L),
+                                "provider@test.local"))
                 .thenThrow(new ClientRoleRequiredException("Solo un cliente autenticado puede crear reservas"));
 
         mockMvc.perform(post("/api/v1/bookings")
@@ -204,8 +203,8 @@ class ReservationControllerTest {
     @Test
     void shouldReturnControlledInternalError() throws Exception {
         when(reservationService.createReservation(
-                eq(new CreateReservationRequest(10L, 20L, 30L)),
-                eq("client@test.local")))
+                                new CreateReservationRequest(10L, 20L, 30L),
+                                "client@test.local"))
                 .thenThrow(new ReservationCreationFailedException("No fue posible completar la reserva. Intenta nuevamente mas tarde"));
 
         mockMvc.perform(post("/api/v1/bookings")
