@@ -27,11 +27,11 @@ VALUES
     ('tbl_reserva', 'Estados aplicables a la tabla tbl_reserva'),
     ('tbl_sesion_usuario', 'Estados aplicables a la tabla tbl_sesion_usuario'),
     ('tbl_evento', 'Estados aplicables a la tabla tbl_evento')
-ON CONFLICT (nombre_categoria_estado) DO NOTHING;
+    ON CONFLICT (nombre_categoria_estado) DO NOTHING;
 
--- -----------------------------------------
--- Estados base del sistema
--- -----------------------------------------
+    -- -----------------------------------------
+    -- Estados base del sistema
+    -- -----------------------------------------
 INSERT INTO public.tbl_estado (id_categoria_estado, nombre_estado, descripcion_estado)
 VALUES
     -- tbl_usuario
@@ -59,7 +59,7 @@ VALUES
 
     -- tbl_evento
     (6, 'EXITO', 'Evento ejecutado correctamente'),
-    (6, 'FALLO', 'Evento que termino en error o rechazo')
+    (6, 'FALLO', 'Evento que termino en error o rechazo');
 
 -- -----------------------------------------
 -- Dias de la semana

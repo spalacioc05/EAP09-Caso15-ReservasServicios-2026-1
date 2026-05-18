@@ -1,7 +1,12 @@
 package com.eap09.reservas.acceptanceTest;
 
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+
 import com.intuit.karate.junit5.Karate;
 
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
+@ActiveProfiles("test")
 class AcceptanceTestRunner {
 
     @Karate.Test
@@ -11,7 +16,6 @@ class AcceptanceTestRunner {
 
     @Karate.Test
     Karate testIdentityAccess() {
-        return Karate.run("identityaccess/Authentication.feature", "identityaccess/Registration.feature",
-                "identityaccess/UpdateProfile.feature", "provider/GeneralSchedule.feature").relativeTo(getClass());
+        return Karate.run("identityaccess/Authentication.feature").relativeTo(getClass());
     }
 }

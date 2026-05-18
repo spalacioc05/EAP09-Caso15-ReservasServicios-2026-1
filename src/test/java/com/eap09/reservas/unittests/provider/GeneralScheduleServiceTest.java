@@ -70,12 +70,18 @@ public class GeneralScheduleServiceTest {
         monday.setIdDiaSemana(1L);
         monday.setNombreDiaSemana("LUNES");
 
+        GeneralScheduleEntity scheduleEntity = new GeneralScheduleEntity();
+        scheduleEntity.setDiaSemana(monday);
+        scheduleEntity.setHoraInicio(LocalTime.of(8, 0));
+        scheduleEntity.setHoraFin(LocalTime.of(12, 0));
+        scheduleEntity.setIdUsuarioProveedor(10L);
+
         when(userAccountRepository.findByCorreoUsuarioIgnoreCase("juan.medina@empresa.com"))
                 .thenReturn(Optional.of(user));
         when(weekDayRepository.findByNombreDiaSemana("LUNES")).thenReturn(Optional.of(monday));
         when(generalScheduleRepository.findByIdUsuarioProveedorAndDiaSemana_IdDiaSemana(10L, 1L))
                 .thenReturn(List.of());
-        when(generalScheduleRepository.save(any())).thenReturn(monday);
+        when(generalScheduleRepository.save(any())).thenReturn(scheduleEntity);
 
         GeneralScheduleResponse response = generalScheduleService.upsertGeneralSchedule(
                 user.getCorreoUsuario(),

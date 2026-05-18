@@ -14,6 +14,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.eap09.reservas.common.audit.SystemEventPublisher;
+import com.eap09.reservas.common.exception.ServiceStatusAlreadySetException;
 import com.eap09.reservas.identityaccess.domain.RoleEntity;
 import com.eap09.reservas.identityaccess.domain.StateEntity;
 import com.eap09.reservas.identityaccess.domain.UserAccountEntity;
@@ -108,7 +109,7 @@ public class ServiceStatusTest {
         when(serviceRepository.findByIdServicio(200L))
                 .thenReturn(Optional.of(service));
 
-        assertThrows(IllegalStateException.class,
+        assertThrows(ServiceStatusAlreadySetException.class,
                 () -> serviceStatusManagementService.updateOwnServiceStatus(
                         "juan.medina@empresa.com",
                         200L,

@@ -1,4 +1,4 @@
-package integrationtests.identityaccess;
+package com.eap09.reservas.integrationtests.identityacces;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -8,7 +8,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.http.MediaType;
-import org.junit.jupiter.api.AfterAll;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -31,22 +31,28 @@ class AuthenticationIntegrationTest {
     private MockMvc mockMvc;
 
     @Autowired
+    private JdbcTemplate jdbcTemplate;
+
+    @Autowired
     private UserAccountRepository userAccountRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    private static Long idTest;
-
     @BeforeEach
     void setUp() {
+        cleanup();
+        insertTestData();
+    }
+
+    void insertTestData(){
 
         UserAccountEntity user = new UserAccountEntity();
         user.setNombresUsuario("Camilo");
         user.setApellidosUsuario("Lopez");
         user.setCorreoUsuario("user@example.com");
         user.setHashContrasenaUsuario(passwordEncoder.encode("Password1!"));
-        user.setIdEstado(2L);
+        user.setIdEstado(1L);
         user.setIntentosFallidosConsecutivos(0);
 
         RoleEntity userRole = new RoleEntity();
@@ -55,13 +61,16 @@ class AuthenticationIntegrationTest {
         user.setRol(userRole);
 
         UserAccountEntity createdUser = userAccountRepository.save(user);
-        idTest = createdUser.getIdUsuario();
-
     }
-
-    @AfterAll
+        
     void cleanup() {
-        userAccountRepository.deleteById(idTest);
+        String truncate_sql = """
+            TRUNCATE TABLE tbl_evento, tbl_sesion_usuario,
+            tbl_usuario RESTART IDENTITY CASCADE
+        """;
+        jdbcTemplate.update(truncate_sql);
+        //userSessionRepository.deleteByIdUsuario(idTest);
+        //userAccountRepository.deleteById(idTest);
     }
 
     @Test
@@ -71,12 +80,27 @@ class AuthenticationIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
                     {
-                      "correo":"cliente.ana@reservas.test",
-                      "contrasena":"Cliente123!"
+                      "correo":"user@example.com",
+                      "contrasena":"Password1!"
                     }
                 """))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.data.tokenType").value("Bearer"));
+    }
+
+    @Test
+    void shouldRejectInvalidCredentials() throws Exception {
+         mockMvc.perform(post("/api/v1/auth/sessions")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                    {
+                      "correo":"user@example.com",
+                      "contrasena":"Cliente123!"
+                    }
+                """))
+            .andExpect(status().isUnauthorized())
+            .andExpect(jsonPath("$.errorCode").value("INVALID_CREDENTIALS"))
+            .andExpect(jsonPath("$.message").value("Credenciales no validas"));
     }
 
 }

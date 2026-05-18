@@ -146,6 +146,7 @@ public class AuthenticationServiceTest {
         @Test
         void createSession_InactiveAccount_Exception() {
                 user.setIdEstado(2L);
+                request = new AuthenticationRequest("camila@gmail.com", "Camila123$");
                 when(stateRepository.findByCategoryAndStateName("tbl_usuario", "ACTIVA"))
                                 .thenReturn(Optional.of(userActiveState));
                 when(userAccountRepository.findByCorreoUsuarioIgnoreCase("camila@gmail.com"))
