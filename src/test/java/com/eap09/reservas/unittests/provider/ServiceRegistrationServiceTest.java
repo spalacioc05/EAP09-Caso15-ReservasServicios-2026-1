@@ -3,8 +3,6 @@ package com.eap09.reservas.unittests.provider;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
@@ -17,7 +15,6 @@ import org.mockito.MockitoAnnotations;
 
 import com.eap09.reservas.common.audit.SystemEventPublisher;
 import com.eap09.reservas.common.exception.ServiceNameAlreadyExistsException;
-import com.eap09.reservas.identityaccess.api.dto.AuthenticationRequest;
 import com.eap09.reservas.identityaccess.domain.RoleEntity;
 import com.eap09.reservas.identityaccess.domain.StateEntity;
 import com.eap09.reservas.identityaccess.domain.UserAccountEntity;

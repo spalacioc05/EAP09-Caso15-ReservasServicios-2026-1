@@ -59,8 +59,8 @@ class AuthenticationIntegrationTest {
         userRole.setIdRol(1L);
         userRole.setNombreRol("CLIENTE");
         user.setRol(userRole);
-
-        UserAccountEntity createdUser = userAccountRepository.save(user);
+        
+        userAccountRepository.save(user);
     }
         
     void cleanup() {
