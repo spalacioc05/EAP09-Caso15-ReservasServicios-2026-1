@@ -72,7 +72,7 @@ class AuthenticationIntegrationTest {
     void cleanup() {
         String truncate_sql = """
             TRUNCATE TABLE tbl_evento, tbl_sesion_usuario,
-            tbl_usuario RESTART IDENTITY CASCADE
+            tbl_usuario RESTART IDENTITY CASCADE;
         """;
         jdbcTemplate.update(truncate_sql);
     }

@@ -26,7 +26,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.*;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.test.context.support.WithMockUser;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, 
@@ -80,7 +79,7 @@ class GeneralScheduleIntegrationTest {
     void cleanup() {
         String truncate_sql = """
             TRUNCATE TABLE tbl_evento, tbl_horario_general_proveedor,
-            tbl_usuario RESTART IDENTITY CASCADE
+            tbl_usuario RESTART IDENTITY CASCADE;
         """;
         jdbcTemplate.update(truncate_sql);
     }
@@ -116,7 +115,6 @@ class GeneralScheduleIntegrationTest {
         Long id = provider.getIdUsuario();
 
         mockMvc.perform(put("/api/v1/providers/me/general-schedule/LUNES")
-                                                                                                .principal(new UsernamePasswordAuthenticationToken("provider@test.local", "N/A"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
@@ -139,14 +137,13 @@ class GeneralScheduleIntegrationTest {
         defineSchedule();
 
         mockMvc.perform(put("/api/v1/providers/me/general-schedule/LUNES")
-                                                                                                .principal(new UsernamePasswordAuthenticationToken("provider@test.local", "N/A"))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {
-                                  "horaInicio":"08:00:00",
-                                  "horaFin":"15:00:00"
-                                }
-                                """))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                        {
+                            "horaInicio":"08:00:00",
+                            "horaFin":"15:00:00"
+                        }
+                        """))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("Horario general definido correctamente"))
                 .andExpect(jsonPath("$.data.providerUserId").value(id))
@@ -161,7 +158,6 @@ class GeneralScheduleIntegrationTest {
     void shouldReturnInvalidTimeRangeError() throws Exception{
 
         mockMvc.perform(put("/api/v1/providers/me/general-schedule/LUNES")
-                                                                                                .principal(new UsernamePasswordAuthenticationToken("provider@test.local", "N/A"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
