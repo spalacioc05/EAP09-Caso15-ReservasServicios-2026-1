@@ -13,7 +13,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.eap09.reservas.common.exception.ApiException;
 import com.eap09.reservas.common.exception.AvailabilityOverlapException;
-import com.eap09.reservas.common.exception.GlobalExceptionHandler;
+import com.eap09.reservas.support.ControllerAdviceTestConfig;
 import com.eap09.reservas.common.exception.ProviderRoleRequiredException;
 import com.eap09.reservas.common.exception.ResourceNotFoundException;
 import com.eap09.reservas.provideroffer.api.dto.ServiceAvailabilityResponse;
@@ -35,7 +35,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(controllers = ServiceAvailabilityController.class)
 @AutoConfigureMockMvc(addFilters = false)
-@Import(GlobalExceptionHandler.class)
+@Import(ControllerAdviceTestConfig.class)
 class ServiceAvailabilityControllerTest {
 
     @Autowired

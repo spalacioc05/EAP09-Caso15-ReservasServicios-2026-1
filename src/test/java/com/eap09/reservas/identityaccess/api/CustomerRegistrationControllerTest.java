@@ -10,7 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.eap09.reservas.common.exception.EmailAlreadyRegisteredException;
-import com.eap09.reservas.common.exception.GlobalExceptionHandler;
+import com.eap09.reservas.support.ControllerAdviceTestConfig;
 import com.eap09.reservas.identityaccess.api.dto.CustomerRegistrationResponse;
 import com.eap09.reservas.identityaccess.application.CustomerRegistrationService;
 import com.eap09.reservas.security.application.JwtService;
@@ -29,7 +29,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 
 @WebMvcTest(controllers = CustomerRegistrationController.class)
 @AutoConfigureMockMvc(addFilters = false)
-@Import(GlobalExceptionHandler.class)
+@Import(ControllerAdviceTestConfig.class)
 class CustomerRegistrationControllerTest {
 
     @Autowired

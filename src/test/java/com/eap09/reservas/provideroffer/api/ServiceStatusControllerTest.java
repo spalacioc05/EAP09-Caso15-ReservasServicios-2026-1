@@ -8,7 +8,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.eap09.reservas.common.exception.GlobalExceptionHandler;
+import com.eap09.reservas.support.ControllerAdviceTestConfig;
 import com.eap09.reservas.common.exception.ProviderRoleRequiredException;
 import com.eap09.reservas.common.exception.ResourceNotFoundException;
 import com.eap09.reservas.common.exception.ServiceInactivationBlockedException;
@@ -36,7 +36,7 @@ import org.springframework.test.web.servlet.MockMvc;
 @WebMvcTest(controllers = ServiceRegistrationController.class)
 @AutoConfigureMockMvc
 @Import({
-        GlobalExceptionHandler.class,
+        ControllerAdviceTestConfig.class,
         SecurityConfig.class,
         RestAuthenticationEntryPoint.class,
         RestAccessDeniedHandler.class,

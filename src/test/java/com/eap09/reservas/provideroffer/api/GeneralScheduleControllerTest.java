@@ -11,7 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.eap09.reservas.common.exception.ApiException;
-import com.eap09.reservas.common.exception.GlobalExceptionHandler;
+import com.eap09.reservas.support.ControllerAdviceTestConfig;
 import com.eap09.reservas.common.exception.ProviderRoleRequiredException;
 import com.eap09.reservas.provideroffer.api.dto.GeneralScheduleResponse;
 import com.eap09.reservas.provideroffer.application.GeneralScheduleService;
@@ -30,7 +30,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(controllers = GeneralScheduleController.class)
 @AutoConfigureMockMvc(addFilters = false)
-@Import(GlobalExceptionHandler.class)
+@Import(ControllerAdviceTestConfig.class)
 class GeneralScheduleControllerTest {
 
     @Autowired

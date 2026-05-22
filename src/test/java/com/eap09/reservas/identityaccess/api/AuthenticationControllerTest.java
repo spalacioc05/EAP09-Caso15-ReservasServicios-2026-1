@@ -11,7 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.eap09.reservas.common.exception.AccountInactiveException;
-import com.eap09.reservas.common.exception.GlobalExceptionHandler;
+import com.eap09.reservas.support.ControllerAdviceTestConfig;
 import com.eap09.reservas.common.exception.InvalidCredentialsException;
 import com.eap09.reservas.common.exception.SessionNotActiveException;
 import com.eap09.reservas.common.exception.TemporaryAccessRestrictedException;
@@ -32,7 +32,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(controllers = AuthenticationController.class)
 @AutoConfigureMockMvc(addFilters = false)
-@Import(GlobalExceptionHandler.class)
+@Import(ControllerAdviceTestConfig.class)
 class AuthenticationControllerTest {
 
     @Autowired

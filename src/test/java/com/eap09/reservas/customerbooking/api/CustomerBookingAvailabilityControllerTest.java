@@ -8,7 +8,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.eap09.reservas.common.exception.ApiException;
 import com.eap09.reservas.common.exception.AvailabilityQueryFailedException;
 import com.eap09.reservas.common.exception.ClientRoleRequiredException;
-import com.eap09.reservas.common.exception.GlobalExceptionHandler;
+import com.eap09.reservas.support.ControllerAdviceTestConfig;
 import com.eap09.reservas.customerbooking.api.dto.AvailabilityResponse;
 import com.eap09.reservas.customerbooking.application.AvailabilityQueryResult;
 import com.eap09.reservas.customerbooking.application.CustomerBookingAvailabilityService;
@@ -29,7 +29,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(controllers = CustomerBookingAvailabilityController.class)
 @AutoConfigureMockMvc(addFilters = false)
-@Import(GlobalExceptionHandler.class)
+@Import(ControllerAdviceTestConfig.class)
 class CustomerBookingAvailabilityControllerTest {
 
     @Autowired

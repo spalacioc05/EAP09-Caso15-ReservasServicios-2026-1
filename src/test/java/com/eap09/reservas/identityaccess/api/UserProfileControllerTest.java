@@ -8,7 +8,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.eap09.reservas.common.exception.ApiException;
 import com.eap09.reservas.common.exception.EmailAlreadyRegisteredException;
-import com.eap09.reservas.common.exception.GlobalExceptionHandler;
+import com.eap09.reservas.support.ControllerAdviceTestConfig;
 import com.eap09.reservas.common.exception.ProfileNoChangesException;
 import com.eap09.reservas.identityaccess.api.dto.UpdateOwnProfileResponse;
 import com.eap09.reservas.identityaccess.application.UserProfileService;
@@ -27,7 +27,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(controllers = UserProfileController.class)
 @AutoConfigureMockMvc(addFilters = false)
-@Import(GlobalExceptionHandler.class)
+@Import(ControllerAdviceTestConfig.class)
 class UserProfileControllerTest {
 
     @Autowired
