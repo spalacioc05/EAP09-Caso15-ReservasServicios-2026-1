@@ -1,12 +1,16 @@
 package com.eap09.reservas.provideroffer.api;
 
+import static org.hamcrest.Matchers.hasItems;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.eap09.reservas.common.exception.ApiException;
 import com.eap09.reservas.common.exception.GlobalExceptionHandler;
 import com.eap09.reservas.common.exception.ProviderRoleRequiredException;
 import com.eap09.reservas.provideroffer.api.dto.GeneralScheduleResponse;
@@ -84,7 +88,94 @@ class GeneralScheduleControllerTest {
                                 }
                                 """))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.errorCode").value("VALIDATION_ERROR"));
+                .andExpect(jsonPath("$.errorCode").value("VALIDATION_ERROR"))
+                .andExpect(jsonPath("$.message").value("Validacion de la solicitud fallida"))
+                .andExpect(jsonPath("$.details", hasItems(
+                        "horaInicio: horaInicio es obligatoria",
+                        "horaFin: horaFin es obligatoria"
+                )));
+
+        verify(generalScheduleService, never()).upsertGeneralSchedule(any(), any(), any());
+    }
+
+    @Test
+    void shouldRejectBlankHoraInicioWithoutInvokingService() throws Exception {
+        mockMvc.perform(put("/api/v1/providers/me/general-schedule/LUNES")
+                        .principal(() -> "provider@test.local")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "horaInicio":"",
+                                  "horaFin":"12:00:00"
+                                }
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errorCode").value("VALIDATION_ERROR"))
+                .andExpect(jsonPath("$.message").value("Validacion de la solicitud fallida"))
+                .andExpect(jsonPath("$.details", hasItems(
+                        "horaInicio: horaInicio es obligatoria"
+                )));
+
+        verify(generalScheduleService, never()).upsertGeneralSchedule(any(), any(), any());
+    }
+
+    @Test
+    void shouldRejectBlankHoraFinWithoutInvokingService() throws Exception {
+        mockMvc.perform(put("/api/v1/providers/me/general-schedule/LUNES")
+                        .principal(() -> "provider@test.local")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "horaInicio":"08:00:00",
+                                  "horaFin":""
+                                }
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errorCode").value("VALIDATION_ERROR"))
+                .andExpect(jsonPath("$.message").value("Validacion de la solicitud fallida"))
+                .andExpect(jsonPath("$.details", hasItems(
+                        "horaFin: horaFin es obligatoria"
+                )));
+
+        verify(generalScheduleService, never()).upsertGeneralSchedule(any(), any(), any());
+    }
+
+    @Test
+    void shouldRejectBlankHoraInicioAndHoraFinWithoutInvokingService() throws Exception {
+        mockMvc.perform(put("/api/v1/providers/me/general-schedule/LUNES")
+                        .principal(() -> "provider@test.local")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "horaInicio":"",
+                                  "horaFin":""
+                                }
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errorCode").value("VALIDATION_ERROR"))
+                .andExpect(jsonPath("$.message").value("Validacion de la solicitud fallida"))
+                .andExpect(jsonPath("$.details").isArray());
+
+        verify(generalScheduleService, never()).upsertGeneralSchedule(any(), any(), any());
+    }
+
+    @Test
+    void shouldRejectInvalidDayOfWeekWithControlledError() throws Exception {
+        when(generalScheduleService.upsertGeneralSchedule(eq("provider@test.local"), eq("INVALID_DAY"), any()))
+                .thenThrow(new ApiException("INVALID_DAY_OF_WEEK", "El dia de la semana ingresado no es valido"));
+
+        mockMvc.perform(put("/api/v1/providers/me/general-schedule/INVALID_DAY")
+                        .principal(new UsernamePasswordAuthenticationToken("provider@test.local", "N/A"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "horaInicio":"08:00:00",
+                                  "horaFin":"12:00:00"
+                                }
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errorCode").value("INVALID_DAY_OF_WEEK"))
+                .andExpect(jsonPath("$.message").value("El dia de la semana ingresado no es valido"));
     }
 
     @Test

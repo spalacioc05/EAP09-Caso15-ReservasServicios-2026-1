@@ -1,7 +1,9 @@
 package com.eap09.reservas.common.exception;
 
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.eap09.reservas.common.response.ErrorResponse;
 import jakarta.validation.ConstraintViolationException;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -11,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -46,6 +49,11 @@ public class GlobalExceptionHandler {
         }
         String detail = parameterName + ": valor invalido";
         return buildValidationError(List.of(detail));
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ErrorResponse> handleHttpMessageNotReadable(HttpMessageNotReadableException ex) {
+        return buildValidationError(extractReadableMessageDetails(ex));
     }
 
     @ExceptionHandler(ApiException.class)
@@ -242,5 +250,36 @@ public class GlobalExceptionHandler {
             case "Size" -> 2;
             default -> 10;
         };
+    }
+
+    private List<String> extractReadableMessageDetails(HttpMessageNotReadableException ex) {
+        Throwable cause = ex.getMostSpecificCause();
+        if (cause instanceof InvalidFormatException invalidFormatException) {
+            String fieldName = extractFieldName(invalidFormatException);
+            if (fieldName == null || fieldName.isBlank()) {
+                fieldName = "cuerpo";
+            }
+
+            Class<?> targetType = invalidFormatException.getTargetType();
+            Object invalidValue = invalidFormatException.getValue();
+            if (LocalTime.class.equals(targetType)) {
+                if (invalidValue instanceof String stringValue && stringValue.isBlank()) {
+                    return List.of(fieldName + ": " + fieldName + " es obligatoria");
+                }
+                return List.of(fieldName + ": valor invalido, use el formato HH:mm:ss");
+            }
+
+            return List.of(fieldName + ": valor invalido");
+        }
+
+        return List.of("cuerpo: formato invalido");
+    }
+
+    private String extractFieldName(InvalidFormatException invalidFormatException) {
+        if (invalidFormatException.getPath() == null || invalidFormatException.getPath().isEmpty()) {
+            return null;
+        }
+
+        return invalidFormatException.getPath().get(invalidFormatException.getPath().size() - 1).getFieldName();
     }
 }
