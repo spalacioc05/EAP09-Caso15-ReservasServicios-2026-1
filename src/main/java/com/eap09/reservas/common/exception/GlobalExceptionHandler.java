@@ -110,6 +110,12 @@ public class GlobalExceptionHandler {
                 .body(build("SERVICE_STATUS_ALREADY_SET", ex.getMessage(), List.of()));
     }
 
+    @ExceptionHandler(ServiceInactivationBlockedException.class)
+    public ResponseEntity<ErrorResponse> handleServiceInactivationBlocked(ServiceInactivationBlockedException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(build(ex.getErrorCode(), ex.getMessage(), List.of()));
+    }
+
     @ExceptionHandler(AvailabilityOverlapException.class)
     public ResponseEntity<ErrorResponse> handleAvailabilityOverlap(AvailabilityOverlapException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT)

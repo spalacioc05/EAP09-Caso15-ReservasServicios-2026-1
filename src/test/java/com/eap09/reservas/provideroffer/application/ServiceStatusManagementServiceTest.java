@@ -11,8 +11,10 @@ import com.eap09.reservas.common.audit.SystemEvent;
 import com.eap09.reservas.common.audit.SystemEventPublisher;
 import com.eap09.reservas.common.exception.ProviderRoleRequiredException;
 import com.eap09.reservas.common.exception.ResourceNotFoundException;
+import com.eap09.reservas.common.exception.ServiceInactivationBlockedException;
 import com.eap09.reservas.common.exception.ServiceStatusAlreadySetException;
 import com.eap09.reservas.common.exception.ServiceStatusChangeFailedException;
+import com.eap09.reservas.customerbooking.infrastructure.ReservationRepository;
 import com.eap09.reservas.identityaccess.domain.RoleEntity;
 import com.eap09.reservas.identityaccess.domain.StateEntity;
 import com.eap09.reservas.identityaccess.domain.UserAccountEntity;
@@ -44,6 +46,9 @@ class ServiceStatusManagementServiceTest {
 
     @Mock
     private ServiceRepository serviceRepository;
+
+        @Mock
+        private ReservationRepository reservationRepository;
 
     @Mock
     private SystemEventPublisher systemEventPublisher;
@@ -79,10 +84,11 @@ class ServiceStatusManagementServiceTest {
         verify(systemEventPublisher).publish(eventCaptor.capture());
         assertEquals("ACTIVACION_SERVICIO", eventCaptor.getValue().type());
         assertEquals("EXITO", eventCaptor.getValue().result());
+                verify(reservationRepository, never()).existsActiveReservationsByServiceId(any(), any(), any());
     }
 
     @Test
-    void shouldInactivateActiveOwnServiceSuccessfully() {
+        void shouldInactivateActiveOwnServiceSuccessfullyWhenThereAreNoActiveReservations() {
         UserAccountEntity provider = providerUser();
         ServiceEntity service = ownService(201L, 10L, 1L, "Servicio Activo");
         StateEntity inactiveState = serviceState(2L, "INACTIVO");
@@ -93,6 +99,8 @@ class ServiceStatusManagementServiceTest {
                 .thenReturn(Optional.of(inactiveState));
         when(serviceRepository.findByIdServicio(201L))
                 .thenReturn(Optional.of(service));
+        when(reservationRepository.existsActiveReservationsByServiceId(201L, "tbl_reserva", "CREADA"))
+                .thenReturn(false);
         when(serviceRepository.save(any(ServiceEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         ServiceStatusUpdateResponse response = serviceStatusManagementService.updateOwnServiceStatus(
@@ -110,7 +118,7 @@ class ServiceStatusManagementServiceTest {
     }
 
     @Test
-    void shouldInactivateOwnServiceWithCreatedReservationsWithoutTouchingThem() {
+        void shouldBlockInactivationWhenServiceHasOneActiveReservation() {
         UserAccountEntity provider = providerUser();
         ServiceEntity service = ownService(202L, 10L, 1L, "Servicio con Reservas");
         StateEntity inactiveState = serviceState(2L, "INACTIVO");
@@ -121,16 +129,104 @@ class ServiceStatusManagementServiceTest {
                 .thenReturn(Optional.of(inactiveState));
         when(serviceRepository.findByIdServicio(202L))
                 .thenReturn(Optional.of(service));
+        when(reservationRepository.existsActiveReservationsByServiceId(202L, "tbl_reserva", "CREADA"))
+                .thenReturn(true);
+
+        ServiceInactivationBlockedException exception = assertThrows(ServiceInactivationBlockedException.class,
+                () -> serviceStatusManagementService.updateOwnServiceStatus(
+                        "provider@test.local",
+                        202L,
+                        new ServiceStatusUpdateRequest("INACTIVO")));
+
+        assertEquals("No es posible inactivar un servicio con reservas activas", exception.getMessage());
+        assertEquals(1L, service.getIdEstadoServicio());
+        verify(serviceRepository, never()).save(any(ServiceEntity.class));
+
+        ArgumentCaptor<SystemEvent> eventCaptor = ArgumentCaptor.forClass(SystemEvent.class);
+        verify(systemEventPublisher).publish(eventCaptor.capture());
+        assertEquals("INACTIVACION_SERVICIO", eventCaptor.getValue().type());
+        assertEquals("FALLO", eventCaptor.getValue().result());
+    }
+
+    @Test
+    void shouldBlockInactivationWhenServiceHasMultipleActiveReservations() {
+        UserAccountEntity provider = providerUser();
+        ServiceEntity service = ownService(209L, 10L, 1L, "Servicio con Varias Reservas");
+        StateEntity inactiveState = serviceState(2L, "INACTIVO");
+
+        when(userAccountRepository.findByCorreoUsuarioIgnoreCase("provider@test.local"))
+                .thenReturn(Optional.of(provider));
+        when(stateRepository.findByCategoryAndStateName("tbl_servicio", "INACTIVO"))
+                .thenReturn(Optional.of(inactiveState));
+        when(serviceRepository.findByIdServicio(209L))
+                .thenReturn(Optional.of(service));
+        when(reservationRepository.existsActiveReservationsByServiceId(209L, "tbl_reserva", "CREADA"))
+                .thenReturn(true);
+
+        assertThrows(ServiceInactivationBlockedException.class,
+                () -> serviceStatusManagementService.updateOwnServiceStatus(
+                        "provider@test.local",
+                        209L,
+                        new ServiceStatusUpdateRequest("INACTIVO")));
+
+        verify(serviceRepository, never()).save(any(ServiceEntity.class));
+        ArgumentCaptor<SystemEvent> eventCaptor = ArgumentCaptor.forClass(SystemEvent.class);
+        verify(systemEventPublisher).publish(eventCaptor.capture());
+        assertEquals("FALLO", eventCaptor.getValue().result());
+    }
+
+    @Test
+    void shouldAllowActivationEvenWhenActiveReservationsExist() {
+        UserAccountEntity provider = providerUser();
+        ServiceEntity service = ownService(210L, 10L, 2L, "Servicio Rehabilitable");
+        StateEntity activeState = serviceState(1L, "ACTIVO");
+
+        when(userAccountRepository.findByCorreoUsuarioIgnoreCase("provider@test.local"))
+                .thenReturn(Optional.of(provider));
+        when(stateRepository.findByCategoryAndStateName("tbl_servicio", "ACTIVO"))
+                .thenReturn(Optional.of(activeState));
+        when(serviceRepository.findByIdServicio(210L))
+                .thenReturn(Optional.of(service));
         when(serviceRepository.save(any(ServiceEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         ServiceStatusUpdateResponse response = serviceStatusManagementService.updateOwnServiceStatus(
                 "provider@test.local",
-                202L,
+                210L,
+                new ServiceStatusUpdateRequest("ACTIVO"));
+
+        assertEquals("ACTIVO", response.estadoServicio());
+        verify(reservationRepository, never()).existsActiveReservationsByServiceId(any(), any(), any());
+        ArgumentCaptor<SystemEvent> eventCaptor = ArgumentCaptor.forClass(SystemEvent.class);
+        verify(systemEventPublisher).publish(eventCaptor.capture());
+        assertEquals("EXITO", eventCaptor.getValue().result());
+    }
+
+    @Test
+    void shouldAllowInactivationWhenOnlyCanceledOrFinalizedReservationsExist() {
+        UserAccountEntity provider = providerUser();
+        ServiceEntity service = ownService(211L, 10L, 1L, "Servicio Sin Reservas Activas");
+        StateEntity inactiveState = serviceState(2L, "INACTIVO");
+
+        when(userAccountRepository.findByCorreoUsuarioIgnoreCase("provider@test.local"))
+                .thenReturn(Optional.of(provider));
+        when(stateRepository.findByCategoryAndStateName("tbl_servicio", "INACTIVO"))
+                .thenReturn(Optional.of(inactiveState));
+        when(serviceRepository.findByIdServicio(211L))
+                .thenReturn(Optional.of(service));
+        when(reservationRepository.existsActiveReservationsByServiceId(211L, "tbl_reserva", "CREADA"))
+                .thenReturn(false);
+        when(serviceRepository.save(any(ServiceEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        ServiceStatusUpdateResponse response = serviceStatusManagementService.updateOwnServiceStatus(
+                "provider@test.local",
+                211L,
                 new ServiceStatusUpdateRequest("INACTIVO"));
 
         assertEquals("INACTIVO", response.estadoServicio());
         verify(serviceRepository).save(service);
-        verify(systemEventPublisher).publish(any(SystemEvent.class));
+        ArgumentCaptor<SystemEvent> eventCaptor = ArgumentCaptor.forClass(SystemEvent.class);
+        verify(systemEventPublisher).publish(eventCaptor.capture());
+        assertEquals("EXITO", eventCaptor.getValue().result());
     }
 
     @Test
@@ -179,6 +275,7 @@ class ServiceStatusManagementServiceTest {
         assertEquals("El servicio ya se encuentra inactivo", exception.getMessage());
         verify(serviceRepository, never()).save(any(ServiceEntity.class));
         verify(systemEventPublisher).publish(any(SystemEvent.class));
+                verify(reservationRepository, never()).existsActiveReservationsByServiceId(any(), any(), any());
     }
 
     @Test
@@ -200,6 +297,7 @@ class ServiceStatusManagementServiceTest {
 
         assertEquals("No tiene permisos para cambiar el estado de este servicio", exception.getMessage());
         verify(serviceRepository, never()).save(any(ServiceEntity.class));
+        verify(reservationRepository, never()).existsActiveReservationsByServiceId(any(), any(), any());
 
         ArgumentCaptor<SystemEvent> eventCaptor = ArgumentCaptor.forClass(SystemEvent.class);
         verify(systemEventPublisher).publish(eventCaptor.capture());
@@ -225,6 +323,7 @@ class ServiceStatusManagementServiceTest {
 
         verify(serviceRepository, never()).save(any(ServiceEntity.class));
         verify(systemEventPublisher).publish(any(SystemEvent.class));
+                verify(reservationRepository, never()).existsActiveReservationsByServiceId(any(), any(), any());
     }
 
     @Test

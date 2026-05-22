@@ -11,6 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.eap09.reservas.common.exception.GlobalExceptionHandler;
 import com.eap09.reservas.common.exception.ProviderRoleRequiredException;
 import com.eap09.reservas.common.exception.ResourceNotFoundException;
+import com.eap09.reservas.common.exception.ServiceInactivationBlockedException;
 import com.eap09.reservas.common.exception.ServiceStatusAlreadySetException;
 import com.eap09.reservas.common.exception.ServiceStatusChangeFailedException;
 import com.eap09.reservas.provideroffer.api.dto.ServiceStatusUpdateResponse;
@@ -97,6 +98,25 @@ class ServiceStatusControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("Servicio inactivado correctamente"))
                 .andExpect(jsonPath("$.data.estadoServicio").value("INACTIVO"));
+    }
+
+    @Test
+    void shouldRejectInactivationWhenServiceHasActiveReservations() throws Exception {
+        when(serviceStatusManagementService.updateOwnServiceStatus(eq("provider@test.local"), eq(909L), any()))
+                .thenThrow(new ServiceInactivationBlockedException(
+                        "No es posible inactivar un servicio con reservas activas"));
+
+        mockMvc.perform(patch("/api/v1/providers/me/services/909/status")
+                        .with(user("provider@test.local").roles("PROVEEDOR"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "targetStatus":"INACTIVO"
+                                }
+                                """))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.errorCode").value("SERVICE_HAS_ACTIVE_RESERVATIONS"))
+                .andExpect(jsonPath("$.message").value("No es posible inactivar un servicio con reservas activas"));
     }
 
     @Test

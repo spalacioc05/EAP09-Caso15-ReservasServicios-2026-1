@@ -5,9 +5,11 @@ import com.eap09.reservas.common.audit.SystemEventPublisher;
 import com.eap09.reservas.common.exception.ApiException;
 import com.eap09.reservas.common.exception.ProviderRoleRequiredException;
 import com.eap09.reservas.common.exception.ResourceNotFoundException;
+import com.eap09.reservas.common.exception.ServiceInactivationBlockedException;
 import com.eap09.reservas.common.exception.ServiceStatusAlreadySetException;
 import com.eap09.reservas.common.exception.ServiceStatusChangeFailedException;
 import com.eap09.reservas.common.util.TraceIdUtil;
+import com.eap09.reservas.customerbooking.infrastructure.ReservationRepository;
 import com.eap09.reservas.identityaccess.domain.StateEntity;
 import com.eap09.reservas.identityaccess.domain.UserAccountEntity;
 import com.eap09.reservas.identityaccess.infrastructure.StateRepository;
@@ -34,6 +36,8 @@ public class ServiceStatusManagementService {
     private static final String SERVICE_STATE_CATEGORY = "tbl_servicio";
     private static final String ACTIVE_STATE = "ACTIVO";
     private static final String INACTIVE_STATE = "INACTIVO";
+    private static final String RESERVATION_STATE_CATEGORY = "tbl_reserva";
+    private static final String CREATED_RESERVATION_STATE = "CREADA";
     private static final String SERVICE_ENTITY_TYPE = "tbl_servicio";
     private static final String ACTIVATE_EVENT = "ACTIVACION_SERVICIO";
     private static final String INACTIVATE_EVENT = "INACTIVACION_SERVICIO";
@@ -41,15 +45,18 @@ public class ServiceStatusManagementService {
     private final UserAccountRepository userAccountRepository;
     private final StateRepository stateRepository;
     private final ServiceRepository serviceRepository;
+    private final ReservationRepository reservationRepository;
     private final SystemEventPublisher systemEventPublisher;
 
     public ServiceStatusManagementService(UserAccountRepository userAccountRepository,
                                           StateRepository stateRepository,
                                           ServiceRepository serviceRepository,
+                                          ReservationRepository reservationRepository,
                                           SystemEventPublisher systemEventPublisher) {
         this.userAccountRepository = userAccountRepository;
         this.stateRepository = stateRepository;
         this.serviceRepository = serviceRepository;
+        this.reservationRepository = reservationRepository;
         this.systemEventPublisher = systemEventPublisher;
     }
 
@@ -81,6 +88,15 @@ public class ServiceStatusManagementService {
             if (targetState.getIdEstado().equals(service.getIdEstadoServicio())) {
                 throw buildRedundantStateException(targetStatus);
             }
+
+                if (INACTIVE_STATE.equals(targetStatus)
+                    && reservationRepository.existsActiveReservationsByServiceId(
+                        serviceId,
+                        RESERVATION_STATE_CATEGORY,
+                        CREATED_RESERVATION_STATE)) {
+                throw new ServiceInactivationBlockedException(
+                    "No es posible inactivar un servicio con reservas activas");
+                }
 
             service.setIdEstadoServicio(targetState.getIdEstado());
             service.setFechaActualizacionServicio(OffsetDateTime.now());
@@ -173,6 +189,7 @@ public class ServiceStatusManagementService {
         if (ex instanceof ServiceStatusAlreadySetException
                 || ex instanceof ResourceNotFoundException
                 || ex instanceof ProviderRoleRequiredException
+                || ex instanceof ServiceInactivationBlockedException
                 || ex instanceof ApiException) {
             return ex.getMessage();
         }

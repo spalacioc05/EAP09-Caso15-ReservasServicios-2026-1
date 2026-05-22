@@ -14,6 +14,23 @@ public interface ReservationRepository extends JpaRepository<ReservationEntity, 
     long countByIdDisponibilidadServicioAndIdEstadoReserva(Long idDisponibilidadServicio, Long idEstadoReserva);
 
     @Query(value = """
+            SELECT COUNT(*) > 0
+            FROM tbl_reserva r
+            JOIN tbl_disponibilidad_servicio ds
+                ON ds.id_disponibilidad_servicio = r.id_disponibilidad_servicio
+            JOIN tbl_estado er
+                ON er.id_estado = r.id_estado_reserva
+            JOIN tbl_categoria_estado cer
+                ON cer.id_categoria_estado = er.id_categoria_estado
+            WHERE ds.id_servicio = :serviceId
+              AND cer.nombre_categoria_estado = :reservationCategory
+              AND er.nombre_estado = :activeStatusName
+            """, nativeQuery = true)
+    boolean existsActiveReservationsByServiceId(@Param("serviceId") Long serviceId,
+                                                @Param("reservationCategory") String reservationCategory,
+                                                @Param("activeStatusName") String activeStatusName);
+
+    @Query(value = """
             SELECT
                 r.id_reserva AS bookingId,
                 s.id_servicio AS serviceId,
