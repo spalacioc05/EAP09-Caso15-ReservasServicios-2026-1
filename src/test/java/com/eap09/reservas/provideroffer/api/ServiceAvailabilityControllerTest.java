@@ -1,7 +1,10 @@
 package com.eap09.reservas.provideroffer.api;
 
+import static org.hamcrest.Matchers.hasItems;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -87,7 +90,123 @@ class ServiceAvailabilityControllerTest {
                                 }
                                 """))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.errorCode").value("VALIDATION_ERROR"));
+                .andExpect(jsonPath("$.errorCode").value("VALIDATION_ERROR"))
+                .andExpect(jsonPath("$.message").value("Validacion de la solicitud fallida"))
+                .andExpect(jsonPath("$.details", hasItems(
+                        "fecha: fecha es obligatoria",
+                        "horaInicio: horaInicio es obligatoria",
+                        "horaFin: horaFin es obligatoria"
+                )));
+
+        verify(serviceAvailabilityService, never()).createAvailability(any(), any(), any());
+    }
+
+    @Test
+    void shouldRejectCreateWhenFechaIsBlank() throws Exception {
+        mockMvc.perform(post("/api/v1/providers/me/services/200/availabilities")
+                        .principal(new UsernamePasswordAuthenticationToken("provider@test.local", "N/A"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "fecha":"",
+                                  "horaInicio":"09:00:00",
+                                  "horaFin":"10:00:00"
+                                }
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errorCode").value("VALIDATION_ERROR"))
+                .andExpect(jsonPath("$.message").value("Validacion de la solicitud fallida"))
+                .andExpect(jsonPath("$.details", hasItems(
+                        "fecha: fecha es obligatoria"
+                )));
+
+        verify(serviceAvailabilityService, never()).createAvailability(any(), any(), any());
+    }
+
+    @Test
+    void shouldRejectCreateWhenHoraInicioIsBlank() throws Exception {
+        mockMvc.perform(post("/api/v1/providers/me/services/200/availabilities")
+                        .principal(new UsernamePasswordAuthenticationToken("provider@test.local", "N/A"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "fecha":"2026-04-07",
+                                  "horaInicio":"",
+                                  "horaFin":"10:00:00"
+                                }
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errorCode").value("VALIDATION_ERROR"))
+                .andExpect(jsonPath("$.message").value("Validacion de la solicitud fallida"))
+                .andExpect(jsonPath("$.details", hasItems(
+                        "horaInicio: horaInicio es obligatoria"
+                )));
+
+        verify(serviceAvailabilityService, never()).createAvailability(any(), any(), any());
+    }
+
+    @Test
+    void shouldRejectCreateWhenHoraFinIsBlank() throws Exception {
+        mockMvc.perform(post("/api/v1/providers/me/services/200/availabilities")
+                        .principal(new UsernamePasswordAuthenticationToken("provider@test.local", "N/A"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "fecha":"2026-04-07",
+                                  "horaInicio":"09:00:00",
+                                  "horaFin":""
+                                }
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errorCode").value("VALIDATION_ERROR"))
+                .andExpect(jsonPath("$.message").value("Validacion de la solicitud fallida"))
+                .andExpect(jsonPath("$.details", hasItems(
+                        "horaFin: horaFin es obligatoria"
+                )));
+
+        verify(serviceAvailabilityService, never()).createAvailability(any(), any(), any());
+    }
+
+    @Test
+    void shouldRejectCreateWhenFechaHoraInicioAndHoraFinAreBlank() throws Exception {
+        mockMvc.perform(post("/api/v1/providers/me/services/200/availabilities")
+                        .principal(new UsernamePasswordAuthenticationToken("provider@test.local", "N/A"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "fecha":"",
+                                  "horaInicio":"",
+                                  "horaFin":""
+                                }
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errorCode").value("VALIDATION_ERROR"))
+                .andExpect(jsonPath("$.message").value("Validacion de la solicitud fallida"))
+                .andExpect(jsonPath("$.details").isArray());
+
+        verify(serviceAvailabilityService, never()).createAvailability(any(), any(), any());
+    }
+
+    @Test
+    void shouldRejectCreateWhenFormatsAreInvalid() throws Exception {
+        mockMvc.perform(post("/api/v1/providers/me/services/200/availabilities")
+                        .principal(new UsernamePasswordAuthenticationToken("provider@test.local", "N/A"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "fecha":"fecha-mala",
+                                  "horaInicio":"25:99:00",
+                                  "horaFin":"hora-mala"
+                                }
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errorCode").value("VALIDATION_ERROR"))
+                .andExpect(jsonPath("$.message").value("Validacion de la solicitud fallida"))
+                .andExpect(jsonPath("$.details", hasItems(
+                        "fecha: valor invalido, use el formato yyyy-MM-dd"
+                )));
+
+        verify(serviceAvailabilityService, never()).createAvailability(any(), any(), any());
     }
 
     @Test

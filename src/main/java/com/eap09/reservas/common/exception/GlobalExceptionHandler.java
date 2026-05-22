@@ -3,6 +3,7 @@ package com.eap09.reservas.common.exception;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.eap09.reservas.common.response.ErrorResponse;
 import jakarta.validation.ConstraintViolationException;
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.LinkedHashMap;
@@ -253,8 +254,8 @@ public class GlobalExceptionHandler {
     }
 
     private List<String> extractReadableMessageDetails(HttpMessageNotReadableException ex) {
-        Throwable cause = ex.getMostSpecificCause();
-        if (cause instanceof InvalidFormatException invalidFormatException) {
+        InvalidFormatException invalidFormatException = findInvalidFormatException(ex);
+        if (invalidFormatException != null) {
             String fieldName = extractFieldName(invalidFormatException);
             if (fieldName == null || fieldName.isBlank()) {
                 fieldName = "cuerpo";
@@ -262,6 +263,13 @@ public class GlobalExceptionHandler {
 
             Class<?> targetType = invalidFormatException.getTargetType();
             Object invalidValue = invalidFormatException.getValue();
+            if (LocalDate.class.equals(targetType)) {
+                if (invalidValue instanceof String stringValue && stringValue.isBlank()) {
+                    return List.of(fieldName + ": " + fieldName + " es obligatoria");
+                }
+                return List.of(fieldName + ": valor invalido, use el formato yyyy-MM-dd");
+            }
+
             if (LocalTime.class.equals(targetType)) {
                 if (invalidValue instanceof String stringValue && stringValue.isBlank()) {
                     return List.of(fieldName + ": " + fieldName + " es obligatoria");
@@ -273,6 +281,17 @@ public class GlobalExceptionHandler {
         }
 
         return List.of("cuerpo: formato invalido");
+    }
+
+    private InvalidFormatException findInvalidFormatException(Throwable throwable) {
+        Throwable current = throwable;
+        while (current != null) {
+            if (current instanceof InvalidFormatException invalidFormatException) {
+                return invalidFormatException;
+            }
+            current = current.getCause();
+        }
+        return null;
     }
 
     private String extractFieldName(InvalidFormatException invalidFormatException) {
