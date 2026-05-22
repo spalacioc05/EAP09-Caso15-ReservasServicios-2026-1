@@ -1,6 +1,9 @@
 package com.eap09.reservas.identityaccess.api;
 
+import static org.hamcrest.Matchers.hasItems;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -69,7 +72,47 @@ class AuthenticationControllerTest {
     }
 
     @Test
-    void shouldRejectInvalidPayload() throws Exception {
+    void shouldRejectBlankEmailWithoutInvokingService() throws Exception {
+        mockMvc.perform(post("/api/v1/auth/sessions")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "correo":"",
+                                  "contrasena":"Password1!"
+                                }
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errorCode").value("VALIDATION_ERROR"))
+                .andExpect(jsonPath("$.message").value("Validacion de la solicitud fallida"))
+                .andExpect(jsonPath("$.details", hasItems(
+                        "correo: correo es obligatorio"
+                )));
+
+        verify(authenticationService, never()).createSession(any());
+    }
+
+    @Test
+    void shouldRejectBlankPasswordWithoutInvokingService() throws Exception {
+        mockMvc.perform(post("/api/v1/auth/sessions")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "correo":"user@example.com",
+                                  "contrasena":""
+                                }
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errorCode").value("VALIDATION_ERROR"))
+                .andExpect(jsonPath("$.message").value("Validacion de la solicitud fallida"))
+                .andExpect(jsonPath("$.details", hasItems(
+                        "contrasena: contrasena es obligatoria"
+                )));
+
+        verify(authenticationService, never()).createSession(any());
+    }
+
+    @Test
+    void shouldRejectBlankEmailAndPasswordWithoutInvokingService() throws Exception {
         mockMvc.perform(post("/api/v1/auth/sessions")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -79,7 +122,14 @@ class AuthenticationControllerTest {
                                 }
                                 """))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.errorCode").value("VALIDATION_ERROR"));
+                .andExpect(jsonPath("$.errorCode").value("VALIDATION_ERROR"))
+                .andExpect(jsonPath("$.message").value("Validacion de la solicitud fallida"))
+                .andExpect(jsonPath("$.details", hasItems(
+                        "correo: correo es obligatorio",
+                        "contrasena: contrasena es obligatoria"
+                )));
+
+        verify(authenticationService, never()).createSession(any());
     }
 
     @Test
