@@ -71,22 +71,98 @@ class UserProfileServiceTest {
         assertEquals("EXITO", eventCaptor.getValue().result());
     }
 
-        @ParameterizedTest
-        @MethodSource("blankFieldRequests")
-        void shouldRejectWhenProvidedFieldIsBlank(UpdateOwnProfileRequest request, String expectedMessage) {
+    @Test
+    void shouldUpdateOnlyNamesSuccessfully() {
+        UserAccountEntity user = buildUser(10L, "cliente@reservas.test", "Ana", "Cliente");
+
+        when(userAccountRepository.findByCorreoUsuarioIgnoreCase("cliente@reservas.test"))
+                .thenReturn(java.util.Optional.of(user));
+        when(userAccountRepository.save(any(UserAccountEntity.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        UpdateOwnProfileResponse response = userProfileService.updateOwnProfile(
+                "cliente@reservas.test",
+                new UpdateOwnProfileRequest("Ana Maria", null, null));
+
+        assertEquals("Ana Maria", response.nombres());
+        assertEquals("Cliente", response.apellidos());
+        assertEquals("cliente@reservas.test", response.correo());
+        verify(userAccountRepository).save(any(UserAccountEntity.class));
+
+        ArgumentCaptor<SystemEvent> eventCaptor = ArgumentCaptor.forClass(SystemEvent.class);
+        verify(systemEventPublisher).publish(eventCaptor.capture());
+        assertEquals("EXITO", eventCaptor.getValue().result());
+    }
+
+    @Test
+    void shouldUpdateOnlyEmailSuccessfully() {
+        UserAccountEntity user = buildUser(10L, "cliente@reservas.test", "Ana", "Cliente");
+
+        when(userAccountRepository.findByCorreoUsuarioIgnoreCase("cliente@reservas.test"))
+                .thenReturn(java.util.Optional.of(user));
+        when(userAccountRepository.existsByCorreoUsuarioIgnoreCaseAndIdUsuarioNot("cliente.nuevo@reservas.test", 10L))
+                .thenReturn(false);
+        when(userAccountRepository.save(any(UserAccountEntity.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        UpdateOwnProfileResponse response = userProfileService.updateOwnProfile(
+                "cliente@reservas.test",
+                new UpdateOwnProfileRequest(null, null, "cliente.nuevo@reservas.test"));
+
+        assertEquals("Ana", response.nombres());
+        assertEquals("Cliente", response.apellidos());
+        assertEquals("cliente.nuevo@reservas.test", response.correo());
+        verify(userAccountRepository).save(any(UserAccountEntity.class));
+
+        ArgumentCaptor<SystemEvent> eventCaptor = ArgumentCaptor.forClass(SystemEvent.class);
+        verify(systemEventPublisher).publish(eventCaptor.capture());
+        assertEquals("EXITO", eventCaptor.getValue().result());
+    }
+
+    @Test
+    void shouldUpdateNamesAndLastNamesSuccessfully() {
+        UserAccountEntity user = buildUser(10L, "cliente@reservas.test", "Ana", "Cliente");
+
+        when(userAccountRepository.findByCorreoUsuarioIgnoreCase("cliente@reservas.test"))
+                .thenReturn(java.util.Optional.of(user));
+        when(userAccountRepository.save(any(UserAccountEntity.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        UpdateOwnProfileResponse response = userProfileService.updateOwnProfile(
+                "cliente@reservas.test",
+                new UpdateOwnProfileRequest("Ana Maria", "Cliente Actualizada", null));
+
+        assertEquals("Ana Maria", response.nombres());
+        assertEquals("Cliente Actualizada", response.apellidos());
+        assertEquals("cliente@reservas.test", response.correo());
+        verify(userAccountRepository).save(any(UserAccountEntity.class));
+
+        ArgumentCaptor<SystemEvent> eventCaptor = ArgumentCaptor.forClass(SystemEvent.class);
+        verify(systemEventPublisher).publish(eventCaptor.capture());
+        assertEquals("EXITO", eventCaptor.getValue().result());
+    }
+
+    @ParameterizedTest
+    @MethodSource("blankFieldRequests")
+    void shouldRejectWhenProvidedFieldIsBlank(UpdateOwnProfileRequest request, String expectedMessage) {
         UserAccountEntity user = buildUser(10L, "cliente@reservas.test", "Ana", "Cliente");
         when(userAccountRepository.findByCorreoUsuarioIgnoreCase("cliente@reservas.test"))
                 .thenReturn(java.util.Optional.of(user));
 
         ApiException ex = assertThrows(ApiException.class,
                 () -> userProfileService.updateOwnProfile("cliente@reservas.test", request));
-                assertEquals(expectedMessage, ex.getMessage());
+        assertEquals(expectedMessage, ex.getMessage());
+
+        assertEquals("Ana", user.getNombresUsuario());
+        assertEquals("Cliente", user.getApellidosUsuario());
+        assertEquals("cliente@reservas.test", user.getCorreoUsuario());
 
         verify(userAccountRepository, never()).save(any(UserAccountEntity.class));
 
         ArgumentCaptor<SystemEvent> eventCaptor = ArgumentCaptor.forClass(SystemEvent.class);
         verify(systemEventPublisher).publish(eventCaptor.capture());
         assertEquals("FALLO", eventCaptor.getValue().result());
+        assertEquals(expectedMessage, eventCaptor.getValue().details());
     }
 
     @Test
@@ -101,10 +177,12 @@ class UserProfileServiceTest {
 
         assertEquals("El correo ingresado no es valido", ex.getMessage());
         verify(userAccountRepository, never()).save(any(UserAccountEntity.class));
+        assertEquals("cliente@reservas.test", user.getCorreoUsuario());
 
         ArgumentCaptor<SystemEvent> eventCaptor = ArgumentCaptor.forClass(SystemEvent.class);
         verify(systemEventPublisher).publish(eventCaptor.capture());
         assertEquals("FALLO", eventCaptor.getValue().result());
+        assertEquals("El correo ingresado no es valido", eventCaptor.getValue().details());
     }
 
     @ParameterizedTest
@@ -141,6 +219,11 @@ class UserProfileServiceTest {
 
         assertEquals("Debe enviar al menos un campo para actualizar", ex.getMessage());
         verify(userAccountRepository, never()).save(any(UserAccountEntity.class));
+
+                ArgumentCaptor<SystemEvent> eventCaptor = ArgumentCaptor.forClass(SystemEvent.class);
+                verify(systemEventPublisher).publish(eventCaptor.capture());
+                assertEquals("FALLO", eventCaptor.getValue().result());
+                assertEquals("Debe enviar al menos un campo para actualizar", eventCaptor.getValue().details());
     }
 
     @Test
@@ -248,11 +331,14 @@ class UserProfileServiceTest {
         return user;
     }
 
-        private static Stream<Arguments> blankFieldRequests() {
-                return Stream.of(
-                                arguments(new UpdateOwnProfileRequest("   ", null, null), "nombres no puede estar vacio"),
-                                arguments(new UpdateOwnProfileRequest(null, "   ", null), "apellidos no puede estar vacio"),
-                                arguments(new UpdateOwnProfileRequest(null, null, "   "), "correo no puede estar vacio")
-                );
-        }
+    private static Stream<Arguments> blankFieldRequests() {
+        return Stream.of(
+                arguments(new UpdateOwnProfileRequest("", null, null), "nombres no puede estar vacio"),
+                arguments(new UpdateOwnProfileRequest("   ", null, null), "nombres no puede estar vacio"),
+                arguments(new UpdateOwnProfileRequest(null, "", null), "apellidos no puede estar vacio"),
+                arguments(new UpdateOwnProfileRequest(null, "   ", null), "apellidos no puede estar vacio"),
+                arguments(new UpdateOwnProfileRequest(null, null, ""), "correo no puede estar vacio"),
+                arguments(new UpdateOwnProfileRequest(null, null, "   "), "correo no puede estar vacio")
+        );
+    }
 }

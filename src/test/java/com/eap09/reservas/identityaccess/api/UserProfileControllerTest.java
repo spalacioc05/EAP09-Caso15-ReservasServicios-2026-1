@@ -118,7 +118,62 @@ class UserProfileControllerTest {
                                 }
                                 """))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.errorCode").value("PROFILE_NAME_REQUIRED"));
+                .andExpect(jsonPath("$.errorCode").value("PROFILE_NAME_REQUIRED"))
+                .andExpect(jsonPath("$.message").value("nombres no puede estar vacio"));
+    }
+
+    @Test
+    @WithMockUser(username = "cliente@reservas.test")
+    void shouldRejectEmptyName() throws Exception {
+        when(userProfileService.updateOwnProfile(any(), any()))
+                .thenThrow(new ApiException("PROFILE_NAME_REQUIRED", "nombres no puede estar vacio"));
+
+        mockMvc.perform(patch("/api/v1/users/me/profile")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "nombres":""
+                                }
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errorCode").value("PROFILE_NAME_REQUIRED"))
+                .andExpect(jsonPath("$.message").value("nombres no puede estar vacio"));
+    }
+
+    @Test
+    @WithMockUser(username = "cliente@reservas.test")
+    void shouldRejectBlankLastName() throws Exception {
+        when(userProfileService.updateOwnProfile(any(), any()))
+                .thenThrow(new ApiException("PROFILE_LASTNAME_REQUIRED", "apellidos no puede estar vacio"));
+
+        mockMvc.perform(patch("/api/v1/users/me/profile")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "apellidos":"   "
+                                }
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errorCode").value("PROFILE_LASTNAME_REQUIRED"))
+                .andExpect(jsonPath("$.message").value("apellidos no puede estar vacio"));
+    }
+
+    @Test
+    @WithMockUser(username = "cliente@reservas.test")
+    void shouldRejectBlankEmail() throws Exception {
+        when(userProfileService.updateOwnProfile(any(), any()))
+                .thenThrow(new ApiException("PROFILE_EMAIL_REQUIRED", "correo no puede estar vacio"));
+
+        mockMvc.perform(patch("/api/v1/users/me/profile")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "correo":""
+                                }
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errorCode").value("PROFILE_EMAIL_REQUIRED"))
+                .andExpect(jsonPath("$.message").value("correo no puede estar vacio"));
     }
 
     @Test
