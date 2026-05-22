@@ -122,6 +122,7 @@ class ServiceStatusManagementServiceTest {
         UserAccountEntity provider = providerUser();
         ServiceEntity service = ownService(202L, 10L, 1L, "Servicio con Reservas");
         StateEntity inactiveState = serviceState(2L, "INACTIVO");
+                ServiceStatusUpdateRequest request = new ServiceStatusUpdateRequest("INACTIVO");
 
         when(userAccountRepository.findByCorreoUsuarioIgnoreCase("provider@test.local"))
                 .thenReturn(Optional.of(provider));
@@ -133,10 +134,7 @@ class ServiceStatusManagementServiceTest {
                 .thenReturn(true);
 
         ServiceInactivationBlockedException exception = assertThrows(ServiceInactivationBlockedException.class,
-                () -> serviceStatusManagementService.updateOwnServiceStatus(
-                        "provider@test.local",
-                        202L,
-                        new ServiceStatusUpdateRequest("INACTIVO")));
+                () -> serviceStatusManagementService.updateOwnServiceStatus("provider@test.local", 202L, request));
 
         assertEquals("No es posible inactivar un servicio con reservas activas", exception.getMessage());
         assertEquals(1L, service.getIdEstadoServicio());
@@ -153,6 +151,7 @@ class ServiceStatusManagementServiceTest {
         UserAccountEntity provider = providerUser();
         ServiceEntity service = ownService(209L, 10L, 1L, "Servicio con Varias Reservas");
         StateEntity inactiveState = serviceState(2L, "INACTIVO");
+                ServiceStatusUpdateRequest request = new ServiceStatusUpdateRequest("INACTIVO");
 
         when(userAccountRepository.findByCorreoUsuarioIgnoreCase("provider@test.local"))
                 .thenReturn(Optional.of(provider));
@@ -164,10 +163,7 @@ class ServiceStatusManagementServiceTest {
                 .thenReturn(true);
 
         assertThrows(ServiceInactivationBlockedException.class,
-                () -> serviceStatusManagementService.updateOwnServiceStatus(
-                        "provider@test.local",
-                        209L,
-                        new ServiceStatusUpdateRequest("INACTIVO")));
+                () -> serviceStatusManagementService.updateOwnServiceStatus("provider@test.local", 209L, request));
 
         verify(serviceRepository, never()).save(any(ServiceEntity.class));
         ArgumentCaptor<SystemEvent> eventCaptor = ArgumentCaptor.forClass(SystemEvent.class);

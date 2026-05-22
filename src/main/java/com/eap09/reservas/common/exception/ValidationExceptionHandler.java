@@ -96,32 +96,65 @@ public class ValidationExceptionHandler extends AbstractErrorResponseHandler {
 
     private List<String> extractReadableMessageDetails(HttpMessageNotReadableException ex) {
         InvalidFormatException invalidFormatException = findInvalidFormatException(ex);
-        if (invalidFormatException != null) {
-            String fieldName = extractFieldName(invalidFormatException);
-            if (fieldName == null || fieldName.isBlank()) {
-                fieldName = "cuerpo";
-            }
-
-            Class<?> targetType = invalidFormatException.getTargetType();
-            Object invalidValue = invalidFormatException.getValue();
-            if (LocalDate.class.equals(targetType)) {
-                if (invalidValue instanceof String stringValue && stringValue.isBlank()) {
-                    return List.of(fieldName + ": " + fieldName + " es obligatoria");
-                }
-                return List.of(fieldName + ": valor invalido, use el formato yyyy-MM-dd");
-            }
-
-            if (LocalTime.class.equals(targetType)) {
-                if (invalidValue instanceof String stringValue && stringValue.isBlank()) {
-                    return List.of(fieldName + ": " + fieldName + " es obligatoria");
-                }
-                return List.of(fieldName + ": valor invalido, use el formato HH:mm:ss");
-            }
-
-            return List.of(fieldName + ": valor invalido");
+        if (invalidFormatException == null) {
+            return List.of("cuerpo: formato invalido");
         }
 
-        return List.of("cuerpo: formato invalido");
+        String fieldName = resolveInvalidFieldName(invalidFormatException);
+        return List.of(buildInvalidFormatDetail(fieldName, invalidFormatException));
+    }
+
+    private String resolveInvalidFieldName(InvalidFormatException invalidFormatException) {
+        String fieldName = extractFieldName(invalidFormatException);
+        if (fieldName == null || fieldName.isBlank()) {
+            return "cuerpo";
+        }
+        return fieldName;
+    }
+
+    private String buildInvalidFormatDetail(String fieldName, InvalidFormatException invalidFormatException) {
+        Class<?> targetType = invalidFormatException.getTargetType();
+        Object invalidValue = invalidFormatException.getValue();
+
+        if (isLocalDateDeserializationError(targetType)) {
+            return buildDateDetail(fieldName, invalidValue);
+        }
+
+        if (isLocalTimeDeserializationError(targetType)) {
+            return buildTimeDetail(fieldName, invalidValue);
+        }
+
+        return fieldName + ": valor invalido";
+    }
+
+    private boolean isLocalDateDeserializationError(Class<?> targetType) {
+        return LocalDate.class.equals(targetType);
+    }
+
+    private boolean isLocalTimeDeserializationError(Class<?> targetType) {
+        return LocalTime.class.equals(targetType);
+    }
+
+    private String buildDateDetail(String fieldName, Object invalidValue) {
+        if (isBlankRejectedValue(invalidValue)) {
+            return buildRequiredFieldDetail(fieldName);
+        }
+        return fieldName + ": valor invalido, use el formato yyyy-MM-dd";
+    }
+
+    private String buildTimeDetail(String fieldName, Object invalidValue) {
+        if (isBlankRejectedValue(invalidValue)) {
+            return buildRequiredFieldDetail(fieldName);
+        }
+        return fieldName + ": valor invalido, use el formato HH:mm:ss";
+    }
+
+    private boolean isBlankRejectedValue(Object invalidValue) {
+        return invalidValue instanceof String stringValue && stringValue.isBlank();
+    }
+
+    private String buildRequiredFieldDetail(String fieldName) {
+        return fieldName + ": " + fieldName + " es obligatoria";
     }
 
     private InvalidFormatException findInvalidFormatException(Throwable throwable) {
