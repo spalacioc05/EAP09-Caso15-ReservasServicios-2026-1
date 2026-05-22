@@ -15,6 +15,8 @@ import com.eap09.reservas.identityaccess.api.dto.CustomerRegistrationResponse;
 import com.eap09.reservas.identityaccess.application.CustomerRegistrationService;
 import com.eap09.reservas.security.application.JwtService;
 import com.eap09.reservas.security.application.SessionTokenValidationService;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -161,7 +163,7 @@ class CustomerRegistrationControllerTest {
     }
 
     @Test
-    void shouldRejectWeakPassword() throws Exception {
+        void shouldRejectPasswordThatDoesNotMeetPolicyWithoutInvokingService() throws Exception {
         mockMvc.perform(post("/api/v1/clients")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -169,10 +171,44 @@ class CustomerRegistrationControllerTest {
                                   "nombres":"Ana",
                                   "apellidos":"Perez",
                                   "correo":"ana@example.com",
-                                  "contrasena":"weak"
+              "contrasena":"12345"
                                 }
                                 """))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.errorCode").value("VALIDATION_ERROR"));
+        .andExpect(jsonPath("$.errorCode").value("VALIDATION_ERROR"))
+        .andExpect(jsonPath("$.message").value("Validacion de la solicitud fallida"))
+        .andExpect(jsonPath("$.details", hasItems(
+          "contrasena: contrasena debe tener entre 8 y 64 caracteres e incluir mayuscula, minuscula, numero y caracter especial"
+        )));
+
+      verify(customerRegistrationService, never()).registerCustomer(any());
+        }
+
+        @ParameterizedTest
+        @CsvSource({
+          "Ab1!, menos de 8 caracteres",
+          "password1!, sin mayuscula",
+          "PASSWORD1!, sin minuscula",
+          "Password!, sin numero",
+          "Password1, sin caracter especial"
+        })
+        void shouldRejectPasswordsThatBreakAnyPolicyRule(String invalidPassword, String scenario) throws Exception {
+      mockMvc.perform(post("/api/v1/clients")
+          .contentType(MediaType.APPLICATION_JSON)
+          .content("""
+            {
+              "nombres":"Ana",
+              "apellidos":"Perez",
+              "correo":"ana@example.com",
+              "contrasena":"%s"
+            }
+            """.formatted(invalidPassword)))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.errorCode").value("VALIDATION_ERROR"))
+        .andExpect(jsonPath("$.details", hasItems(
+          "contrasena: contrasena debe tener entre 8 y 64 caracteres e incluir mayuscula, minuscula, numero y caracter especial"
+        )));
+
+      verify(customerRegistrationService, never()).registerCustomer(any());
     }
 }
