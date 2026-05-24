@@ -73,6 +73,16 @@ public class IdentityAccessExceptionHandler extends AbstractErrorResponseHandler
         return response(HttpStatus.INTERNAL_SERVER_ERROR, "USER_ROLE_UPDATE_FAILED", ex.getMessage());
     }
 
+    @ExceptionHandler(UserAccountStatusAlreadySetException.class)
+    public ResponseEntity<ErrorResponse> handleUserAccountStatusAlreadySet(UserAccountStatusAlreadySetException ex) {
+        return response(HttpStatus.CONFLICT, "USER_ACCOUNT_STATUS_ALREADY_SET", ex.getMessage());
+    }
+
+    @ExceptionHandler(UserAccountStatusUpdateFailedException.class)
+    public ResponseEntity<ErrorResponse> handleUserAccountStatusUpdateFailed(UserAccountStatusUpdateFailedException ex) {
+        return response(HttpStatus.INTERNAL_SERVER_ERROR, "USER_ACCOUNT_STATUS_UPDATE_FAILED", ex.getMessage());
+    }
+
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<ErrorResponse> handleAuthentication(AuthenticationException ex) {
         String message = (ex.getMessage() == null || ex.getMessage().isBlank())
