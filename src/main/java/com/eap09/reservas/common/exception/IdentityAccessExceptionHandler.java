@@ -43,6 +43,11 @@ public class IdentityAccessExceptionHandler extends AbstractErrorResponseHandler
         return response(HttpStatus.FORBIDDEN, "CLIENT_ROLE_REQUIRED", ex.getMessage());
     }
 
+    @ExceptionHandler(AdminRoleRequiredException.class)
+    public ResponseEntity<ErrorResponse> handleAdminRoleRequired(AdminRoleRequiredException ex) {
+        return response(HttpStatus.FORBIDDEN, "ADMIN_ROLE_REQUIRED", ex.getMessage());
+    }
+
     @ExceptionHandler(SessionNotActiveException.class)
     public ResponseEntity<ErrorResponse> handleSessionNotActive(SessionNotActiveException ex) {
         return response(HttpStatus.CONFLICT, "SESSION_NOT_ACTIVE", ex.getMessage());
@@ -51,6 +56,21 @@ public class IdentityAccessExceptionHandler extends AbstractErrorResponseHandler
     @ExceptionHandler(ProfileNoChangesException.class)
     public ResponseEntity<ErrorResponse> handleProfileNoChanges(ProfileNoChangesException ex) {
         return response(HttpStatus.CONFLICT, "PROFILE_NO_CHANGES", ex.getMessage());
+    }
+
+    @ExceptionHandler(UserRoleAlreadyAssignedException.class)
+    public ResponseEntity<ErrorResponse> handleUserRoleAlreadyAssigned(UserRoleAlreadyAssignedException ex) {
+        return response(HttpStatus.CONFLICT, "USER_ROLE_ALREADY_ASSIGNED", ex.getMessage());
+    }
+
+    @ExceptionHandler(TargetUserInactiveException.class)
+    public ResponseEntity<ErrorResponse> handleTargetUserInactive(TargetUserInactiveException ex) {
+        return response(HttpStatus.CONFLICT, "TARGET_USER_INACTIVE", ex.getMessage());
+    }
+
+    @ExceptionHandler(UserRoleUpdateFailedException.class)
+    public ResponseEntity<ErrorResponse> handleUserRoleUpdateFailed(UserRoleUpdateFailedException ex) {
+        return response(HttpStatus.INTERNAL_SERVER_ERROR, "USER_ROLE_UPDATE_FAILED", ex.getMessage());
     }
 
     @ExceptionHandler(AuthenticationException.class)
