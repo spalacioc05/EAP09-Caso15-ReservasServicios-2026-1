@@ -88,6 +88,16 @@ public class IdentityAccessExceptionHandler extends AbstractErrorResponseHandler
         return response(HttpStatus.INTERNAL_SERVER_ERROR, "ADMIN_RESERVATION_QUERY_FAILED", ex.getMessage());
     }
 
+    @ExceptionHandler(OperationalReportUnavailableException.class)
+    public ResponseEntity<ErrorResponse> handleOperationalReportUnavailable(OperationalReportUnavailableException ex) {
+        return response(HttpStatus.CONFLICT, "OPERATIONAL_REPORT_UNAVAILABLE", ex.getMessage());
+    }
+
+    @ExceptionHandler(OperationalReportGenerationFailedException.class)
+    public ResponseEntity<ErrorResponse> handleOperationalReportGenerationFailed(OperationalReportGenerationFailedException ex) {
+        return response(HttpStatus.INTERNAL_SERVER_ERROR, "OPERATIONAL_REPORT_GENERATION_FAILED", ex.getMessage());
+    }
+
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<ErrorResponse> handleAuthentication(AuthenticationException ex) {
         String message = (ex.getMessage() == null || ex.getMessage().isBlank())
