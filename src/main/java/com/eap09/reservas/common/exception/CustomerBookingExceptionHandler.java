@@ -51,4 +51,9 @@ public class CustomerBookingExceptionHandler extends AbstractErrorResponseHandle
     public ResponseEntity<ErrorResponse> handleReservationCancellationFailed(ReservationCancellationFailedException ex) {
         return response(HttpStatus.INTERNAL_SERVER_ERROR, "RESERVATION_CANCELLATION_FAILED", ex.getMessage());
     }
+
+    @ExceptionHandler(ReservationReschedulingFailedException.class)
+    public ResponseEntity<ErrorResponse> handleReservationReschedulingFailed(ReservationReschedulingFailedException ex) {
+        return response(HttpStatus.INTERNAL_SERVER_ERROR, "RESERVATION_RESCHEDULING_FAILED", ex.getMessage());
+    }
 }
