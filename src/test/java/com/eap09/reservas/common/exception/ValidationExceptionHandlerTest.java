@@ -22,6 +22,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.mock.http.MockHttpInputMessage;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -154,14 +155,14 @@ class ValidationExceptionHandlerTest {
     @Test
     void shouldReturnGenericBodyFormatMessageWhenNoInvalidFormatExceptionExists() {
         ResponseEntity<ErrorResponse> response = handler.handleHttpMessageNotReadable(
-                new HttpMessageNotReadableException("payload invalido")
+                new HttpMessageNotReadableException("payload invalido", new MockHttpInputMessage(new byte[0]))
         );
 
         assertEquals(List.of("cuerpo: formato invalido"), response.getBody().details());
     }
 
     private MethodParameter requestParameter() throws NoSuchMethodException {
-        Method method = ValidationExceptionHandlerTest.class.getDeclaredMethod("sampleHandlerMethod", Object.class);
+        Method method = List.class.getMethod("add", Object.class);
         return new MethodParameter(method, 0);
     }
 
@@ -177,9 +178,10 @@ class ValidationExceptionHandlerTest {
                 targetType
         );
         invalidFormatException.prependPath(new Object(), fieldName);
-        return new HttpMessageNotReadableException("payload invalido", invalidFormatException, null);
-    }
-
-    private void sampleHandlerMethod(Object request) {
+        return new HttpMessageNotReadableException(
+            "payload invalido",
+            invalidFormatException,
+            new MockHttpInputMessage(new byte[0])
+        );
     }
 }
