@@ -3,7 +3,6 @@ package com.eap09.reservas.administration.application;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -165,14 +164,17 @@ class OperationalReportAdministrationServiceTest {
 
     @Test
     void shouldRejectInvalidDateRange() {
+        LocalDate from = LocalDate.of(2026, 6, 30);
+        LocalDate to = LocalDate.of(2026, 6, 1);
+
         stubAdmin();
 
         ApiException exception = assertThrows(
                 ApiException.class,
                 () -> operationalReportAdministrationService.generateOperationalReport(
                         "admin@reservas.test",
-                        LocalDate.of(2026, 6, 30),
-                        LocalDate.of(2026, 6, 1)));
+                from,
+                to));
 
         assertEquals("INVALID_DATE_RANGE", exception.getErrorCode());
         verifyNoInteractions(operationalReportRepository);

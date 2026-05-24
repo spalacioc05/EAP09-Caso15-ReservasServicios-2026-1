@@ -1,6 +1,5 @@
 package com.eap09.reservas.administration.api;
 
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
@@ -79,13 +78,13 @@ class AdminReservationSupervisionControllerTest {
     @Test
     void shouldReturnReservationsWithFilters() throws Exception {
         when(adminReservationSupervisionService.getReservations(
-                eq("admin@reservas.test"),
-                eq(10L),
-                eq(20L),
-                eq(30L),
-                eq("CREADA"),
-                eq(LocalDate.of(2026, 5, 1)),
-                eq(LocalDate.of(2026, 5, 31))))
+                "admin@reservas.test",
+                10L,
+                20L,
+                30L,
+                "CREADA",
+                LocalDate.of(2026, 5, 1),
+                LocalDate.of(2026, 5, 31)))
                 .thenReturn(new AdminReservationSupervisionResult(
                         "Reservas consultadas correctamente",
                         List.of(response())));

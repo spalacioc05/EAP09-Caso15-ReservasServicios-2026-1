@@ -115,6 +115,7 @@ class UserAccountStatusAdministrationServiceTest {
     void shouldRejectWhenActivatingAlreadyActiveUser() {
         UserAccountEntity adminUser = buildUser(1L, ADMIN_EMAIL, "ADMINISTRADOR", ACTIVE_STATE_ID);
         UserAccountEntity targetUser = buildUser(20L, CLIENT_EMAIL, "CLIENTE", ACTIVE_STATE_ID);
+                UserAccountStatusUpdateRequest request = new UserAccountStatusUpdateRequest("ACTIVA");
 
         when(userAccountRepository.findByCorreoUsuarioIgnoreCase(ADMIN_EMAIL))
                 .thenReturn(Optional.of(adminUser));
@@ -127,7 +128,7 @@ class UserAccountStatusAdministrationServiceTest {
                 () -> userAccountStatusAdministrationService.updateUserAccountStatus(
                         ADMIN_EMAIL,
                         20L,
-                        new UserAccountStatusUpdateRequest("ACTIVA")));
+                        request));
 
         assertEquals("La cuenta ya se encontraba activada", exception.getMessage());
         verify(userAccountRepository, never()).save(any(UserAccountEntity.class));
@@ -142,6 +143,7 @@ class UserAccountStatusAdministrationServiceTest {
     void shouldRejectWhenDeactivatingAlreadyInactiveUser() {
         UserAccountEntity adminUser = buildUser(1L, ADMIN_EMAIL, "ADMINISTRADOR", ACTIVE_STATE_ID);
         UserAccountEntity targetUser = buildUser(20L, CLIENT_EMAIL, "CLIENTE", INACTIVE_STATE_ID);
+                UserAccountStatusUpdateRequest request = new UserAccountStatusUpdateRequest("INACTIVA");
 
         when(userAccountRepository.findByCorreoUsuarioIgnoreCase(ADMIN_EMAIL))
                 .thenReturn(Optional.of(adminUser));
@@ -154,7 +156,7 @@ class UserAccountStatusAdministrationServiceTest {
                 () -> userAccountStatusAdministrationService.updateUserAccountStatus(
                         ADMIN_EMAIL,
                         20L,
-                        new UserAccountStatusUpdateRequest("INACTIVA")));
+                        request));
 
         assertEquals("La cuenta ya se encontraba desactivada", exception.getMessage());
         verify(userAccountRepository, never()).save(any(UserAccountEntity.class));
@@ -168,6 +170,7 @@ class UserAccountStatusAdministrationServiceTest {
     @Test
     void shouldRejectWhenTargetUserDoesNotExist() {
         UserAccountEntity adminUser = buildUser(1L, ADMIN_EMAIL, "ADMINISTRADOR", ACTIVE_STATE_ID);
+                UserAccountStatusUpdateRequest request = new UserAccountStatusUpdateRequest("ACTIVA");
 
         when(userAccountRepository.findByCorreoUsuarioIgnoreCase(ADMIN_EMAIL))
                 .thenReturn(Optional.of(adminUser));
@@ -180,7 +183,7 @@ class UserAccountStatusAdministrationServiceTest {
                 () -> userAccountStatusAdministrationService.updateUserAccountStatus(
                         ADMIN_EMAIL,
                         20L,
-                        new UserAccountStatusUpdateRequest("ACTIVA")));
+                        request));
 
         assertEquals("Usuario no encontrado", exception.getMessage());
         verify(userAccountRepository, never()).save(any(UserAccountEntity.class));
@@ -190,6 +193,7 @@ class UserAccountStatusAdministrationServiceTest {
     @Test
     void shouldRejectWhenRequestedStatusIsInvalid() {
         UserAccountEntity adminUser = buildUser(1L, ADMIN_EMAIL, "ADMINISTRADOR", ACTIVE_STATE_ID);
+                UserAccountStatusUpdateRequest request = new UserAccountStatusUpdateRequest("BLOQUEADA");
 
         when(userAccountRepository.findByCorreoUsuarioIgnoreCase(ADMIN_EMAIL))
                 .thenReturn(Optional.of(adminUser));
@@ -199,7 +203,7 @@ class UserAccountStatusAdministrationServiceTest {
                 () -> userAccountStatusAdministrationService.updateUserAccountStatus(
                         ADMIN_EMAIL,
                         20L,
-                        new UserAccountStatusUpdateRequest("BLOQUEADA")));
+                        request));
 
         assertEquals("INVALID_USER_ACCOUNT_STATUS", exception.getErrorCode());
         assertEquals("El estado solicitado no es valido para usuarios", exception.getMessage());
@@ -210,6 +214,7 @@ class UserAccountStatusAdministrationServiceTest {
     @Test
     void shouldRejectWhenAuthenticatedUserIsNotAdmin() {
         UserAccountEntity providerUser = buildUser(1L, "provider@reservas.test", "PROVEEDOR", ACTIVE_STATE_ID);
+                UserAccountStatusUpdateRequest request = new UserAccountStatusUpdateRequest("INACTIVA");
 
         when(userAccountRepository.findByCorreoUsuarioIgnoreCase("provider@reservas.test"))
                 .thenReturn(Optional.of(providerUser));
@@ -219,7 +224,7 @@ class UserAccountStatusAdministrationServiceTest {
                 () -> userAccountStatusAdministrationService.updateUserAccountStatus(
                         "provider@reservas.test",
                         20L,
-                        new UserAccountStatusUpdateRequest("INACTIVA")));
+                        request));
 
         assertEquals(
                 "Solo un administrador autenticado puede actualizar el estado de cuentas de usuario",
@@ -270,6 +275,7 @@ class UserAccountStatusAdministrationServiceTest {
     void shouldTranslateUnexpectedDataAccessFailureIntoControlledException() {
         UserAccountEntity adminUser = buildUser(1L, ADMIN_EMAIL, "ADMINISTRADOR", ACTIVE_STATE_ID);
         UserAccountEntity targetUser = buildUser(20L, CLIENT_EMAIL, "CLIENTE", ACTIVE_STATE_ID);
+                UserAccountStatusUpdateRequest request = new UserAccountStatusUpdateRequest("INACTIVA");
 
         when(userAccountRepository.findByCorreoUsuarioIgnoreCase(ADMIN_EMAIL))
                 .thenReturn(Optional.of(adminUser));
@@ -284,7 +290,7 @@ class UserAccountStatusAdministrationServiceTest {
                 () -> userAccountStatusAdministrationService.updateUserAccountStatus(
                         ADMIN_EMAIL,
                         20L,
-                        new UserAccountStatusUpdateRequest("INACTIVA")));
+                        request));
 
         assertEquals(
                 "No fue posible completar la actualizacion del estado de la cuenta de usuario. Intenta nuevamente mas tarde",

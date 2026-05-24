@@ -90,6 +90,7 @@ class UserRoleAdministrationServiceTest {
     @Test
     void shouldRejectWhenAuthenticatedUserIsNotAdmin() {
         UserAccountEntity providerUser = buildUser(1L, "provider@reservas.test", "PROVEEDOR", 100L);
+                UserRoleUpdateRequest request = new UserRoleUpdateRequest("CLIENTE");
 
         when(userAccountRepository.findByCorreoUsuarioIgnoreCase("provider@reservas.test"))
                 .thenReturn(Optional.of(providerUser));
@@ -99,7 +100,7 @@ class UserRoleAdministrationServiceTest {
                 () -> userRoleAdministrationService.updateUserRole(
                         "provider@reservas.test",
                         20L,
-                        new UserRoleUpdateRequest("CLIENTE")));
+                        request));
 
         assertEquals("Solo un administrador autenticado puede actualizar roles de usuario", exception.getMessage());
         verify(roleRepository, never()).findByNombreRol(any());
@@ -224,6 +225,7 @@ class UserRoleAdministrationServiceTest {
         UserAccountEntity adminUser = buildUser(1L, "admin@reservas.test", "ADMINISTRADOR", 100L);
         UserAccountEntity targetUser = buildUser(20L, "cliente@reservas.test", "CLIENTE", 100L);
         RoleEntity providerRole = buildRole(2L, "PROVEEDOR");
+                UserRoleUpdateRequest request = new UserRoleUpdateRequest("PROVEEDOR");
 
         when(userAccountRepository.findByCorreoUsuarioIgnoreCase("admin@reservas.test"))
                 .thenReturn(Optional.of(adminUser));
@@ -241,7 +243,7 @@ class UserRoleAdministrationServiceTest {
                 () -> userRoleAdministrationService.updateUserRole(
                         "admin@reservas.test",
                         20L,
-                        new UserRoleUpdateRequest("PROVEEDOR")));
+                        request));
 
         assertEquals(
                 "No fue posible completar la actualizacion del rol del usuario. Intenta nuevamente mas tarde",

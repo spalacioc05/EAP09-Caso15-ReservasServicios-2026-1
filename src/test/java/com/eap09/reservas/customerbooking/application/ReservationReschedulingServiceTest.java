@@ -10,7 +10,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-import com.eap09.reservas.common.audit.SystemEvent;
 import com.eap09.reservas.common.audit.SystemEventPublisher;
 import com.eap09.reservas.common.exception.ClientRoleRequiredException;
 import com.eap09.reservas.common.exception.ReservationConflictException;
@@ -137,11 +136,12 @@ class ReservationReschedulingServiceTest {
     @Test
     void shouldRejectWhenBookingDoesNotExist() {
         ReservationReschedulingService service = serviceAt("2026-05-01T10:00:00Z");
+        ReservationReschedulingRequest request = new ReservationReschedulingRequest(701L);
         stubClient("customer@test.local", 50L, "CLIENTE");
         when(reservationRepository.findBookingLifecycleById(101L)).thenReturn(Optional.empty());
 
         ResourceNotFoundException ex = assertThrows(ResourceNotFoundException.class,
-                () -> service.rescheduleOwnBooking("customer@test.local", 101L, new ReservationReschedulingRequest(701L)));
+                () -> service.rescheduleOwnBooking("customer@test.local", 101L, request));
 
         assertEquals("BOOKING_NOT_FOUND", ex.getErrorCode());
         verify(systemEventPublisher).publish(argThat(event -> "FALLO".equals(event.result())));
@@ -151,13 +151,14 @@ class ReservationReschedulingServiceTest {
     @Test
     void shouldRejectWhenBookingDoesNotBelongToAuthenticatedClient() {
         ReservationReschedulingService service = serviceAt("2026-05-01T10:00:00Z");
+        ReservationReschedulingRequest request = new ReservationReschedulingRequest(701L);
         stubClient("customer@test.local", 50L, "CLIENTE");
         when(reservationRepository.findBookingLifecycleById(101L))
                 .thenReturn(Optional.of(bookingProjection(101L, 300L, 90L, 99L, 7L, "CREADA",
                         LocalDate.of(2026, 5, 3), LocalTime.of(9, 0), LocalTime.of(10, 0))));
 
         assertThrows(AccessDeniedException.class,
-                () -> service.rescheduleOwnBooking("customer@test.local", 101L, new ReservationReschedulingRequest(701L)));
+                () -> service.rescheduleOwnBooking("customer@test.local", 101L, request));
 
         verify(systemEventPublisher).publish(argThat(event -> "FALLO".equals(event.result())));
         verify(reservationRepository, never()).save(any(ReservationEntity.class));
@@ -166,10 +167,11 @@ class ReservationReschedulingServiceTest {
     @Test
     void shouldRejectWhenAuthenticatedUserIsNotClient() {
         ReservationReschedulingService service = serviceAt("2026-05-01T10:00:00Z");
+        ReservationReschedulingRequest request = new ReservationReschedulingRequest(701L);
         stubClient("provider@test.local", 50L, "PROVEEDOR");
 
         assertThrows(ClientRoleRequiredException.class,
-                () -> service.rescheduleOwnBooking("provider@test.local", 101L, new ReservationReschedulingRequest(701L)));
+                () -> service.rescheduleOwnBooking("provider@test.local", 101L, request));
 
         verifyNoInteractions(systemEventPublisher);
     }
@@ -177,6 +179,7 @@ class ReservationReschedulingServiceTest {
     @Test
     void shouldRejectWhenBookingIsCanceled() {
         ReservationReschedulingService service = serviceAt("2026-05-01T10:00:00Z");
+        ReservationReschedulingRequest request = new ReservationReschedulingRequest(701L);
         stubClient("customer@test.local", 50L, "CLIENTE");
         stubCreatedReservationStates();
         when(reservationRepository.findBookingLifecycleById(101L))
@@ -184,7 +187,7 @@ class ReservationReschedulingServiceTest {
                         LocalDate.of(2026, 5, 3), LocalTime.of(9, 0), LocalTime.of(10, 0))));
 
         ReservationConflictException ex = assertThrows(ReservationConflictException.class,
-                () -> service.rescheduleOwnBooking("customer@test.local", 101L, new ReservationReschedulingRequest(701L)));
+                () -> service.rescheduleOwnBooking("customer@test.local", 101L, request));
 
         assertEquals("RESERVATION_RESCHEDULING_NOT_ALLOWED", ex.getErrorCode());
         verify(systemEventPublisher).publish(argThat(event -> "FALLO".equals(event.result())));
@@ -193,6 +196,7 @@ class ReservationReschedulingServiceTest {
     @Test
     void shouldRejectWhenBookingIsFinalized() {
         ReservationReschedulingService service = serviceAt("2026-05-01T10:00:00Z");
+        ReservationReschedulingRequest request = new ReservationReschedulingRequest(701L);
         stubClient("customer@test.local", 50L, "CLIENTE");
         stubCreatedReservationStates();
         when(reservationRepository.findBookingLifecycleById(101L))
@@ -200,7 +204,7 @@ class ReservationReschedulingServiceTest {
                         LocalDate.of(2026, 5, 3), LocalTime.of(9, 0), LocalTime.of(10, 0))));
 
         ReservationConflictException ex = assertThrows(ReservationConflictException.class,
-                () -> service.rescheduleOwnBooking("customer@test.local", 101L, new ReservationReschedulingRequest(701L)));
+                () -> service.rescheduleOwnBooking("customer@test.local", 101L, request));
 
         assertEquals("RESERVATION_RESCHEDULING_NOT_ALLOWED", ex.getErrorCode());
         verify(systemEventPublisher).publish(argThat(event -> "FALLO".equals(event.result())));
@@ -209,6 +213,7 @@ class ReservationReschedulingServiceTest {
     @Test
     void shouldRejectWhenThereAreLessThanTwentyFourHoursBeforeCurrentSlot() {
         ReservationReschedulingService service = serviceAt("2026-05-01T10:00:00Z");
+        ReservationReschedulingRequest request = new ReservationReschedulingRequest(701L);
         stubClient("customer@test.local", 50L, "CLIENTE");
         stubCreatedReservationStates();
         when(reservationRepository.findBookingLifecycleById(101L))
@@ -216,7 +221,7 @@ class ReservationReschedulingServiceTest {
                         LocalDate.of(2026, 5, 2), LocalTime.of(9, 59), LocalTime.of(10, 59))));
 
         ReservationConflictException ex = assertThrows(ReservationConflictException.class,
-                () -> service.rescheduleOwnBooking("customer@test.local", 101L, new ReservationReschedulingRequest(701L)));
+                () -> service.rescheduleOwnBooking("customer@test.local", 101L, request));
 
         assertEquals("RESERVATION_RESCHEDULING_TOO_LATE", ex.getErrorCode());
         verify(systemEventPublisher).publish(argThat(event -> "FALLO".equals(event.result())));
@@ -226,6 +231,7 @@ class ReservationReschedulingServiceTest {
     void shouldRejectWhenTargetAvailabilityDoesNotExist() {
         ReservationReschedulingService service = serviceAt("2026-05-01T10:00:00Z");
         ReservationEntity reservation = reservationEntity(101L, 700L, 50L, 7L);
+                ReservationReschedulingRequest request = new ReservationReschedulingRequest(701L);
 
         stubClient("customer@test.local", 50L, "CLIENTE");
         stubCreatedReservationStates();
@@ -236,7 +242,7 @@ class ReservationReschedulingServiceTest {
         when(servicesAvailabilityRepository.findByIdDisponibilidadServicioForUpdate(701L)).thenReturn(Optional.empty());
 
         ResourceNotFoundException ex = assertThrows(ResourceNotFoundException.class,
-                () -> service.rescheduleOwnBooking("customer@test.local", 101L, new ReservationReschedulingRequest(701L)));
+                () -> service.rescheduleOwnBooking("customer@test.local", 101L, request));
 
         assertEquals("AVAILABILITY_NOT_FOUND", ex.getErrorCode());
         verify(systemEventPublisher).publish(argThat(event -> "FALLO".equals(event.result())));
@@ -246,6 +252,7 @@ class ReservationReschedulingServiceTest {
     void shouldRejectWhenTargetAvailabilityIsBlocked() {
         ReservationReschedulingService service = serviceAt("2026-05-01T10:00:00Z");
         ReservationEntity reservation = reservationEntity(101L, 700L, 50L, 7L);
+                ReservationReschedulingRequest request = new ReservationReschedulingRequest(701L);
 
         stubClient("customer@test.local", 50L, "CLIENTE");
         stubCreatedReservationStates();
@@ -258,7 +265,7 @@ class ReservationReschedulingServiceTest {
                         LocalDate.of(2026, 5, 5), LocalTime.of(11, 0), LocalTime.of(12, 0))));
 
         ReservationConflictException ex = assertThrows(ReservationConflictException.class,
-                () -> service.rescheduleOwnBooking("customer@test.local", 101L, new ReservationReschedulingRequest(701L)));
+                () -> service.rescheduleOwnBooking("customer@test.local", 101L, request));
 
         assertEquals("RESERVATION_RESCHEDULING_SLOT_UNAVAILABLE", ex.getErrorCode());
         verify(systemEventPublisher).publish(argThat(event -> "FALLO".equals(event.result())));
@@ -268,6 +275,7 @@ class ReservationReschedulingServiceTest {
     void shouldRejectWhenTargetAvailabilityBelongsToDifferentService() {
         ReservationReschedulingService service = serviceAt("2026-05-01T10:00:00Z");
         ReservationEntity reservation = reservationEntity(101L, 700L, 50L, 7L);
+                ReservationReschedulingRequest request = new ReservationReschedulingRequest(701L);
 
         stubClient("customer@test.local", 50L, "CLIENTE");
         stubCreatedReservationStates();
@@ -280,7 +288,7 @@ class ReservationReschedulingServiceTest {
                         LocalDate.of(2026, 5, 5), LocalTime.of(11, 0), LocalTime.of(12, 0))));
 
         ReservationConflictException ex = assertThrows(ReservationConflictException.class,
-                () -> service.rescheduleOwnBooking("customer@test.local", 101L, new ReservationReschedulingRequest(701L)));
+                () -> service.rescheduleOwnBooking("customer@test.local", 101L, request));
 
         assertEquals("RESERVATION_RESCHEDULING_DIFFERENT_SERVICE", ex.getErrorCode());
         verify(systemEventPublisher).publish(argThat(event -> "FALLO".equals(event.result())));
@@ -290,6 +298,7 @@ class ReservationReschedulingServiceTest {
     void shouldRejectWhenTargetAvailabilityMatchesCurrentAvailability() {
         ReservationReschedulingService service = serviceAt("2026-05-01T10:00:00Z");
         ReservationEntity reservation = reservationEntity(101L, 700L, 50L, 7L);
+                ReservationReschedulingRequest request = new ReservationReschedulingRequest(700L);
 
         stubClient("customer@test.local", 50L, "CLIENTE");
         stubCreatedReservationStates();
@@ -299,7 +308,7 @@ class ReservationReschedulingServiceTest {
         when(reservationRepository.findById(101L)).thenReturn(Optional.of(reservation));
 
         ReservationConflictException ex = assertThrows(ReservationConflictException.class,
-                () -> service.rescheduleOwnBooking("customer@test.local", 101L, new ReservationReschedulingRequest(700L)));
+                () -> service.rescheduleOwnBooking("customer@test.local", 101L, request));
 
         assertEquals("RESERVATION_RESCHEDULING_SAME_AVAILABILITY", ex.getErrorCode());
         verify(systemEventPublisher).publish(argThat(event -> "FALLO".equals(event.result())));
@@ -310,6 +319,7 @@ class ReservationReschedulingServiceTest {
     void shouldRejectWhenTargetAvailabilityHasNoCapacity() {
         ReservationReschedulingService service = serviceAt("2026-05-01T10:00:00Z");
         ReservationEntity reservation = reservationEntity(101L, 700L, 50L, 7L);
+                ReservationReschedulingRequest request = new ReservationReschedulingRequest(701L);
 
         stubClient("customer@test.local", 50L, "CLIENTE");
         stubCreatedReservationStates();
@@ -324,7 +334,7 @@ class ReservationReschedulingServiceTest {
         when(reservationRepository.countByIdDisponibilidadServicioAndIdEstadoReserva(701L, 7L)).thenReturn(1L);
 
         ReservationConflictException ex = assertThrows(ReservationConflictException.class,
-                () -> service.rescheduleOwnBooking("customer@test.local", 101L, new ReservationReschedulingRequest(701L)));
+                () -> service.rescheduleOwnBooking("customer@test.local", 101L, request));
 
         assertEquals("RESERVATION_RESCHEDULING_NO_CAPACITY", ex.getErrorCode());
         verify(systemEventPublisher).publish(argThat(event -> "FALLO".equals(event.result())));
@@ -335,6 +345,7 @@ class ReservationReschedulingServiceTest {
     void shouldRejectWhenTargetAvailabilityStartsInThePast() {
         ReservationReschedulingService service = serviceAt("2026-05-01T10:00:00Z");
         ReservationEntity reservation = reservationEntity(101L, 700L, 50L, 7L);
+                ReservationReschedulingRequest request = new ReservationReschedulingRequest(701L);
 
         stubClient("customer@test.local", 50L, "CLIENTE");
         stubCreatedReservationStates();
@@ -347,7 +358,7 @@ class ReservationReschedulingServiceTest {
                         LocalDate.of(2026, 5, 1), LocalTime.of(9, 0), LocalTime.of(10, 0))));
 
         ReservationConflictException ex = assertThrows(ReservationConflictException.class,
-                () -> service.rescheduleOwnBooking("customer@test.local", 101L, new ReservationReschedulingRequest(701L)));
+                () -> service.rescheduleOwnBooking("customer@test.local", 101L, request));
 
         assertEquals("RESERVATION_RESCHEDULING_SLOT_UNAVAILABLE", ex.getErrorCode());
         verify(systemEventPublisher).publish(argThat(event -> "FALLO".equals(event.result())));
@@ -357,6 +368,7 @@ class ReservationReschedulingServiceTest {
     void shouldTranslatePersistenceErrorToControlledException() {
         ReservationReschedulingService service = serviceAt("2026-05-01T10:00:00Z");
         ReservationEntity reservation = reservationEntity(101L, 700L, 50L, 7L);
+                ReservationReschedulingRequest request = new ReservationReschedulingRequest(701L);
 
         stubClient("customer@test.local", 50L, "CLIENTE");
         stubCreatedReservationStates();
@@ -373,7 +385,7 @@ class ReservationReschedulingServiceTest {
                 .thenThrow(new DataAccessResourceFailureException("db unavailable"));
 
         ReservationReschedulingFailedException ex = assertThrows(ReservationReschedulingFailedException.class,
-                () -> service.rescheduleOwnBooking("customer@test.local", 101L, new ReservationReschedulingRequest(701L)));
+                () -> service.rescheduleOwnBooking("customer@test.local", 101L, request));
 
         assertEquals("No fue posible completar la reprogramacion de la reserva. Intenta nuevamente mas tarde", ex.getMessage());
         verify(systemEventPublisher).publish(argThat(event -> "FALLO".equals(event.result())));

@@ -1,6 +1,5 @@
 package com.eap09.reservas.administration.api;
 
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
@@ -86,9 +85,9 @@ class OperationalReportAdministrationControllerTest {
         LocalDate from = LocalDate.of(2026, 5, 1);
         LocalDate to = LocalDate.of(2026, 5, 31);
         when(operationalReportAdministrationService.generateOperationalReport(
-                eq("admin@reservas.test"),
-                eq(from),
-                eq(to)))
+                "admin@reservas.test",
+                from,
+                to))
                 .thenReturn(new OperationalReportAdministrationResult(
                         "Reporte operativo generado correctamente",
                         response(from, to)));
