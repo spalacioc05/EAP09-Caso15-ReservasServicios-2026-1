@@ -83,6 +83,11 @@ public class IdentityAccessExceptionHandler extends AbstractErrorResponseHandler
         return response(HttpStatus.INTERNAL_SERVER_ERROR, "USER_ACCOUNT_STATUS_UPDATE_FAILED", ex.getMessage());
     }
 
+    @ExceptionHandler(AdminReservationQueryFailedException.class)
+    public ResponseEntity<ErrorResponse> handleAdminReservationQueryFailed(AdminReservationQueryFailedException ex) {
+        return response(HttpStatus.INTERNAL_SERVER_ERROR, "ADMIN_RESERVATION_QUERY_FAILED", ex.getMessage());
+    }
+
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<ErrorResponse> handleAuthentication(AuthenticationException ex) {
         String message = (ex.getMessage() == null || ex.getMessage().isBlank())
