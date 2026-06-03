@@ -1,192 +1,174 @@
 <h1 align="center">EAP09 · Caso 15 · Reservas de Servicios</h1>
 
 <p align="center">
-  Backend modular para reservas de servicios por agenda, cupos, administración y reportes operativos.
+  Backend modular en Java 21 para reservas de servicios por agenda y cupos, con autenticación JWT, administración operativa, observabilidad y despliegue contenerizado.
 </p>
 
 <p align="center">
   <img alt="Java 21" src="https://img.shields.io/badge/Java-21-007396?style=for-the-badge&logo=openjdk&logoColor=white">
   <img alt="Spring Boot 3.3.4" src="https://img.shields.io/badge/Spring%20Boot-3.3.4-6DB33F?style=for-the-badge&logo=springboot&logoColor=white">
   <img alt="Maven" src="https://img.shields.io/badge/Maven-Build-C71A36?style=for-the-badge&logo=apachemaven&logoColor=white">
-  <img alt="PostgreSQL Supabase" src="https://img.shields.io/badge/PostgreSQL-Supabase-4169E1?style=for-the-badge&logo=postgresql&logoColor=white">
+  <img alt="PostgreSQL / Supabase" src="https://img.shields.io/badge/PostgreSQL-Supabase-4169E1?style=for-the-badge&logo=postgresql&logoColor=white">
   <img alt="Docker" src="https://img.shields.io/badge/Docker-Multi--Stage-2496ED?style=for-the-badge&logo=docker&logoColor=white">
 </p>
 
 <p align="center">
-  <img alt="Azure Container Apps" src="https://img.shields.io/badge/Azure-Container%20Apps-0078D4?style=for-the-badge&logo=microsoftazure&logoColor=white">
-  <img alt="GitHub Actions" src="https://img.shields.io/badge/GitHub%20Actions-CI%2FCD-2088FF?style=for-the-badge&logo=githubactions&logoColor=white">
-  <img alt="SonarCloud" src="https://img.shields.io/badge/SonarCloud-Quality-4E9BCD?style=for-the-badge&logo=sonarcloud&logoColor=white">
+  <img alt="Kubernetes" src="https://img.shields.io/badge/Kubernetes-NodePort-326CE5?style=for-the-badge&logo=kubernetes&logoColor=white">
+  <img alt="Prometheus" src="https://img.shields.io/badge/Prometheus-Metrics-E6522C?style=for-the-badge&logo=prometheus&logoColor=white">
+  <img alt="Grafana" src="https://img.shields.io/badge/Grafana-Observability-F46800?style=for-the-badge&logo=grafana&logoColor=white">
   <img alt="Swagger OpenAPI" src="https://img.shields.io/badge/Swagger-OpenAPI-85EA2D?style=for-the-badge&logo=swagger&logoColor=black">
-  <img alt="JaCoCo" src="https://img.shields.io/badge/JaCoCo-Coverage-D22128?style=for-the-badge">
+  <img alt="JWT" src="https://img.shields.io/badge/JWT-Bearer-000000?style=for-the-badge&logo=jsonwebtokens&logoColor=white">
 </p>
 
 <p align="center">
-  Estado real del backend al cierre de Sprint 3, conservando el recorrido funcional y técnico construido a lo largo de Sprint 1, Sprint 2 y Sprint 3.
+  <img alt="JaCoCo" src="https://img.shields.io/badge/JaCoCo-Cobertura-D22128?style=for-the-badge">
+  <img alt="SonarCloud" src="https://img.shields.io/badge/SonarCloud-Quality-4E9BCD?style=for-the-badge&logo=sonarcloud&logoColor=white">
+  <img alt="GitHub Actions" src="https://img.shields.io/badge/GitHub%20Actions-CI%2FCD-2088FF?style=for-the-badge&logo=githubactions&logoColor=white">
+</p>
+
+<p align="center">
+  Estado real del backend al cierre de Sprint 3, con la base transaccional de Sprint 1, la operación de Sprint 2 y el gobierno administrativo y analítico de Sprint 3 integrados en una sola evolución del producto.
 </p>
 
 > [!NOTE]
-> Documentación interactiva principal:
+> Documentación principal del proyecto:
 >
-> - Producción: <https://reservas-backend-prod.happypond-328540f7.eastus.azurecontainerapps.io/swagger-ui/index.html>
-> - Local: `http://localhost:8080/swagger-ui/index.html`
+> - [API REST consolidada](docs/api/README.md)
+> - [Sprint 1 · APIs priorizadas](docs/api/sprint-1/README.md)
+> - [Sprint 2 · APIs priorizadas](docs/api/sprint-2/README.md)
+> - [Endpoints auxiliares](docs/api/auxiliares/README.md)
+> - [Recursos comunes y contratos](docs/api/recursos/README.md)
 
 > [!IMPORTANT]
-> Este README representa el proyecto completo. La información de Sprint 3 se mantiene, pero integrada dentro de una narrativa equilibrada que también refleja la base funcional de Sprint 1 y la consolidación operativa de Sprint 2.
+> Este README resume el estado completo del repositorio. Sprint 3 no reemplaza la historia anterior: se integra sobre Sprint 1 y Sprint 2 para mostrar la evolución funcional y técnica del backend.
 
 > [!TIP]
-> Si llegas por primera vez al repositorio, empieza por la visión general, la evolución por sprint y la sección de API REST. Si estás revisando calidad o sustentación, ve luego a documentación adicional y a las validaciones de Sprint 3.
+> Si llegas por primera vez, empieza por la visión general, sigue con la arquitectura y revisa después las secciones de APIs, seguridad, base de datos, calidad y despliegue.
 
 ## Índice
 
 - [Visión general](#vision-general)
-- [Resumen visual del proyecto](#resumen-visual-del-proyecto)
-- [Estado actual del proyecto](#estado-actual-del-proyecto)
-- [Arquitectura del sistema](#arquitectura-del-sistema)
-- [Historias de usuario implementadas](#historias-de-usuario-implementadas)
-- [Flujo funcional general](#flujo-funcional-general)
-- [API REST y Swagger](#api-rest-y-swagger)
+- [Estado actual](#estado-actual)
+- [Arquitectura general](#arquitectura-general)
+- [Flujo funcional](#flujo-funcional)
+- [Historias por sprint](#historias-por-sprint)
+- [APIs principales](#apis-principales)
 - [Seguridad](#seguridad)
-- [Base de datos y persistencia](#base-de-datos-y-persistencia)
-- [CI/CD y despliegue](#cicd-y-despliegue)
+- [Base de datos](#base-de-datos)
 - [Calidad y pruebas](#calidad-y-pruebas)
+- [Docker](#docker)
+- [Kubernetes](#kubernetes)
+- [Observabilidad](#observabilidad)
+- [CI/CD](#cicd)
 - [Ejecución local](#ejecucion-local)
-- [Postman y flujo de demo](#postman-y-flujo-de-demo)
+- [Kubernetes local](#kubernetes-local)
+- [Swagger / OpenAPI](#swagger--openapi)
 - [Documentación adicional](#documentacion-adicional)
 - [Equipo](#equipo)
+- [Estado final](#estado-final)
 
 ---
 
 ## Visión general
 
-El backend de **Reservas de Servicios** resuelve la coordinación entre **clientes**, **proveedores** y **administradores** sobre una plataforma de reservas por agenda y cupos. Su objetivo no es solo guardar reservas, sino sostener un flujo completo con autenticación, oferta operable, reglas de disponibilidad, trazabilidad funcional y capacidades administrativas globales.
+El proyecto **Reservas de Servicios** resuelve el ciclo completo de una plataforma de reservas: registro, autenticación, publicación de oferta, consulta de cupos, creación de reservas, operación posterior, supervisión administrativa y generación de reportes. El backend está diseñado para sostener reglas de negocio claras, trazabilidad funcional y una operación técnica realista sobre PostgreSQL.
 
 ### Actores principales
 
-| Actor | Responsabilidad funcional |
+| Actor | Responsabilidad |
 |---|---|
-| `CLIENTE` | Consultar oferta, ver cupos, crear reservas, cancelarlas, reprogramarlas y revisar su historial. |
-| `PROVEEDOR` | Configurar horario general, registrar servicios, gestionar disponibilidades y operar reservas asociadas a su oferta. |
-| `ADMINISTRADOR` | Gobernar roles y estados de cuentas, supervisar reservas globales y generar reportes operativos. |
+| `CLIENTE` | Consulta oferta, revisa cupos, crea reservas, cancela, reprograma y consulta su historial. |
+| `PROVEEDOR` | Configura horario general, publica servicios, gestiona disponibilidades y opera reservas propias. |
+| `ADMINISTRADOR` | Gestiona roles y estados de cuentas, supervisa reservas globales y genera reportes operativos. |
 
-### Qué permite hoy la plataforma
+### Resumen ejecutivo
 
-- Registrar clientes y proveedores.
-- Autenticar usuarios con JWT y cerrar sesión de forma segura.
-- Mantener el perfil propio actualizado.
-- Configurar horario general, servicios y disponibilidades de proveedor.
-- Consultar oferta y cupos reales por fecha.
-- Crear, cancelar, finalizar y reprogramar reservas bajo reglas de negocio.
-- Gestionar administración global de usuarios.
-- Supervisar reservas a nivel plataforma y generar reportes operativos.
+- Backend modular en capas con una sola unidad desplegable.
+- Seguridad stateless con JWT y autorización por rol.
+- Persistencia con PostgreSQL y Flyway.
+- Documentación API con Swagger / OpenAPI.
+- Contenedorización con Docker multi-stage.
+- Despliegue Kubernetes con `NodePort` y probes de salud.
+- Observabilidad con Actuator, Micrometer Prometheus y validación operativa con PromQL.
+- Calidad controlada con JUnit, Spring Security Test, JaCoCo y SonarCloud.
 
 ---
 
-## Resumen visual del proyecto
+## Estado actual
 
-| Sprint | Enfoque | Resultado |
-|---|---|---|
-| Sprint 1 | MVP transaccional | Registro, oferta, disponibilidad y creación de reservas |
-| Sprint 2 | Operación y trazabilidad | Perfil, sesiones, servicios, cancelación, finalización y consultas |
-| Sprint 3 | Administración y analítica | Roles, cuentas, reprogramación, supervisión y reportes |
-
-```mermaid
-flowchart LR
-    S1[Sprint 1<br/>MVP de reservas] --> S2[Sprint 2<br/>Operación y trazabilidad]
-    S2 --> S3[Sprint 3<br/>Administración y reportes]
-
-    S1 --> A1[Registro<br/>Oferta<br/>Disponibilidad<br/>Reserva]
-    S2 --> A2[Sesiones<br/>Perfil<br/>Servicios<br/>Cancelación<br/>Finalización]
-    S3 --> A3[Roles<br/>Cuentas<br/>Reprogramación<br/>Supervisión<br/>Reportes]
-```
-
----
-
-## Estado actual del proyecto
-
-| Aspecto | Estado actual |
+| Aspecto | Estado |
 |---|---|
-| Sprint 1 | Implementado y estabilizado |
-| Sprint 2 | Implementado y estabilizado |
-| Sprint 3 | Implementado y validado |
-| Arquitectura | Monolito modular en capas |
-| API | Expuesta bajo `/api/v1` y documentada con Swagger/OpenAPI |
-| Base de datos | PostgreSQL sobre Supabase |
-| Migraciones | Flyway versionado hasta `V8__seed_hu21_operational_report.sql` |
-| Calidad | SonarCloud integrado en CI y remediación reciente documentada |
-| Cobertura | Validada con JaCoCo y reporte de cobertura generado |
-| Contenedorización | Docker multi-stage |
-| Despliegue | Azure Container Registry + Azure Container Apps |
+| Lenguaje | Java 21 |
+| Framework | Spring Boot 3.3.4 |
+| Build | Maven |
+| Persistencia | PostgreSQL / Supabase |
+| Migraciones | Flyway hasta `V8__seed_hu21_operational_report.sql` |
+| Seguridad | JWT Bearer + Spring Security |
+| API | `/api/v1` + Swagger / OpenAPI |
+| Contenedores | Docker multi-stage |
+| Kubernetes | Namespace `reservas`, Service `reservas-backend-service`, `NodePort 30080` |
+| Observabilidad | Actuator + Micrometer Prometheus |
+| Calidad | JaCoCo + SonarCloud + pruebas automatizadas |
 
-### Estado operativo y de despliegue
+### Evidencias recientes
 
-| Componente | Valor actual |
+- Validación local final: `mvn verify -B --no-transfer-progress`
+- Resultado observado: `Tests run: 354, Failures: 0, Errors: 0, Skipped: 0`
+- JaCoCo generado correctamente durante `verify` y `mvn test jacoco:report`
+- Remediación SonarCloud documentada sin tocar código productivo
+
+### Estado operativo documentado
+
+| Componente | Valor |
 |---|---|
-| Repositorio | GitHub |
-| Ramas principales | `main`, `dev` |
 | Workflow principal | `.github/workflows/CI-CD.yaml` |
-| Registry | `reservasregistry.azurecr.io` |
-| Imágenes | `reservas-backend-prod`, `reservas-backend-dev` |
-| Azure Container Apps | `reservas-backend-prod`, `reservas-backend-dev` |
-| Environment | `reservas-env` |
-| Región | `East US` |
-| Puerto | `8080` |
-| Swagger producción | <https://reservas-backend-prod.happypond-328540f7.eastus.azurecontainerapps.io/swagger-ui/index.html> |
-
-### Validación reciente observada
-
-La secuencia más reciente ejecutada sobre este workspace dejó en verde:
-
-- `mvn clean test -B --no-transfer-progress`
-- `mvn verify -B --no-transfer-progress`
-- `mvn test jacoco:report`
-
-Resultado observado: **354 tests, 0 fallos, 0 errores, 0 omitidos**, con `BUILD SUCCESS` y reporte JaCoCo generado.
+| Imagen Docker para K8s | `reservas-backend:sprint3-obs` |
+| Puerto del backend | `8080` |
+| Service Kubernetes | `reservas-backend-service` |
+| Namespace app | `reservas` |
+| Namespace observabilidad | `monitoring` |
+| Endpoint público de verificación | `/api/v1/public/status` |
+| Endpoint de métricas | `/actuator/prometheus` |
 
 ---
 
-## Arquitectura del sistema
+## Arquitectura general
 
-### Estilo arquitectónico
+El proyecto sigue un **monolito modular en capas**. La separación por contexto funcional evita mezclar responsabilidades y permite que cada sprint agregue capacidades sobre una base estable.
 
-El proyecto sigue un **monolito modular en capas**, con separación por contexto funcional y una sola unidad desplegable. Esta decisión permitió crecer por sprint sin reescribir la base del sistema ni fragmentar artificialmente el dominio.
+### Módulos reales
 
-### Evolución arquitectónica por sprint
-
-- **Sprint 1** consolidó la base funcional en `identityaccess`, `provideroffer` y `customerbooking`.
-- **Sprint 2** fortaleció operación, seguridad y trazabilidad sobre esos mismos módulos sin cambiar la arquitectura.
-- **Sprint 3** agregó el módulo `administration` para gobierno operativo y analítica global, manteniendo coherencia con el resto del backend.
-
-### Módulos principales
-
-| Módulo | Responsabilidad principal |
+| Módulo | Responsabilidad |
 |---|---|
-| `identityaccess` | Registro, autenticación, cierre de sesión y perfil de usuario. |
-| `provideroffer` | Horario general, servicios, activación/inactivación y disponibilidades del proveedor. |
-| `customerbooking` | Oferta, horarios/cupos, creación de reserva, cancelación, finalización y reprogramación. |
-| `administration` | Gestión global de roles, cuentas, supervisión de reservas y reportes operativos. |
-| `common` | Respuestas uniformes, trazabilidad, auditoría, excepciones, utilitarios y endpoints base. |
-| `security` | JWT, filtros, configuración HTTP stateless y soporte de autenticación. |
+| `identityaccess` | Registro de cliente y proveedor, autenticación, cierre de sesión y perfil propio. |
+| `provideroffer` | Horario general, servicios, estado de servicios y disponibilidades. |
+| `customerbooking` | Consulta de oferta, cupos y reservas; creación, cancelación, finalización y reprogramación. |
+| `administration` | Gestión de roles, estados de cuentas, supervisión de reservas y reportes operativos. |
+| `common` | Respuestas uniformes, errores, trazabilidad, auditoría y utilitarios compartidos. |
+| `security` | JWT, filtro de autenticación, handlers HTTP de seguridad y usuario principal. |
+| `config` | CORS, OpenAPI, zona horaria y rutas base. |
 
 ### Capas por módulo
 
 | Capa | Propósito |
 |---|---|
-| `api` | Controllers y DTOs expuestos por HTTP. |
+| `api` | Controladores y DTOs HTTP. |
 | `application` | Casos de uso y reglas de negocio. |
-| `domain` | Entidades y modelo del dominio. |
-| `infrastructure` | Repositorios, consultas y adaptadores de persistencia. |
+| `domain` | Entidades del dominio. |
+| `infrastructure` | Repositorios, proyecciones y adaptadores de persistencia. |
 
-### Diagrama de arquitectura modular
+### Diagrama modular
 
 ```mermaid
 flowchart LR
-    Client[Cliente / Proveedor / Administrador] --> API[API REST Spring Boot]
+    U[Cliente / Proveedor / Administrador] --> API[API REST Spring Boot]
     API --> IA[identityaccess]
     API --> PO[provideroffer]
     API --> CB[customerbooking]
     API --> AD[administration]
     API --> CM[common]
     API --> SE[security]
+    API --> CF[config]
     IA --> DB[(PostgreSQL / Supabase)]
     PO --> DB
     CB --> DB
@@ -194,348 +176,175 @@ flowchart LR
     CM --> EV[tbl_evento + traceId]
 ```
 
-<details>
-<summary><strong>Ver estructura útil del repositorio</strong></summary>
-
-```text
-.
-├── .github/
-│   └── workflows/
-│       └── CI-CD.yaml
-├── docs/
-│   ├── api/
-│   ├── sprint-3/
-│   ├── sonar-java-s6539-exception-handler-refactor-report.md
-│   └── sonarcloud-quality-gate-remediation-report.md
-├── src/
-│   ├── main/
-│   │   ├── java/com/eap09/reservas/
-│   │   │   ├── administration/
-│   │   │   ├── common/
-│   │   │   ├── config/
-│   │   │   ├── customerbooking/
-│   │   │   ├── identityaccess/
-│   │   │   ├── provideroffer/
-│   │   │   └── security/
-│   │   └── resources/
-│   │       ├── application.yml
-│   │       ├── application-dev.yml
-│   │       └── db/migration/
-│   └── test/
-│       └── java/
-├── Dockerfile
-├── pom.xml
-└── README.md
-```
-
-</details>
-
 ---
 
-## Historias de usuario implementadas
-
-### Sprint 1 · MVP funcional de reservas
-
-Este sprint construyó la base funcional del sistema: registro de usuarios, autenticación, publicación de servicios, definición de horarios y disponibilidades, consulta de oferta y creación inicial de reservas.
-
-| HU | Capacidad | Resultado funcional |
-|---|---|---|
-| HU-01 | Registro de cliente | Alta de cuenta cliente con validación y trazabilidad. |
-| HU-02 | Registro de proveedor | Alta de cuenta proveedor con rol y estado inicial controlados. |
-| HU-03 | Autenticación | Emisión de JWT y control de intentos fallidos. |
-| HU-08 | Horario general | Configuración semanal del proveedor por día. |
-| HU-09 | Registro de servicio | Publicación de servicios ofertables por proveedor. |
-| HU-11 | Gestión de disponibilidad | Creación y bloqueo de franjas concretas por servicio. |
-| HU-14 | Consulta de oferta | Exploración de servicios reservables para cliente. |
-| HU-15 | Consulta de horarios y cupos | Consulta por proveedor, servicio y fecha con cupos reales. |
-| HU-16 | Creación de reserva | Reserva transaccional válida sobre una franja habilitada. |
-
-<details>
-<summary><strong>Ver detalle funcional de Sprint 1</strong></summary>
-
-- Construye la cadena base del producto: registro, autenticación, oferta, disponibilidad y reserva.
-- Deja definidos los actores operativos iniciales: cliente y proveedor.
-- Establece las bases de trazabilidad funcional y validación de reglas de negocio.
-
-</details>
-
-### Sprint 2 · Operación, seguridad y ciclo de vida
-
-Este sprint fortaleció la operación real de la plataforma: sesiones seguras, edición de perfil, control de servicios y ciclo de vida de reservas desde cliente y proveedor.
-
-| HU | Capacidad | Resultado funcional |
-|---|---|---|
-| HU-04 | Cierre de sesión segura | Terminación controlada de la sesión JWT actual. |
-| HU-05 | Actualización de perfil | Mantenimiento del perfil propio con validación y trazabilidad. |
-| HU-10 | Estado de servicio | Activación e inactivación de servicios propios. |
-| HU-12 | Consulta de reservas del proveedor | Vista operativa de reservas asociadas a servicios propios. |
-| HU-13 | Finalización de reservas | Cierre operativo de reservas atendidas. |
-| HU-17 | Cancelación de reserva | Cancelación de reserva futura del cliente propietario. |
-| HU-19 | Consulta de reservas del cliente | Trazabilidad del historial propio del cliente. |
-
-<details>
-<summary><strong>Ver detalle funcional de Sprint 2</strong></summary>
-
-- Convierte el MVP de reservas en una plataforma operable de punta a punta.
-- Refuerza seguridad y experiencia de uso sobre sesiones, perfil y operación posterior de la reserva.
-- Mantiene la arquitectura original mientras amplía el comportamiento real del sistema.
-
-</details>
-
-### Sprint 3 · Administración, reprogramación y analítica
-
-Este sprint agregó gobierno administrativo, reprogramación manual y observabilidad operativa sobre reservas globales.
-
-| HU | Capacidad | Endpoint principal |
-|---|---|---|
-| HU-06 | Gestión de roles de usuario | `PATCH /api/v1/admin/users/{userId}/role` |
-| HU-07 | Activación e inactivación de cuentas | `PATCH /api/v1/admin/users/{userId}/status` |
-| HU-18 | Reprogramación manual de reserva | `PATCH /api/v1/bookings/{bookingId}/reschedule` |
-| HU-20 | Supervisión administrativa de reservas | `GET /api/v1/admin/bookings` |
-| HU-21 | Generación de reportes operativos globales | `GET /api/v1/admin/reports/operational` |
-
-<details>
-<summary><strong>Ver detalle funcional de Sprint 3</strong></summary>
-
-### HU-06 · Gestión de roles de usuario
-
-- **Actor**: `ADMINISTRADOR`
-- **Propósito**: actualizar el rol de una cuenta para controlar acceso a funcionalidades según el perfil.
-- **Endpoint**: `PATCH /api/v1/admin/users/{userId}/role`
-- **Reglas clave**:
-  - solo un administrador autenticado puede ejecutar el cambio;
-  - la cuenta objetivo debe existir y estar activa;
-  - no se permite reasignar el mismo rol;
-  - la operación mantiene trazabilidad funcional.
-- **Payload de ejemplo**:
-
-```json
-{
-  "roleName": "PROVEEDOR"
-}
-```
-
-### HU-07 · Activación e inactivación de cuentas
-
-- **Actor**: `ADMINISTRADOR`
-- **Propósito**: activar o inactivar usuarios sin alterar servicios o reservas existentes.
-- **Endpoint**: `PATCH /api/v1/admin/users/{userId}/status`
-- **Reglas clave**:
-  - activa cuentas inactivas e inactiva cuentas activas;
-  - bloquea solicitudes redundantes;
-  - conserva servicios y reservas sin mutación funcional;
-  - deja auditoría administrativa.
-- **Payload de ejemplo**:
-
-```json
-{
-  "targetStatus": "INACTIVA"
-}
-```
-
-### HU-18 · Reprogramación manual de reserva
-
-- **Actor**: `CLIENTE`
-- **Propósito**: mover una reserva activa hacia otra franja disponible sin perder identidad ni trazabilidad.
-- **Endpoint**: `PATCH /api/v1/bookings/{bookingId}/reschedule`
-- **Reglas clave**:
-  - la reserva debe pertenecer al cliente autenticado;
-  - la reserva debe seguir en estado `CREADA`;
-  - no se permite reprogramar con menos de 24 horas de anticipación;
-  - la disponibilidad destino debe existir, estar habilitada, corresponder al mismo servicio, ser futura y tener cupos.
-- **Payload de ejemplo**:
-
-```json
-{
-  "availabilityId": 42
-}
-```
-
-### HU-20 · Supervisión administrativa de reservas
-
-- **Actor**: `ADMINISTRADOR`
-- **Propósito**: supervisar reservas activas e históricas de toda la plataforma.
-- **Endpoint**: `GET /api/v1/admin/bookings`
-- **Filtros**: `customerId`, `providerId`, `serviceId`, `status`, `from`, `to`.
-- **Reglas clave**:
-  - admite filtros combinados;
-  - distingue entre “sin coincidencias” y “sin reservas registradas”;
-  - es una operación read-only;
-  - mantiene trazabilidad funcional.
-
-### HU-21 · Generación de reportes operativos globales
-
-- **Actor**: `ADMINISTRADOR`
-- **Propósito**: generar indicadores agregados de ocupación, uso y cancelaciones con base en historial de reservas.
-- **Endpoint**: `GET /api/v1/admin/reports/operational`
-- **Filtros**: `from`, `to`.
-- **Incluye**:
-  - conteos por estado;
-  - agregados por servicio;
-  - agregados por proveedor;
-  - tasas operativas derivadas del historial disponible.
-- **Reglas clave**:
-  - responde error controlado si no existe historial suficiente;
-  - mantiene patrón de solo lectura;
-  - deja auditoría administrativa.
-
-</details>
-
----
-
-## Flujo funcional general
+## Flujo funcional
 
 ```mermaid
 flowchart TD
-    U[Usuario] --> Auth[Registro y autenticación]
-    Auth --> Provider[Proveedor configura oferta]
-    Provider --> Availability[Servicios y disponibilidades]
-    Availability --> Customer[Cliente consulta oferta y cupos]
-    Customer --> Booking[Cliente crea reserva]
-    Booking --> Lifecycle[Cancelación / Finalización / Reprogramación]
-    Admin[Administrador] --> Governance[Roles y cuentas]
-    Admin --> Supervision[Supervisión de reservas]
-    Admin --> Reports[Reportes operativos]
+    A[Registro / autenticación] --> B[Proveedor configura horario]
+    B --> C[Proveedor publica servicios]
+    C --> D[Proveedor crea disponibilidades]
+    D --> E[Cliente consulta oferta y cupos]
+    E --> F[Cliente crea reserva]
+    F --> G[Operación posterior<br/>cancelación / finalización / reprogramación]
+    H[Administrador] --> I[Gestión de roles y cuentas]
+    H --> J[Supervisión global de reservas]
+    H --> K[Reportes operativos]
 ```
 
-<details>
-<summary><strong>Decisiones funcionales consolidadas</strong></summary>
+### Decisiones funcionales consolidadas
 
-- El proveedor registrado nace en estado `ACTIVA`.
-- El horario general del proveedor se modela como un único rango por día.
-- La disponibilidad se modela como una franja concreta con fecha real.
+- El proveedor nace en estado `ACTIVA`.
+- La disponibilidad se modela como franja concreta con fecha real.
 - La reserva nace en estado `CREADA`.
-- La capacidad restante se calcula; no se persiste como dato redundante.
-- Un servicio puede pasar entre `ACTIVO` e `INACTIVO` sin invalidar reservas ya creadas.
-- Una reserva `CREADA` puede pasar a `FINALIZADA` o `CANCELADA` según reglas de tiempo, propiedad y estado.
-- La reprogramación de HU-18 conserva la misma reserva y actualiza su disponibilidad asociada.
-- Las consultas administrativas de HU-20 y HU-21 son de solo lectura.
+- La capacidad restante se calcula a partir del dominio, no como dato duplicado.
+- La reprogramación conserva la misma reserva y cambia la disponibilidad asociada.
+- Las consultas administrativas son de solo lectura.
+
+---
+
+## Historias por sprint
+
+### Sprint 1
+
+Este sprint construyó la base transaccional del producto: registro, autenticación, oferta del proveedor, consulta de cupos y creación de reservas.
+
+| HU | Actor | Propósito | Endpoint principal | Estado | Documento relacionado |
+|---|---|---|---|---|---|
+| HU-01 | Cliente | Registrar cuenta de cliente | `POST /api/v1/clients` | Implementado | [Sprint 1](docs/api/sprint-1/README.md) |
+| HU-02 | Proveedor | Registrar cuenta de proveedor | `POST /api/v1/providers` | Implementado | [Sprint 1](docs/api/sprint-1/README.md) |
+| HU-03 | Usuario | Autenticarse y obtener JWT | `POST /api/v1/auth/sessions` | Implementado | [Sprint 1](docs/api/sprint-1/README.md) |
+| HU-08 | Proveedor | Definir horario general semanal | `PUT /api/v1/providers/me/general-schedule/{dayOfWeek}` | Implementado | [Sprint 1](docs/api/sprint-1/README.md) |
+| HU-09 | Proveedor | Registrar un servicio propio | `POST /api/v1/providers/me/services` | Implementado | [Sprint 1](docs/api/sprint-1/README.md) |
+| HU-11 | Proveedor | Crear y bloquear disponibilidades | `POST /api/v1/providers/me/services/{serviceId}/availabilities` | Implementado | [Sprint 1](docs/api/sprint-1/README.md) |
+| HU-14 | Cliente | Consultar oferta disponible | `GET /api/v1/offers` | Implementado | [Sprint 1](docs/api/sprint-1/README.md) |
+| HU-15 | Cliente | Consultar horarios y cupos | `GET /api/v1/providers/{providerId}/services/{serviceId}/availabilities?date=YYYY-MM-DD` | Implementado | [Sprint 1](docs/api/sprint-1/README.md) |
+| HU-16 | Cliente | Crear una reserva | `POST /api/v1/bookings` | Implementado | [Sprint 1](docs/api/sprint-1/README.md) |
+
+<details>
+<summary><strong>Resumen funcional de Sprint 1</strong></summary>
+
+- Forma la primera versión operable del sistema.
+- Deja definidos los actores iniciales y la lógica de oferta.
+- Sienta la base para la seguridad y la trazabilidad posterior.
+
+</details>
+
+### Sprint 2
+
+Este sprint amplió la operación posterior y la autogestión: sesión segura, perfil, estado de servicios, consulta operativa y ciclo de vida de reservas.
+
+| HU | Actor | Propósito | Endpoint principal | Estado | Documento relacionado |
+|---|---|---|---|---|---|
+| HU-04 | Usuario autenticado | Cerrar sesión segura | `DELETE /api/v1/auth/sessions/current` | Implementado | [Sprint 2](docs/api/sprint-2/README.md) |
+| HU-05 | Usuario autenticado | Actualizar perfil propio | `PATCH /api/v1/users/me/profile` | Implementado | [Sprint 2](docs/api/sprint-2/README.md) |
+| HU-10 | Proveedor | Activar o inactivar servicio propio | `PATCH /api/v1/providers/me/services/{serviceId}/status` | Implementado | [Sprint 2](docs/api/sprint-2/README.md) |
+| HU-12 | Proveedor | Consultar reservas del proveedor | `GET /api/v1/providers/me/bookings` | Implementado | [Sprint 2](docs/api/sprint-2/README.md) |
+| HU-13 | Proveedor | Finalizar reserva atendida | `PATCH /api/v1/providers/me/bookings/{bookingId}/finalization` | Implementado | [Sprint 2](docs/api/sprint-2/README.md) |
+| HU-17 | Cliente | Cancelar reserva propia | `PATCH /api/v1/bookings/{bookingId}/cancellation` | Implementado | [Sprint 2](docs/api/sprint-2/README.md) |
+| HU-19 | Cliente | Consultar historial propio | `GET /api/v1/bookings/me` | Implementado | [Sprint 2](docs/api/sprint-2/README.md) |
+
+<details>
+<summary><strong>Resumen funcional de Sprint 2</strong></summary>
+
+- Consolida el uso real de la plataforma después de la creación de reservas.
+- Refuerza la autogestión de usuarios y proveedores.
+- Mantiene la arquitectura base mientras amplía el comportamiento operativo.
+
+</details>
+
+### Sprint 3
+
+Sprint 3 añadió gobierno administrativo, reprogramación manual y analítica global sobre reservas.
+
+| HU | Actor | Propósito | Endpoint principal | Estado | Documento relacionado |
+|---|---|---|---|---|---|
+| HU-06 | Administrador | Gestionar roles de usuario | `PATCH /api/v1/admin/users/{userId}/role` | Validado | [Validación HU-06](docs/sprint-3/hu-06-validacion-final.md) |
+| HU-07 | Administrador | Activar o inactivar cuentas | `PATCH /api/v1/admin/users/{userId}/status` | Validado | [Validación HU-07](docs/sprint-3/hu-07-validacion-final.md) |
+| HU-18 | Cliente | Reprogramar una reserva activa | `PATCH /api/v1/bookings/{bookingId}/reschedule` | Validado | [Validación HU-18](docs/sprint-3/hu-18-validacion-final.md) |
+| HU-20 | Administrador | Supervisar reservas globales | `GET /api/v1/admin/bookings` | Validado | [Validación HU-20](docs/sprint-3/hu-20-validacion-final.md) |
+| HU-21 | Administrador | Generar reportes operativos | `GET /api/v1/admin/reports/operational` | Validado | [Validación HU-21](docs/sprint-3/hu-21-validacion-final.md) |
+
+<details>
+<summary><strong>Resumen funcional de Sprint 3</strong></summary>
+
+- Agrega control administrativo real sobre usuarios y reservas.
+- Introduce reprogramación manual con reglas de negocio claras.
+- Cierra el ciclo con reportes operativos y auditoría funcional.
 
 </details>
 
 ---
 
-## API REST y Swagger
+## APIs principales
 
-### Convenciones generales
-
-- Base path: `/api/v1`
-- Estilo: REST con respuestas uniformes y `traceId`
-- Documentación OpenAPI local: `http://localhost:8080/v3/api-docs`
-- Swagger UI local: `http://localhost:8080/swagger-ui/index.html`
-- Swagger UI de producción: <https://reservas-backend-prod.happypond-328540f7.eastus.azurecontainerapps.io/swagger-ui/index.html>
-
-### Endpoints principales por módulo
+La documentación completa de rutas y ejemplos vive en [docs/api/README.md](docs/api/README.md). Aquí queda el mapa principal por dominio, con las rutas reales observadas en el código y en la documentación técnica del repositorio.
 
 <details>
-<summary><strong>Identity Access</strong></summary>
+<summary><strong>Identidad y acceso</strong></summary>
 
-| Método | Ruta | Descripción | Auth |
+| Método | Ruta | Actor / Rol | Descripción | Seguridad |
+|---|---|---|---|---|
+| `POST` | `/api/v1/clients` | Público | Registrar cliente | Pública |
+| `POST` | `/api/v1/providers` | Público | Registrar proveedor | Pública |
+| `POST` | `/api/v1/auth/sessions` | Público | Autenticar y emitir JWT | Pública |
+| `DELETE` | `/api/v1/auth/sessions/current` | Usuario autenticado | Cerrar sesión vigente | JWT |
+| `PATCH` | `/api/v1/users/me/profile` | Usuario autenticado | Actualizar perfil propio | JWT |
+
+</details>
+
+<details>
+<summary><strong>Oferta del proveedor</strong></summary>
+
+| Método | Ruta | Actor / Rol | Descripción | Seguridad |
+|---|---|---|---|---|
+| `PUT` | `/api/v1/providers/me/general-schedule/{dayOfWeek}` | `PROVEEDOR` | Definir o reemplazar horario general | JWT + rol |
+| `POST` | `/api/v1/providers/me/services` | `PROVEEDOR` | Registrar servicio propio | JWT + rol |
+| `PATCH` | `/api/v1/providers/me/services/{serviceId}/status` | `PROVEEDOR` | Activar o inactivar servicio | JWT + rol |
+| `POST` | `/api/v1/providers/me/services/{serviceId}/availabilities` | `PROVEEDOR` | Crear disponibilidad | JWT + rol |
+| `PATCH` | `/api/v1/providers/me/services/{serviceId}/availabilities/{availabilityId}/block` | `PROVEEDOR` | Bloquear disponibilidad | JWT + rol |
+
+</details>
+
+<details>
+<summary><strong>Reservas del cliente y del proveedor</strong></summary>
+
+| Método | Ruta | Actor / Rol | Descripción | Seguridad |
+|---|---|---|---|---|
+| `GET` | `/api/v1/offers` | `CLIENTE` | Consultar oferta disponible | JWT + rol |
+| `GET` | `/api/v1/providers/{providerId}/services/{serviceId}/availabilities?date=YYYY-MM-DD` | `CLIENTE` | Consultar horarios y cupos reales | JWT + rol |
+| `POST` | `/api/v1/bookings` | `CLIENTE` | Crear reserva | JWT + rol |
+| `PATCH` | `/api/v1/bookings/{bookingId}/cancellation` | `CLIENTE` | Cancelar reserva propia | JWT + rol |
+| `PATCH` | `/api/v1/bookings/{bookingId}/reschedule` | `CLIENTE` | Reprogramar reserva propia | JWT + rol |
+| `GET` | `/api/v1/bookings/me` | `CLIENTE` | Consultar historial propio | JWT + rol |
+| `GET` | `/api/v1/providers/me/bookings` | `PROVEEDOR` | Consultar reservas operativas | JWT + rol |
+| `PATCH` | `/api/v1/providers/me/bookings/{bookingId}/finalization` | `PROVEEDOR` | Finalizar reserva atendida | JWT + rol |
+
+</details>
+
+<details>
+<summary><strong>Administración</strong></summary>
+
+| Método | Ruta | Actor / Rol | Descripción | Seguridad |
+|---|---|---|---|---|
+| `PATCH` | `/api/v1/admin/users/{userId}/role` | `ADMINISTRADOR` | Cambiar rol de usuario | JWT + rol |
+| `PATCH` | `/api/v1/admin/users/{userId}/status` | `ADMINISTRADOR` | Activar o inactivar cuenta | JWT + rol |
+| `GET` | `/api/v1/admin/bookings` | `ADMINISTRADOR` | Supervisar reservas globales | JWT + rol |
+| `GET` | `/api/v1/admin/reports/operational` | `ADMINISTRADOR` | Generar reporte operativo | JWT + rol |
+
+</details>
+
+<details>
+<summary><strong>Endpoints auxiliares</strong></summary>
+
+| Método | Ruta | Seguridad | Propósito |
 |---|---|---|---|
-| `POST` | `/api/v1/clients` | Registro de cliente | No |
-| `POST` | `/api/v1/providers` | Registro de proveedor | No |
-| `POST` | `/api/v1/auth/sessions` | Autenticación y emisión JWT | No |
-| `DELETE` | `/api/v1/auth/sessions/current` | Cierre seguro de la sesión actual | Sí |
-| `PATCH` | `/api/v1/users/me/profile` | Actualización del perfil propio | Sí |
-
-</details>
-
-<details>
-<summary><strong>Provider Offer</strong></summary>
-
-| Método | Ruta | Descripción | Rol esperado |
-|---|---|---|---|
-| `PUT` | `/api/v1/providers/me/general-schedule/{dayOfWeek}` | Definir o reemplazar horario general | `PROVEEDOR` |
-| `POST` | `/api/v1/providers/me/services` | Registrar servicio propio | `PROVEEDOR` |
-| `PATCH` | `/api/v1/providers/me/services/{serviceId}/status` | Activar o inactivar servicio propio | `PROVEEDOR` |
-| `POST` | `/api/v1/providers/me/services/{serviceId}/availabilities` | Crear disponibilidad | `PROVEEDOR` |
-| `PATCH` | `/api/v1/providers/me/services/{serviceId}/availabilities/{availabilityId}/block` | Bloquear disponibilidad | `PROVEEDOR` |
-
-</details>
-
-<details>
-<summary><strong>Customer Booking y Reservation</strong></summary>
-
-| Método | Ruta | Descripción | Rol esperado |
-|---|---|---|---|
-| `GET` | `/api/v1/offers` | Consultar oferta disponible | `CLIENTE` |
-| `GET` | `/api/v1/providers/{providerId}/services/{serviceId}/availabilities?date=YYYY-MM-DD` | Consultar horarios y cupos | `CLIENTE` |
-| `POST` | `/api/v1/bookings` | Crear reserva | `CLIENTE` |
-| `PATCH` | `/api/v1/bookings/{bookingId}/cancellation` | Cancelar reserva propia | `CLIENTE` |
-| `PATCH` | `/api/v1/bookings/{bookingId}/reschedule` | Reprogramar reserva propia | `CLIENTE` |
-| `GET` | `/api/v1/bookings/me` | Consultar historial propio | `CLIENTE` |
-| `GET` | `/api/v1/providers/me/bookings` | Consultar reservas del proveedor | `PROVEEDOR` |
-| `PATCH` | `/api/v1/providers/me/bookings/{bookingId}/finalization` | Finalizar reserva atendida | `PROVEEDOR` |
-
-</details>
-
-<details>
-<summary><strong>Administration</strong></summary>
-
-| Método | Ruta | Descripción | Rol esperado |
-|---|---|---|---|
-| `PATCH` | `/api/v1/admin/users/{userId}/role` | Actualizar rol de usuario | `ADMINISTRADOR` |
-| `PATCH` | `/api/v1/admin/users/{userId}/status` | Actualizar estado de cuenta | `ADMINISTRADOR` |
-| `GET` | `/api/v1/admin/bookings` | Supervisión global de reservas | `ADMINISTRADOR` |
-| `GET` | `/api/v1/admin/reports/operational` | Reporte operativo global | `ADMINISTRADOR` |
-
-</details>
-
-<details>
-<summary><strong>Endpoints auxiliares y bootstrap</strong></summary>
-
-| Método | Ruta | Propósito |
-|---|---|---|
-| `GET` | `/api/v1/public/status` | Estado público básico |
-| `GET` | `/api/v1/protected/status` | Estado protegido con usuario autenticado |
-| `GET` | `/api/v1/auth/bootstrap` | Bootstrap del módulo de identidad |
-| `GET` | `/api/v1/protected/provider-offer/bootstrap` | Bootstrap del módulo de oferta |
-| `GET` | `/api/v1/protected/customer-booking/bootstrap` | Bootstrap del módulo de reservas |
-
-</details>
-
-<details>
-<summary><strong>Ejemplos rápidos de requests</strong></summary>
-
-```http
-PATCH /api/v1/admin/users/15/role
-Authorization: Bearer <jwt>
-Content-Type: application/json
-
-{
-  "roleName": "PROVEEDOR"
-}
-```
-
-```http
-PATCH /api/v1/admin/users/15/status
-Authorization: Bearer <jwt>
-Content-Type: application/json
-
-{
-  "targetStatus": "ACTIVA"
-}
-```
-
-```http
-PATCH /api/v1/bookings/98/reschedule
-Authorization: Bearer <jwt>
-Content-Type: application/json
-
-{
-  "availabilityId": 201
-}
-```
-
-```http
-GET /api/v1/admin/bookings?status=CREADA&from=2026-05-01&to=2026-05-31
-Authorization: Bearer <jwt>
-```
-
-```http
-GET /api/v1/admin/reports/operational?from=2026-05-01&to=2026-05-31
-Authorization: Bearer <jwt>
-```
+| `GET` | `/api/v1/public/status` | Pública | Estado público del backend |
+| `GET` | `/api/v1/protected/status` | JWT | Estado protegido con usuario autenticado |
+| `GET` | `/api/v1/auth/bootstrap` | Pública | Bootstrap del módulo de identidad |
+| `GET` | `/api/v1/protected/customer-booking/bootstrap` | JWT | Bootstrap del módulo de reservas |
+| `GET` | `/api/v1/protected/provider-offer/bootstrap` | JWT | Bootstrap del módulo de oferta |
 
 </details>
 
@@ -543,219 +352,246 @@ Authorization: Bearer <jwt>
 
 ## Seguridad
 
-### Enfoque aplicado
+La seguridad está implementada con Spring Security en modo stateless, autenticación JWT Bearer y autorización por rol. El filtro JWT se ejecuta antes de `UsernamePasswordAuthenticationFilter`, y las respuestas HTTP de error se manejan con handlers dedicados para `401` y `403`.
 
-- API stateless con `SessionCreationPolicy.STATELESS`.
-- Autenticación mediante JWT Bearer.
-- Contraseñas protegidas con BCrypt.
-- Autorización fina por rol validada desde los servicios.
-- Operaciones propias bajo rutas `/me` para cliente y proveedor.
-- Operaciones administrativas separadas bajo `/api/v1/admin/**`.
+### Puntos clave
+
+- `SessionCreationPolicy.STATELESS`.
+- Contraseñas con BCrypt.
+- Esquema `bearerAuth` documentado en OpenAPI.
+- Rutas públicas limitadas a registro, login, bootstrap, `swagger-ui` y health/metrics permitidos.
+- Operaciones propias bajo rutas `/me`.
+- Operaciones administrativas bajo `/api/v1/admin/**`.
+- Validación manual de propiedad del recurso cuando corresponde.
 
 ### Roles del sistema
 
-| Rol real | Uso principal |
+| Rol | Uso principal |
 |---|---|
-| `CLIENTE` | Explorar oferta, reservar, cancelar, reprogramar y consultar historial propio. |
-| `PROVEEDOR` | Mantener oferta, disponibilidades y operar reservas de sus servicios. |
-| `ADMINISTRADOR` | Gestionar usuarios, supervisar reservas y generar reportes globales. |
+| `CLIENTE` | Oferta, reservas propias y operación sobre su historial. |
+| `PROVEEDOR` | Oferta, disponibilidades y reservas asociadas a su servicio. |
+| `ADMINISTRADOR` | Gestión de usuarios, supervisión global y reportes. |
 
-### Reglas relevantes
+### Comportamiento esperado
 
-- Las rutas públicas se limitan a registro, login, Swagger/OpenAPI y health/info.
-- Todo lo demás requiere autenticación.
-- Las capacidades administrativas se restringen a cuentas con rol real `ADMINISTRADOR`.
-- HU-06 y HU-07 validan administración explícita antes de modificar roles o estados.
-- HU-20 y HU-21 mantienen modo solo lectura aun bajo privilegios administrativos.
+- Sin token: `401 Unauthorized`.
+- Token válido y rol correcto: acceso permitido.
+- Token válido con rol incorrecto: `403 Forbidden`.
 
-### Política de contraseña en registro
+### Flujo JWT
 
-- mínimo 8 caracteres;
-- máximo 64 caracteres;
-- al menos una mayúscula;
-- al menos una minúscula;
-- al menos un número;
-- al menos un carácter especial.
-
-### Protección de información sensible
-
-- Contrato uniforme de error: `errorCode`, `message`, `details`, `traceId`.
-- Trazabilidad por `X-Trace-Id` y generación automática cuando el cliente no lo envía.
-- Mensajes funcionales en español sin fuga de detalles internos de base de datos.
-- Este README no expone credenciales, secretos ni configuraciones reales de acceso.
+```mermaid
+flowchart LR
+    A[Login] --> B[JWT Bearer]
+    B --> C[Request protegida]
+    C --> D[Filtro JWT]
+    D --> E[Autenticación]
+    E --> F[Autorización por rol]
+    F --> G[Respuesta o 401/403]
+```
 
 ---
 
-## Base de datos y persistencia
+## Base de datos
 
-### Estado actual
+El backend usa PostgreSQL como base transaccional, con el entorno de trabajo documentado sobre Supabase. Flyway gestiona las migraciones al arranque y mantiene el esquema alineado con el estado funcional del proyecto.
 
-- Base de datos relacional PostgreSQL.
-- Entorno principal del proyecto en Supabase.
-- Migraciones gestionadas con Flyway al arranque.
-- Persistencia orientada a catálogos de estados y eventos para sostener trazabilidad y coherencia funcional.
+### Migraciones principales
 
-### Migraciones versionadas presentes
+| Versión | Archivo | Propósito |
+|---|---|---|
+| `V1` | `V1__schema_reset.sql` | Reset del esquema base. |
+| `V2` | `V2__seed_catalogos.sql` | Carga de catálogos iniciales. |
+| `V3` | `V3__seed_operativo_sprint2.sql` | Seed operativo de Sprint 2. |
+| `V4` | `V4__seed_hu06_user_role_management.sql` | Semilla para gestión de roles. |
+| `V5` | `V5__seed_hu07_user_account_status_management.sql` | Semilla para activación e inactivación de cuentas. |
+| `V6` | `V6__seed_hu18_reservation_rescheduling.sql` | Semilla para reprogramación de reservas. |
+| `V7` | `V7__seed_hu20_admin_reservation_supervision.sql` | Semilla para supervisión administrativa de reservas. |
+| `V8` | `V8__seed_hu21_operational_report.sql` | Semilla para reporte operativo global. |
 
-| Versión | Propósito |
-|---|---|
-| `V1` | Reset de esquema base |
-| `V2` | Catálogos iniciales |
-| `V3` | Seed operativo de Sprint 2 |
-| `V4` | Evento de HU-06 gestión de roles |
-| `V5` | Evento de HU-07 estado de cuentas |
-| `V6` | Evento de HU-18 reprogramación de reserva |
-| `V7` | Evento de HU-20 supervisión administrativa |
-| `V8` | Evento de HU-21 reporte operativo |
-
-### Entidades funcionales clave
+### Entidades y tablas destacadas
 
 | Dominio | Tablas relevantes |
 |---|---|
 | Usuarios y roles | `tbl_usuario`, `tbl_rol` |
-| Estados centralizados | `tbl_categoria_estado`, `tbl_estado` |
-| Horario y oferta del proveedor | `tbl_horario_general_proveedor`, `tbl_dia_semana`, `tbl_servicio`, `tbl_disponibilidad_servicio` |
+| Estados | `tbl_categoria_estado`, `tbl_estado` |
+| Oferta del proveedor | `tbl_horario_general_proveedor`, `tbl_dia_semana`, `tbl_servicio`, `tbl_disponibilidad_servicio` |
 | Reservas | `tbl_reserva` |
 | Auditoría y trazabilidad | `tbl_evento`, `tbl_tipo_evento`, `tbl_tipo_registro` |
 
-### Estados funcionales centrales
+### Estados funcionales observados
 
-| Categoría | Estados usados en el backend |
+| Entidad | Estados principales |
 |---|---|
 | `tbl_usuario` | `ACTIVA`, `INACTIVA` |
 | `tbl_servicio` | `ACTIVO`, `INACTIVO` |
 | `tbl_disponibilidad_servicio` | `HABILITADA`, `BLOQUEADA` |
 | `tbl_reserva` | `CREADA`, `CANCELADA`, `FINALIZADA` |
 
-### Eventos funcionales destacados
+### Auditoría funcional
 
-- `REGISTRO_CLIENTE`
-- `REGISTRO_PROVEEDOR`
-- `AUTENTICACION_USUARIO`
-- `APLICACION_RESTRICCION_ACCESO`
-- `ACTUALIZACION_PERFIL_USUARIO`
-- `DEFINICION_HORARIO_GENERAL`
-- `REGISTRO_SERVICIO`
-- `ACTIVACION_SERVICIO`
-- `INACTIVACION_SERVICIO`
-- `CREACION_DISPONIBILIDAD`
-- `BLOQUEO_DISPONIBILIDAD`
-- `CREACION_RESERVA`
-- `REPROGRAMACION_RESERVA`
-- `ACTUALIZACION_ROL_USUARIO`
-- `ACTUALIZACION_ESTADO_USUARIO`
-- `CONSULTA_ADMIN_RESERVAS`
-- `GENERACION_REPORTE_OPERATIVO`
-
-### Configuración responsable
-
-El proyecto soporta variables de entorno para base de datos, JWT y CORS. En este README solo se documentan nombres de variables y ejemplos genéricos, nunca valores reales.
-
----
-
-## CI/CD y despliegue
-
-### Pipeline actual
-
-El workflow principal en `.github/workflows/CI-CD.yaml` se activa sobre:
-
-- `push` a `main`;
-- `push` a `dev`;
-- `pull_request` hacia `main`.
-
-### Qué hace el pipeline
-
-1. Levanta un servicio PostgreSQL temporal para validación.
-2. Configura Java 21 con Temurin.
-3. Ejecuta `mvn clean verify sonar:sonar`.
-4. Publica análisis en SonarCloud.
-5. Determina la imagen objetivo según la rama.
-6. Hace login en Azure Container Registry.
-7. Construye y publica imágenes Docker etiquetadas con SHA y `latest`.
-
-```mermaid
-flowchart LR
-    Dev[Push a dev/main o PR a main] --> GHA[GitHub Actions]
-    GHA --> Verify[Maven clean verify]
-    Verify --> Sonar[SonarCloud]
-    Sonar --> Docker[Docker build y push]
-    Docker --> ACR[reservasregistry.azurecr.io]
-    ACR --> Manual[Despliegue final manual<br/>Azure CLI]
-    Manual --> ACA[Azure Container Apps]
-    ACA --> Swagger[Swagger publicado]
-```
-
-### Contenedorización
-
-- Docker multi-stage:
-  - build con `maven:3.9.9-eclipse-temurin-21`;
-  - runtime con `eclipse-temurin:21-jre-alpine`.
-- Puerto expuesto: `8080`.
-
-### Topología actual de despliegue
-
-| Elemento | Valor |
-|---|---|
-| Registry | `reservasregistry.azurecr.io` |
-| Imagen para `main` | `reservas-backend-prod` |
-| Imagen para `dev` | `reservas-backend-dev` |
-| Container App producción | `reservas-backend-prod` |
-| Container App desarrollo | `reservas-backend-dev` |
-| Environment | `reservas-env` |
-| Región | `East US` |
-
-> [!TIP]
-> El pipeline deja listas las imágenes en ACR. El despliegue final hacia Azure Container Apps se maneja manualmente vía Azure CLI por restricciones de permisos del proyecto.
+El backend registra eventos de negocio para trazabilidad, incluyendo registro de usuarios, autenticación, configuración de oferta, creación de reservas, reprogramación y acciones administrativas. El contrato de respuestas conserva `traceId` para correlación.
 
 ---
 
 ## Calidad y pruebas
 
-### Estrategia de calidad actual
+El proyecto está cubierto con Maven, JUnit 5, Spring Security Test, MockMvc, pruebas de aplicación y de controlador, más JaCoCo para cobertura y SonarCloud para calidad.
 
-- SonarCloud integrado en el pipeline principal.
-- JaCoCo integrado para generar reporte de cobertura.
-- Pruebas unitarias de servicios (`application`).
-- Controller tests para contrato HTTP y códigos.
-- Pruebas de integración y regresiones amplias sobre módulos críticos.
+### Evidencia reciente
 
-### Estado reciente de calidad
+- `mvn verify -B --no-transfer-progress`
+- `Tests run: 354, Failures: 0, Errors: 0, Skipped: 0`
+- `BUILD SUCCESS`
+- JaCoCo generado correctamente
 
-- Se corrigieron hallazgos recientes reportados por calidad y SonarCloud.
-- Se remediaron smells de tests relacionados con `assertThrows(...)`, imports muertos y usos innecesarios de `eq(...)`.
-- La remediación quedó documentada en [docs/sprint-3/sonarcloud-remediacion-issues-actuales.md](docs/sprint-3/sonarcloud-remediacion-issues-actuales.md).
+### Herramientas observadas
 
-### Tipos de pruebas en el repositorio
-
-| Tipo | Cobertura funcional |
+| Herramienta | Uso |
 |---|---|
-| Unitarias | Reglas de negocio por caso de uso |
-| Controller tests | Contrato HTTP, validaciones y códigos de respuesta |
-| Integración / regresión | Contexto Spring, persistencia, seguridad y slices completos |
+| Maven | Compilación, pruebas y empaquetado |
+| JUnit 5 | Pruebas unitarias y de integración |
+| Spring Security Test | Validación de autenticación y autorización |
+| JaCoCo | Cobertura local |
+| SonarCloud | Calidad y remediación de issues |
 
-### Suites representativas recientes
+### Suites representativas
 
 ```bash
-mvn "-Dtest=*Administration*Test" test
-mvn "-Dtest=*Reservation*Test,*CustomerBooking*Test,*Availability*Test,*ProviderBooking*Test,*OperationalReport*Test" test
+mvn test
 mvn clean test -B --no-transfer-progress
 mvn verify -B --no-transfer-progress
 mvn test jacoco:report
 ```
 
-### Estado responsable de cobertura
+### Validación SonarCloud
 
-La cobertura quedó **validada con JaCoCo** y el reporte se regeneró correctamente durante `verify` y `mvn test jacoco:report`. Este README no afirma porcentajes exactos porque esos datos deben leerse directamente del reporte generado o de la plataforma de análisis correspondiente.
+- Remediación documentada en [docs/sprint-3/sonarcloud-remediacion-issues-actuales.md](docs/sprint-3/sonarcloud-remediacion-issues-actuales.md)
+- Refactor de handler documentado en [docs/sonar-java-s6539-exception-handler-refactor-report.md](docs/sonar-java-s6539-exception-handler-refactor-report.md)
+- Calidad adicional documentada en [docs/sonarcloud-quality-gate-remediation-report.md](docs/sonarcloud-quality-gate-remediation-report.md)
 
-### Cuándo considerar una HU "Done" desde backend
+---
 
-1. Endpoint o endpoints implementados con contrato estable.
-2. Validaciones funcionales y de seguridad activas.
-3. Error handling uniforme con `traceId`.
-4. Persistencia correcta en base de datos relacional.
-5. Trazabilidad funcional mediante eventos.
-6. Pruebas unitarias, controller y regresiones relevantes en verde.
-7. Validación manual reproducible cuando aplica.
+## Docker
+
+El repositorio incluye un Dockerfile multi-stage. La etapa de build usa Maven sobre Temurin 21 y la etapa final ejecuta el JRE mínimo de Eclipse Temurin 21.
+
+### Lo que hace el Dockerfile
+
+- Resuelve dependencias con Maven.
+- Compila el artefacto Spring Boot.
+- Copia el JAR final a una imagen runtime mínima.
+- Expone el puerto `8080`.
+
+### Imagen usada en el proyecto
+
+- `reservas-backend:sprint3-obs`
+
+### Comandos útiles
+
+```bash
+docker build -t reservas-backend:sprint3-obs .
+docker images reservas-backend
+```
+
+---
+
+## Kubernetes
+
+Los manifiestos en `k8s/` definen el despliegue del backend dentro del namespace `reservas`.
+
+### Lo que está definido
+
+| Elemento | Valor |
+|---|---|
+| Namespace | `reservas` |
+| ConfigMap | `reservas-backend-config` |
+| Secret esperado por el deployment | `reservas-backend-secret` |
+| Deployment | `reservas-backend` |
+| Service | `reservas-backend-service` |
+| Tipo de Service | `NodePort` |
+| Puerto del Service | `8080` |
+| NodePort | `30080` |
+| Imagen del contenedor | `reservas-backend:sprint3-obs` |
+
+### Probes
+
+El deployment usa `readinessProbe` y `livenessProbe` sobre `/api/v1/public/status`.
+
+### Anotaciones de monitoreo
+
+El service está anotado para scraping de Prometheus:
+
+- `prometheus.io/scrape: "true"`
+- `prometheus.io/path: "/actuator/prometheus"`
+- `prometheus.io/port: "8080"`
+
+### Comandos útiles
+
+```bash
+kubectl apply -f k8s/namespace-configmap.yaml
+kubectl apply -f k8s/deployment-service.yaml
+kubectl get deployments,pods,svc -n reservas
+```
+
+### Diagrama de despliegue
+
+```mermaid
+flowchart LR
+    U[Usuario] --> NP[NodePort 30080]
+    NP --> SVC[reservas-backend-service]
+    SVC --> POD[Pod reservas-backend]
+    POD --> BE[Backend Spring Boot]
+    BE --> DB[(Supabase / PostgreSQL)]
+```
+
+---
+
+## Observabilidad
+
+La observabilidad del proyecto se apoya en Spring Boot Actuator y Micrometer Prometheus. El backend expone métricas en `/actuator/prometheus` y mantiene los endpoints de salud y métricas habilitados desde configuración.
+
+### Lo que está documentado y validado
+
+- Actuator expone `health`, `info`, `metrics` y `prometheus`.
+- El service del backend está preparado para scrapeo por Prometheus.
+- El namespace de observabilidad es `monitoring`.
+- Grafana consume Prometheus como datasource en el entorno del proyecto.
+- La consulta PromQL validada fue:
+
+```promql
+up{namespace="reservas",service="reservas-backend-service"}
+```
+
+- Resultado esperado: `1`
+
+### Flujo de observabilidad
+
+```mermaid
+flowchart LR
+    BE[Backend] --> A[/actuator/prometheus/]
+    A --> P[Prometheus]
+    P --> G[Grafana]
+```
+
+---
+
+## CI/CD
+
+El workflow [`.github/workflows/CI-CD.yaml`](.github/workflows/CI-CD.yaml) se activa en `push` a `main`, `push` a `dev` y `pull_request` hacia `main`.
+
+### Lo que realmente hace el workflow
+
+1. Hace checkout del código.
+2. Configura Java 21 con Temurin.
+3. Ejecuta `mvn clean verify sonar:sonar`.
+4. Publica análisis en SonarCloud.
+5. Define el nombre lógico de la imagen según la rama.
+6. Hace login en Azure Container Registry.
+7. Construye y publica la imagen Docker con SHA y `latest`.
+
+> [!NOTE]
+> En el workflow revisado no aparece una etapa automática de despliegue final a Azure Container Apps. El pipeline deja la imagen lista para publicación y análisis de calidad.
 
 ---
 
@@ -765,140 +601,114 @@ La cobertura quedó **validada con JaCoCo** y el reporte se regeneró correctame
 
 - Java 21
 - Maven 3.9+
-- PostgreSQL accesible localmente o vía entorno remoto controlado
+- PostgreSQL accesible o entorno equivalente
+- Docker si se desea construir la imagen
+- `kubectl` y `minikube` si se quiere validar Kubernetes localmente
 
-### Variables de entorno mínimas
+### Variables de entorno
 
-| Variable | Descripción | Ejemplo genérico |
-|---|---|---|
-| `DB_URL` | URL JDBC de PostgreSQL | `jdbc:postgresql://localhost:5432/eap09_reservas` |
-| `DB_USERNAME` | Usuario de base de datos | `postgres` |
-| `DB_PASSWORD` | Contraseña de base de datos | `change_me` |
-| `JWT_SECRET` | Secreto JWT de al menos 32 bytes | `change_this_for_a_long_random_secret` |
-| `JWT_EXPIRATION_SECONDS` | Duración del token | `1800` |
-| `CORS_ALLOWED_ORIGINS` | Orígenes permitidos | `http://localhost:3000,http://localhost:5173` |
-| `USER_ACTIVE_STATE_ID` | Id del estado activo de usuario | `1` |
+Usa nombres de variables, no valores reales:
 
-### Ejecución paso a paso
+- `DB_URL`
+- `DB_USERNAME`
+- `DB_PASSWORD`
+- `JWT_SECRET`
+- `JWT_EXPIRATION_SECONDS`
+- `CORS_ALLOWED_ORIGINS`
+- `USER_ACTIVE_STATE_ID`
+
+### Arranque local
 
 ```bash
-git clone <url-del-repo>
-cd EAP09-Caso15-ReservasServicios-2026-1
+mvn spring-boot:run
 ```
 
-Configura las variables de entorno en tu terminal o en un archivo `.env` local no versionado.
+### Validación local
 
 ```bash
-mvn clean spring-boot:run
-```
-
-### Verificaciones útiles
-
-- Health: `GET /actuator/health`
-- Swagger UI: `http://localhost:8080/swagger-ui/index.html`
-- OpenAPI JSON: `http://localhost:8080/v3/api-docs`
-
-### Comandos Maven recomendados
-
-```bash
-mvn test
-mvn clean test -B --no-transfer-progress
 mvn verify -B --no-transfer-progress
-mvn test jacoco:report
 ```
 
 ---
 
-## Postman y flujo de demo
+## Kubernetes local
 
-El repositorio no versiona actualmente una colección Postman en la raíz, pero el backend sigue siendo apto para validación manual y sustentación académica mediante requests organizados por historia de usuario y sprint.
+### Flujo resumido
 
-### Variables sugeridas para pruebas manuales
+```bash
+minikube start --driver=docker
+docker build -t reservas-backend:sprint3-obs .
+minikube image load reservas-backend:sprint3-obs
+kubectl apply -f k8s/namespace-configmap.yaml
+kubectl apply -f k8s/deployment-service.yaml
+kubectl get deployments,pods,svc -n reservas
+minikube service reservas-backend-service -n reservas --url
+```
 
-- `baseUrl`
-- `clientToken`
-- `providerToken`
-- `adminToken`
-- `providerId`
-- `serviceId`
-- `availabilityId`
-- `bookingId`
-- `bookingIdFuture`
-- `bookingIdPast`
-- `date`
+> [!TIP]
+> En Windows, `minikube service ... --url` puede dejar una sesión de túnel activa mientras el servicio esté expuesto.
 
-### Flujo sugerido de demo
+---
 
-1. Registrar o autenticar proveedor y cliente.
-2. Construir oferta del proveedor: horario general, servicio y disponibilidad.
-3. Consultar oferta y cupos desde cliente.
-4. Crear una reserva.
-5. Mostrar operación posterior: cancelación, finalización o reprogramación.
-6. Autenticar administrador.
-7. Cambiar rol o estado de una cuenta.
-8. Consultar supervisión global de reservas.
-9. Generar reporte operativo global.
+## Swagger / OpenAPI
 
-<details>
-<summary><strong>Secuencia corta para sustentación</strong></summary>
+La documentación interactiva está disponible en:
 
-1. `POST /api/v1/auth/sessions` como proveedor.
-2. `PATCH /api/v1/providers/me/services/{serviceId}/status`.
-3. `GET /api/v1/providers/me/bookings`.
-4. `PATCH /api/v1/providers/me/bookings/{bookingId}/finalization`.
-5. `POST /api/v1/auth/sessions` como cliente.
-6. `PATCH /api/v1/bookings/{bookingId}/reschedule` o `PATCH /api/v1/bookings/{bookingId}/cancellation`.
-7. `GET /api/v1/bookings/me`.
-8. `POST /api/v1/auth/sessions` como administrador.
-9. `GET /api/v1/admin/bookings`.
-10. `GET /api/v1/admin/reports/operational`.
+- `/swagger-ui/index.html`
+- `/swagger-ui.html`
+- `/v3/api-docs`
 
-</details>
+### Lo que ofrece Swagger
+
+- Exploración de endpoints por módulo.
+- Botón `Authorize` para enviar el JWT Bearer.
+- Contratos y ejemplos alineados con los controladores del backend.
 
 ---
 
 ## Documentación adicional
 
-### Documentación API y auxiliares
+### APIs y contratos
 
 - [docs/api/README.md](docs/api/README.md)
+- [docs/api/sprint-1/README.md](docs/api/sprint-1/README.md)
+- [docs/api/sprint-2/README.md](docs/api/sprint-2/README.md)
 - [docs/api/auxiliares/README.md](docs/api/auxiliares/README.md)
-- [docs/api/auxiliares/bootstrap-y-health.md](docs/api/auxiliares/bootstrap-y-health.md)
-
-### Calidad y remediaciones
-
-- [docs/sonarcloud-quality-gate-remediation-report.md](docs/sonarcloud-quality-gate-remediation-report.md)
-- [docs/sonar-java-s6539-exception-handler-refactor-report.md](docs/sonar-java-s6539-exception-handler-refactor-report.md)
-- [docs/sprint-3/sonarcloud-remediacion-issues-actuales.md](docs/sprint-3/sonarcloud-remediacion-issues-actuales.md)
+- [docs/api/recursos/README.md](docs/api/recursos/README.md)
 
 ### Sprint 3
 
-<details>
-<summary><strong>Diagnóstico y validación final por historia</strong></summary>
+- [HU-06 diagnóstico](docs/sprint-3/hu-06-gestion-roles-diagnostico.md)
+- [HU-06 validación final](docs/sprint-3/hu-06-validacion-final.md)
+- [HU-07 diagnóstico](docs/sprint-3/hu-07-activacion-inactivacion-cuentas-diagnostico.md)
+- [HU-07 validación final](docs/sprint-3/hu-07-validacion-final.md)
+- [HU-18 diagnóstico](docs/sprint-3/hu-18-reprogramacion-manual-reserva-diagnostico.md)
+- [HU-18 validación final](docs/sprint-3/hu-18-validacion-final.md)
+- [HU-20 diagnóstico](docs/sprint-3/hu-20-supervision-administrativa-reservas-diagnostico.md)
+- [HU-20 validación final](docs/sprint-3/hu-20-validacion-final.md)
+- [HU-21 diagnóstico](docs/sprint-3/hu-21-reportes-operativos-globales-diagnostico.md)
+- [HU-21 validación final](docs/sprint-3/hu-21-validacion-final.md)
 
-- HU-06:
-  - [Diagnóstico](docs/sprint-3/hu-06-gestion-roles-diagnostico.md)
-  - [Validación final](docs/sprint-3/hu-06-validacion-final.md)
-- HU-07:
-  - [Diagnóstico](docs/sprint-3/hu-07-activacion-inactivacion-cuentas-diagnostico.md)
-  - [Validación final](docs/sprint-3/hu-07-validacion-final.md)
-- HU-18:
-  - [Diagnóstico](docs/sprint-3/hu-18-reprogramacion-manual-reserva-diagnostico.md)
-  - [Validación final](docs/sprint-3/hu-18-validacion-final.md)
-- HU-20:
-  - [Diagnóstico](docs/sprint-3/hu-20-supervision-administrativa-reservas-diagnostico.md)
-  - [Validación final](docs/sprint-3/hu-20-validacion-final.md)
-- HU-21:
-  - [Diagnóstico](docs/sprint-3/hu-21-reportes-operativos-globales-diagnostico.md)
-  - [Validación final](docs/sprint-3/hu-21-validacion-final.md)
+### Calidad
 
-</details>
+- [Remediación actual de SonarCloud](docs/sprint-3/sonarcloud-remediacion-issues-actuales.md)
+- [Quality gate remediation report](docs/sonarcloud-quality-gate-remediation-report.md)
+- [Refactor de handler por S6539](docs/sonar-java-s6539-exception-handler-refactor-report.md)
 
 ---
 
 ## Equipo
 
-**EAP09**  
+**EAP09**
+
 Caso 15 - Plataforma backend para reservas de servicios por agenda y cupos.
 
-Si el equipo desea completar este bloque para sustentación o entrega final, puede agregar aquí integrantes, roles y enlaces internos del proyecto sin alterar el resto de la documentación técnica.
+Si el equipo desea completar este bloque para sustentación o entrega final, puede agregar aquí integrantes, roles y enlaces internos del proyecto sin modificar el resto de la documentación.
+
+---
+
+## Estado final
+
+El backend queda documentado como un sistema funcional y cohesionado, con APIs principales descritas, seguridad JWT aplicada, base de datos migrada con Flyway, contenedorización Docker, despliegue Kubernetes, observabilidad Prometheus/Grafana y validaciones automáticas en verde.
+
+La versión actual del proyecto representa la consolidación de Sprint 1, Sprint 2 y Sprint 3 como una sola narrativa técnica y funcional, lista para GitHub como documento principal del repositorio.
