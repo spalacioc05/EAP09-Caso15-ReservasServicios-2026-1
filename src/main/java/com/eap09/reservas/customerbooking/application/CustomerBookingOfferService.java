@@ -45,7 +45,8 @@ public class CustomerBookingOfferService {
                         offer.getServiceId(),
                         offer.getServiceName(),
                         offer.getServiceDescription(),
-                        offer.getProviderName()))
+                        offer.getProviderName(),
+                        offer.getProviderId()))
                     .toList();
         } catch (DataAccessException ex) {
             log.error("Error de datos al consultar oferta disponible", ex);

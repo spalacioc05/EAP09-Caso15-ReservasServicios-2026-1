@@ -9,4 +9,6 @@ public interface AvailableOfferProjection {
     String getServiceDescription();
 
     String getProviderName();
+
+    Long getProviderId();
 }

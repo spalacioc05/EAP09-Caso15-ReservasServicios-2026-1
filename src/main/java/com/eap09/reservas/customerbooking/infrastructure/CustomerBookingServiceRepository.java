@@ -12,7 +12,8 @@ public interface CustomerBookingServiceRepository extends JpaRepository<ServiceE
                         s.id_servicio AS serviceId,
                         s.nombre_servicio AS serviceName,
                         s.descripcion_servicio AS serviceDescription,
-                        CONCAT(u.nombres_usuario, ' ', u.apellidos_usuario) AS providerName
+                        CONCAT(u.nombres_usuario, ' ', u.apellidos_usuario) AS providerName,
+                        u.id_usuario AS providerId
                 FROM tbl_servicio s
                 JOIN tbl_usuario u
                     ON u.id_usuario = s.id_usuario_proveedor

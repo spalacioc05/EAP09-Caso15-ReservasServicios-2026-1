@@ -4,6 +4,7 @@ public record OfferResponse(
         Long serviceId,
         String serviceName,
         String serviceDescription,
-        String providerName
+        String providerName,
+        Long providerId
 ) {
 }
