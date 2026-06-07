@@ -46,7 +46,7 @@ class CustomerBookingControllerTest {
     @Test
     void shouldReturnOfferSuccessfully() throws Exception {
                 when(customerBookingOfferService.getAvailableOffers("client@test.local"))
-                .thenReturn(List.of(new OfferResponse(10L, "Servicio", "Descripcion", "Proveedor")));
+                .thenReturn(List.of(new OfferResponse(10L, "Servicio", "Descripcion", "Proveedor", 2L)));
 
         mockMvc.perform(get("/api/v1/offers")
                         .principal(new UsernamePasswordAuthenticationToken("client@test.local", "N/A")))

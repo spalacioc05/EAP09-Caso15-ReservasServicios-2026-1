@@ -115,6 +115,11 @@ class CustomerBookingOfferServiceTest {
             public String getProviderName() {
                 return providerName;
             }
+
+            @Override
+            public Long getProviderId() {
+                return 2L;
+            }
         };
     }
 }
